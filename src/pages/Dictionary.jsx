@@ -56,6 +56,7 @@ export default function Dictionary() {
       if (letter !== 'all' && entry.letter !== letter) return false
       if (pos !== 'all' && entry.posGroup !== pos) return false
       if (!q) return true
+      if (entry.search) return entry.search.includes(q)
       return (
         norm(entry.latin).includes(q) ||
         norm(entry.headword).includes(q) ||
@@ -75,15 +76,19 @@ export default function Dictionary() {
           <p className="eyebrow">Lexicon</p>
           <h1>The Dictionary</h1>
           <p className="lead dictionary-page__lead">
-            Every word gathered from the readings of the course, with its part of speech and the
-            passages where it occurs. Headwords carry their macra, so the lexicon can be used when
-            checking or proofreading a line of Latin.
+            Every headword in the readings of the course, with its English sense, the forms you meet
+            in the text, and the passages where it occurs. Headwords carry their macra, so the
+            lexicon can be used when checking or proofreading a line of Latin.
           </p>
 
           <dl className="dictionary-stats">
             <div>
-              <dt>Entries</dt>
+              <dt>Headwords</dt>
               <dd>{stats.entries.toLocaleString()}</dd>
+            </div>
+            <div>
+              <dt>Forms</dt>
+              <dd>{stats.forms?.toLocaleString() ?? '—'}</dd>
             </div>
             <div>
               <dt>With passages</dt>
@@ -149,7 +154,7 @@ export default function Dictionary() {
 
             <p className="dictionary-count">
               <strong>{filtered.length.toLocaleString()}</strong>{' '}
-              {filtered.length === 1 ? 'entry' : 'entries'}
+              {filtered.length === 1 ? 'headword' : 'headwords'}
               {letter !== 'all' && <> in <strong>{letter.toUpperCase()}</strong></>}
               {query && <> matching “{query}”</>}
             </p>

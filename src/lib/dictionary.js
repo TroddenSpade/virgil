@@ -12,6 +12,9 @@ export const norm = (s) =>
   (s || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/æ/g, 'ae')
+    .replace(/œ/g, 'oe')
+    .replace(/j/g, 'i')
     .toLowerCase()
 
 // Every word carries a meaning, but the generator marks the forms it could

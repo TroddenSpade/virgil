@@ -32,11 +32,19 @@ export default function DictionaryDetail() {
   const entries = data?.entries || []
   const normWord = norm(word)
 
-  const index = useMemo(
+  const directIndex = useMemo(
     () => entries.findIndex((entry) => norm(entry.headword) === normWord),
     [entries, normWord],
   )
+  const targetId = directIndex < 0 ? data?.formIndex?.[normWord] : null
+  const index =
+    directIndex >= 0
+      ? directIndex
+      : targetId
+        ? entries.findIndex((entry) => entry.id === targetId)
+        : -1
   const entry = index >= 0 ? entries[index] : null
+  const isForm = !!entry && norm(entry.headword) !== normWord
   const prev = index > 0 ? entries[index - 1] : null
   const next = index >= 0 && index < entries.length - 1 ? entries[index + 1] : null
 
@@ -127,6 +135,16 @@ export default function DictionaryDetail() {
             </div>
           </header>
 
+          {isForm && (
+            <p className="lexicon__form-note">
+              <span className="latin">{word}</span> is a form of{' '}
+              <Link className="latin" to={wordHref(entry.headword)}>
+                {entry.headword}
+              </Link>
+              .
+            </p>
+          )}
+
           <section className="lexicon__sense">
             <p className="lexicon__section-title">Sense</p>
             {hasDefinition(entry.english) ? (
@@ -138,6 +156,22 @@ export default function DictionaryDetail() {
               </p>
             )}
           </section>
+
+          {entry.forms?.length > 0 && (
+            <section className="lexicon__forms">
+              <p className="lexicon__section-title">
+                Forms in the readings
+                <span className="lexicon__section-count">{entry.forms.length}</span>
+              </p>
+              <ul className="lexicon__form-list">
+                {entry.forms.map((form) => (
+                  <li key={form} className={norm(form) === normWord ? 'is-current' : ''}>
+                    <span className="latin">{form}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {examples.length > 0 && (
             <section className="lexicon__passages">

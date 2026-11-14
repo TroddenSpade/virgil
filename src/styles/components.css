@@ -2020,6 +2020,42 @@ button.lesson__keywords-label:focus-visible {
   color: var(--ink-faint);
 }
 
+.lexicon__form-note {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.lexicon__form-note .latin {
+  color: var(--bronze-deep);
+}
+.lexicon__forms {
+  margin-top: 2.2rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--line);
+}
+.lexicon__form-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lexicon__form-list li {
+  padding: 0.22rem 0.5rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  background: var(--surface-2);
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+.lexicon__form-list li.is-current {
+  color: var(--oxblood);
+  border-color: color-mix(in srgb, var(--oxblood) 40%, var(--line));
+  background: color-mix(in srgb, var(--oxblood) 8%, transparent);
+}
+
 .lexicon__passages {
   margin-top: 2.2rem;
   padding-top: 1.6rem;
