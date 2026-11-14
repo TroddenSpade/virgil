@@ -108,8 +108,9 @@ export default function Dictionary() {
           <h1>The Dictionary</h1>
           <p className="lead dictionary-page__lead">
             Every word in the readings of the course — each inflected form, its headword, its
-            English sense, and the chapter it was taken from. Headwords carry their macra, so the
-            lexicon can be used when checking or proofreading a line of Latin.
+            English sense, the chapter it was taken from, and an example from the readings or the
+            chapter vocabulary. Headwords carry their macra, so the lexicon can be used when
+            checking or proofreading a line of Latin.
           </p>
 
           <dl className="dictionary-stats">
@@ -126,7 +127,7 @@ export default function Dictionary() {
               <dd>{stats.sources.toLocaleString()}</dd>
             </div>
             <div>
-              <dt>With passages</dt>
+              <dt>With examples</dt>
               <dd>{stats.withExamples.toLocaleString()}</dd>
             </div>
           </dl>

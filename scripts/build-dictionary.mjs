@@ -341,6 +341,20 @@ for (const [key, curatedEntry] of curated) {
   for (const sid of curatedEntry.sourceIds) entry.sourceIds.add(sid)
   for (const sid of curatedEntry.sourceIds) addWord(curatedEntry.head, key, sid)
   addWord(curatedEntry.head, key, null)
+
+  /* A vocabulary headword may never occur in a reading (a companion's
+     glossary, for instance). Give it the glossary line itself as its
+     example, tied to the chapter it comes from. */
+  if (!entry.examples.length) {
+    const sid = [...entry.sourceIds][0]
+    if (sid != null) {
+      entry.examples.push({
+        latin: curatedEntry.latin || curatedEntry.head,
+        s: sid,
+        vocab: true,
+      })
+    }
+  }
 }
 
 /* ---------- Finalise ---------- */

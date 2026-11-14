@@ -238,7 +238,7 @@ export default function DictionaryDetail() {
           {examples.length > 0 && (
             <section className="lexicon__passages">
               <p className="lexicon__section-title">
-                In the readings
+                {examples[0]?.vocab ? 'From the vocabulary' : 'In the readings'}
                 <span className="lexicon__section-count">{examples.length}</span>
               </p>
               <ol className="lexicon__examples">
