@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { norm, hasDefinition, bookHref, wordHref, exampleSegments } from '../lib/dictionary.js'
-
-const EXAMPLE_LIMIT = 12
+import {
+  norm,
+  hasDefinition,
+  wordHref,
+  sourceHref,
+  sourceLabel,
+  exampleSegments,
+} from '../lib/dictionary.js'
 
 export default function DictionaryDetail() {
   const { word } = useParams()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
-  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -24,37 +28,58 @@ export default function DictionaryDetail() {
     }
   }, [])
 
-  // Reset the passage list whenever the reader moves to another word.
-  useEffect(() => {
-    setShowAll(false)
-  }, [word])
-
-  const entries = data?.entries || []
   const normWord = norm(word)
 
-  const directIndex = useMemo(
-    () => entries.findIndex((entry) => norm(entry.headword) === normWord),
-    [entries, normWord],
+  const wordEntry = useMemo(
+    () => (data?.words || []).find((entry) => norm(entry.w) === normWord) || null,
+    [data, normWord],
   )
-  const targetId = directIndex < 0 ? data?.formIndex?.[normWord] : null
-  const index =
-    directIndex >= 0
-      ? directIndex
-      : targetId
-        ? entries.findIndex((entry) => entry.id === targetId)
-        : -1
-  const entry = index >= 0 ? entries[index] : null
-  const isForm = !!entry && norm(entry.headword) !== normWord
-  const prev = index > 0 ? entries[index - 1] : null
-  const next = index >= 0 && index < entries.length - 1 ? entries[index + 1] : null
+
+  const lemma = useMemo(() => {
+    if (!data) return null
+    if (wordEntry) return data.lemmas.find((entry) => entry.id === wordEntry.l) || null
+    return data.lemmas.find((entry) => norm(entry.headword) === normWord) || null
+  }, [data, wordEntry, normWord])
+
+  const isForm = !!lemma && !!wordEntry && norm(wordEntry.w) !== norm(lemma.headword)
+
+  const sourceIds = wordEntry?.s?.length ? wordEntry.s : lemma?.s || []
+  const sources = data ? sourceIds.map((index) => data.sources[index]).filter(Boolean) : []
+  const sourceTotal = wordEntry?.n ?? lemma?.sn ?? sources.length
+
+  const examples = useMemo(
+    () =>
+      (lemma?.examples || []).map((example) => ({
+        ...example,
+        source: data?.sources[example.s] || null,
+      })),
+    [lemma, data],
+  )
+
+  const neighbours = useMemo(() => {
+    if (!data || !wordEntry) return { prev: null, next: null }
+    const index = data.words.findIndex((entry) => norm(entry.w) === normWord)
+    return {
+      prev: index > 0 ? data.words[index - 1] : null,
+      next: index >= 0 && index < data.words.length - 1 ? data.words[index + 1] : null,
+    }
+  }, [data, wordEntry, normWord])
+
+  const entry = lemma
+    ? {
+        ...lemma,
+        headword: wordEntry ? wordEntry.w : lemma.headword,
+        latin: wordEntry && isForm ? wordEntry.w : lemma.latin,
+      }
+    : null
 
   const crumb = (
     <nav className="dict-crumb">
       <Link to="/dictionary">← Lexicon</Link>
-      {entry?.letter && (
+      {entry?.headword && (
         <>
           <span aria-hidden="true">·</span>
-          <span>Letter {entry.letter.toUpperCase()}</span>
+          <span>Letter {norm(entry.headword)[0]?.toUpperCase()}</span>
         </>
       )}
     </nav>
@@ -95,7 +120,27 @@ export default function DictionaryDetail() {
             <p className="eyebrow">Lexicon</p>
             <h1 className="lexicon__latin latin">{word}</h1>
             <p className="lexicon__meaning lexicon__meaning--none">
-              This word is not in the lexicon.
+              This word is not in the lexicon. It may be a spelling not found in the
+              readings, or a word outside the course.
+            </p>
+            <p className="lexicon__lookup">
+              Look it up online:
+              {' '}
+              <a
+                href={`https://latin-dictionary.net/search/latin/${encodeURIComponent(word || '')}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                latin-dictionary.net
+              </a>
+              {' · '}
+              <a
+                href={`https://www.online-latin-dictionary.com/latin-english-dictionary.php?parola=${encodeURIComponent(word || '')}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                online-latin-dictionary.com
+              </a>
             </p>
             <p>
               <Link className="btn btn--ghost btn--sm" to="/dictionary">
@@ -108,9 +153,6 @@ export default function DictionaryDetail() {
     )
   }
 
-  const examples = entry.examples || []
-  const shown = showAll ? examples : examples.slice(0, EXAMPLE_LIMIT)
-
   return (
     <section className="section dictionary-leaf-page">
       <div className="container-narrow">
@@ -118,28 +160,26 @@ export default function DictionaryDetail() {
 
         <article className="lexicon">
           <header className="lexicon__head">
-            <p className="eyebrow">Lexicon</p>
+            <p className="eyebrow">{isForm ? 'Form' : 'Lexicon'}</p>
             <h1 className="lexicon__latin latin">{entry.latin}</h1>
             <div className="lexicon__meta">
               {entry.pos && entry.pos !== 'other' && <span className="lexicon__pos">{entry.pos}</span>}
-              {entry.sources?.[0] && (
-                <Link className="lexicon__source" to={bookHref(entry.sources[0])}>
-                  {entry.sources[0].book}
+              {sources[0] && (
+                <Link className="lexicon__source" to={sourceHref(sources[0])}>
+                  {sourceLabel(sources[0])}
                 </Link>
               )}
-              {examples.length > 0 && (
-                <span className="muted">
-                  {examples.length} {examples.length === 1 ? 'passage' : 'passages'}
-                </span>
+              {sourceTotal > 1 && (
+                <span className="muted">{sourceTotal} places</span>
               )}
             </div>
           </header>
 
           {isForm && (
             <p className="lexicon__form-note">
-              <span className="latin">{word}</span> is a form of{' '}
-              <Link className="latin" to={wordHref(entry.headword)}>
-                {entry.headword}
+              <span className="latin">{wordEntry.w}</span> is a form of{' '}
+              <Link className="latin" to={wordHref(lemma.headword)}>
+                {lemma.headword}
               </Link>
               .
             </p>
@@ -151,10 +191,32 @@ export default function DictionaryDetail() {
               <p className="lexicon__meaning">{entry.english}</p>
             ) : (
               <p className="lexicon__meaning lexicon__meaning--none">
-                No definition is recorded for this word in the course vocabulary. Its use can be read
-                in the passages below.
+                No definition is recorded for this word. Its use can be read in the passages below.
               </p>
             )}
+          </section>
+
+          <section className="lexicon__sources">
+            <p className="lexicon__section-title">
+              Where it occurs
+              <span className="lexicon__section-count">
+                {sources.length}
+                {sourceTotal > sources.length ? ` of ${sourceTotal}` : ''}
+              </span>
+            </p>
+            <ul className="lexicon__source-list">
+              {sources.map((source, index) => (
+                <li key={`${source.bookSlug}-${source.number}-${index}`}>
+                  <Link to={sourceHref(source)}>
+                    <span className="lexicon__source-book">{source.book}</span>
+                    <span className="lexicon__source-chapter">
+                      Cap. {source.roman}
+                      {source.title ? ` · ${source.title}` : ''}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
 
           {entry.forms?.length > 0 && (
@@ -180,8 +242,8 @@ export default function DictionaryDetail() {
                 <span className="lexicon__section-count">{examples.length}</span>
               </p>
               <ol className="lexicon__examples">
-                {shown.map((example, i) => (
-                  <li className="dict-example" key={`${example.book}-${i}`}>
+                {examples.map((example, i) => (
+                  <li className="dict-example" key={`${example.s}-${i}`}>
                     <p className="dict-example__latin latin">
                       {exampleSegments(example.latin).map((segment, j) =>
                         segment.mark ? (
@@ -193,35 +255,31 @@ export default function DictionaryDetail() {
                         ),
                       )}
                     </p>
-                    <p className="dict-example__source">{example.book}</p>
+                    {example.source && (
+                      <p className="dict-example__source">
+                        <Link to={sourceHref(example.source)}>{sourceLabel(example.source)}</Link>
+                      </p>
+                    )}
                   </li>
                 ))}
               </ol>
-
-              {examples.length > shown.length && (
-                <div className="lexicon__more">
-                  <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowAll(true)}>
-                    Show all {examples.length} passages
-                  </button>
-                </div>
-              )}
             </section>
           )}
         </article>
 
-        {(prev || next) && (
+        {(neighbours.prev || neighbours.next) && (
           <nav className="dict-neighbours" aria-label="Nearby words">
-            {prev ? (
-              <Link className="dict-neighbours__link" to={wordHref(prev.headword)}>
+            {neighbours.prev ? (
+              <Link className="dict-neighbours__link" to={wordHref(neighbours.prev.w)}>
                 <span aria-hidden="true">←</span>
-                <span className="latin">{prev.latin}</span>
+                <span className="latin">{neighbours.prev.w}</span>
               </Link>
             ) : (
               <span />
             )}
-            {next ? (
-              <Link className="dict-neighbours__link" to={wordHref(next.headword)}>
-                <span className="latin">{next.latin}</span>
+            {neighbours.next ? (
+              <Link className="dict-neighbours__link" to={wordHref(neighbours.next.w)}>
+                <span className="latin">{neighbours.next.w}</span>
                 <span aria-hidden="true">→</span>
               </Link>
             ) : (

@@ -29,6 +29,17 @@ export function bookHref(source) {
   return source?.bookSlug ? `/library/${source.bookSlug}` : '/library'
 }
 
+// The exact chapter a word was taken from.
+export function sourceHref(source) {
+  if (!source?.bookSlug) return '/library'
+  return source.slug ? `/library/${source.bookSlug}/${source.slug}` : `/library/${source.bookSlug}`
+}
+
+export function sourceLabel(source) {
+  if (!source) return ''
+  return [source.book, source.roman ? `Cap. ${source.roman}` : ''].filter(Boolean).join(' · ')
+}
+
 export function wordHref(headword) {
   return `/dictionary/${encodeURIComponent(headword || '')}`
 }

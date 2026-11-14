@@ -1864,6 +1864,16 @@ button.lesson__keywords-label:focus-visible {
   font-style: italic;
   color: var(--ink-faint);
 }
+
+.dict-entry__lemma {
+  margin: 0 0 0.18rem;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
 .dict-entry__foot {
   display: flex;
   align-items: center;
@@ -2054,6 +2064,45 @@ button.lesson__keywords-label:focus-visible {
   color: var(--oxblood);
   border-color: color-mix(in srgb, var(--oxblood) 40%, var(--line));
   background: color-mix(in srgb, var(--oxblood) 8%, transparent);
+}
+
+.lexicon__sources {
+  margin-top: 2.2rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--line);
+}
+.lexicon__source-list {
+  display: grid;
+  gap: 0.45rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lexicon__source-list a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  background: var(--surface-2);
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+.lexicon__source-list a:hover {
+  border-color: var(--bronze-soft);
+}
+.lexicon__source-book {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.lexicon__source-chapter {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  color: var(--ink-faint);
 }
 
 .lexicon__passages {
