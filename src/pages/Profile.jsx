@@ -8,6 +8,7 @@ import {
   summarizeProgress,
 } from '../lib/progress.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
+import { buildWordlist } from '../lib/wordlist.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
@@ -67,6 +68,7 @@ export default function Profile() {
 
   const local = useMemo(() => readLocalProgress(), [revision])
   const localSummary = useMemo(() => summarizeProgress(local), [local])
+  const wordlistCount = useMemo(() => buildWordlist(local).words.length, [local])
   const remoteSummary = useMemo(
     () => (remote ? summarizeProgress(remote.progress) : null),
     [remote],
@@ -670,6 +672,17 @@ export default function Profile() {
                 security protects the table.
               </p>
             </section>
+
+            <Link className="profile-side-card card profile-side-link" to="/wordlist">
+              <p className="eyebrow">After the lesson</p>
+              <h3>Your wordlist</h3>
+              <p>
+                {wordlistCount
+                  ? `${wordlistCount.toLocaleString()} words from your learned chapters, with a review session that remembers what you know.`
+                  : 'Every word from the chapters you learn, gathered in one place for review.'}
+              </p>
+              <span>Open the wordlist →</span>
+            </Link>
 
             <Link className="profile-side-card card profile-side-link" to="/dictionary">
               <p className="eyebrow">While you read</p>

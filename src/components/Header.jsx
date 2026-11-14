@@ -29,6 +29,11 @@ function pageContext(pathname) {
       page,
     }
   }
+  if (parts[0] === 'wordlist') {
+    return parts[1] === 'review'
+      ? { root: { to: '/wordlist', label: 'Wordlist' }, page: 'Review' }
+      : { page: 'Wordlist' }
+  }
   const labels = {
     dictionary: 'Dictionary',
     approach: 'Approach',
@@ -94,6 +99,7 @@ export default function Header() {
           <NavLink to="/iter">Iter</NavLink>
           <NavLink to="/library">Library</NavLink>
           <NavLink to="/dictionary">Dictionary</NavLink>
+          <NavLink to="/wordlist">Wordlist</NavLink>
           <NavLink to="/approach">Approach</NavLink>
           <NavLink to="/profile">Profile</NavLink>
           <ThemeToggle />

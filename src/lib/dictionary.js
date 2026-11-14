@@ -41,7 +41,10 @@ export function sourceLabel(source) {
 }
 
 export function wordHref(headword) {
-  return `/dictionary/${encodeURIComponent(headword || '')}`
+  // Enclitics are printed with a hyphen in the wordlist ("-ne"), but the
+  // lexicon files them under the bare word ("ne").
+  const key = String(headword || '').replace(/^-+/, '')
+  return `/dictionary/${encodeURIComponent(key)}`
 }
 
 // Split an example around its {{highlighted}} forms, returning plain objects

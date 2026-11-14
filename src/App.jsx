@@ -4,6 +4,8 @@ import Home from './pages/Home.jsx'
 import Library from './pages/Library.jsx'
 import Dictionary from './pages/Dictionary.jsx'
 import DictionaryDetail from './pages/DictionaryDetail.jsx'
+import Wordlist from './pages/Wordlist.jsx'
+import WordlistReview from './pages/WordlistReview.jsx'
 import Profile from './pages/Profile.jsx'
 import BookPage from './pages/BookPage.jsx'
 import ChapterPage from './pages/ChapterPage.jsx'
@@ -21,6 +23,8 @@ export default function App() {
         <Route path="library" element={<Library />} />
         <Route path="dictionary" element={<Dictionary />} />
         <Route path="dictionary/:word" element={<DictionaryDetail />} />
+        <Route path="wordlist" element={<Wordlist />} />
+        <Route path="wordlist/review" element={<WordlistReview />} />
         <Route path="iter" element={<Iter />} />
         <Route path="profile" element={<Profile />} />
         <Route path="library/:bookSlug" element={<BookPage />} />
