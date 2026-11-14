@@ -243,17 +243,31 @@ function bestAnalysis(token) {
 
 const lemmaMap = new Map()
 const wordMap = new Map()
+const exampleTable = []
+const exampleIds = new Map()
+
+/* One shared table of example sentences; each word points at the sentence
+   where it first occurs. */
+function addExample(latin, sid, vocab = false) {
+  const key = `${sid}|${vocab ? 1 : 0}|${latin}`
+  if (exampleIds.has(key)) return exampleIds.get(key)
+  const id = exampleTable.length
+  exampleTable.push({ latin, s: sid, ...(vocab ? { vocab: true } : {}) })
+  exampleIds.set(key, id)
+  return id
+}
 
 const addWord = (form, lemmaKey, sid) => {
   const key = norm(form)
-  if (!key) return
+  if (!key) return null
   let word = wordMap.get(key)
   if (!word) {
-    word = { w: form, l: lemmaKey, sourceIds: new Set() }
+    word = { w: form, l: lemmaKey, sourceIds: new Set(), e: null }
     wordMap.set(key, word)
   }
   if (!/[A-Z]/.test(form)) word.w = form
   if (sid != null) word.sourceIds.add(sid)
+  return word
 }
 
 for (const { slug, book, chapters } of books) {
@@ -292,7 +306,7 @@ for (const { slug, book, chapters } of books) {
             poses: new Set([label === 'noun' && gender ? `noun (${gender}.)` : label]),
             formMap: new Map(),
             sourceIds: new Set(),
-            examples: [],
+            e: null,
           }
           lemmaMap.set(key, entry)
         }
@@ -303,17 +317,15 @@ for (const { slug, book, chapters } of books) {
           entry.formMap.set(formKey, token)
         }
         entry.sourceIds.add(sid)
-        addWord(token, key, sid)
-
-        if (!entry.examples.length) {
+        const word = addWord(token, key, sid)
+        if (word && word.e == null) {
           const marked = sentence.replace(
             new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
             `{{${token}}}`,
           )
-          if (!entry.examples.some((example) => example.latin === marked)) {
-            entry.examples.push({ latin: marked, s: sid })
-          }
+          word.e = addExample(marked, sid)
         }
+        if (entry.e == null && word?.e != null) entry.e = word.e
       }
     }
   }
@@ -330,7 +342,7 @@ for (const [key, curatedEntry] of curated) {
       poses: new Set(),
       formMap: new Map(),
       sourceIds: new Set(),
-      examples: [],
+      e: null,
     }
     lemmaMap.set(key, entry)
   }
@@ -338,23 +350,22 @@ for (const [key, curatedEntry] of curated) {
   entry.latin = curatedEntry.latin
   if (curatedEntry.meanings.size) entry.meanings = new Set(curatedEntry.meanings)
   if (curatedEntry.poses.size) entry.poses = new Set(curatedEntry.poses)
-  for (const sid of curatedEntry.sourceIds) entry.sourceIds.add(sid)
-  for (const sid of curatedEntry.sourceIds) addWord(curatedEntry.head, key, sid)
-  addWord(curatedEntry.head, key, null)
+  const citation = curatedEntry.latin || curatedEntry.head
+  for (const sid of curatedEntry.sourceIds) {
+    entry.sourceIds.add(sid)
+    const word = addWord(curatedEntry.head, key, sid)
+    if (word && word.e == null) word.e = addExample(citation, sid, true)
+  }
+  const headWord = addWord(curatedEntry.head, key, null)
 
   /* A vocabulary headword may never occur in a reading (a companion's
      glossary, for instance). Give it the glossary line itself as its
      example, tied to the chapter it comes from. */
-  if (!entry.examples.length) {
+  if (entry.e == null) {
     const sid = [...entry.sourceIds][0]
-    if (sid != null) {
-      entry.examples.push({
-        latin: curatedEntry.latin || curatedEntry.head,
-        s: sid,
-        vocab: true,
-      })
-    }
+    if (sid != null) entry.e = addExample(citation, sid, true)
   }
+  if (headWord && headWord.e == null) headWord.e = entry.e
 }
 
 /* ---------- Finalise ---------- */
@@ -371,7 +382,7 @@ const lemmas = [...lemmaMap.entries()]
       posGroup: posGroup(poses[0] || ''),
       english,
       forms: [...entry.formMap.values()].sort((a, b) => a.localeCompare(b)),
-      examples: entry.examples,
+      e: entry.e,
       s: [...entry.sourceIds].slice(0, 12),
       sn: entry.sourceIds.size,
     }
@@ -390,6 +401,7 @@ const words = [...wordMap.values()]
     l: word.l,
     s: [...word.sourceIds].slice(0, 12),
     n: word.sourceIds.size,
+    e: word.e ?? lemmaById.get(word.l)?.e ?? null,
   }))
   .sort((a, b) => norm(a.w).localeCompare(norm(b.w)))
 
@@ -397,12 +409,15 @@ const letters = [...new Set(words.map((word) => norm(word.w).replace(/^[^a-z]+/,
   .filter((c) => /[a-z]/.test(c))
   .sort()
 
-const withExamples = lemmas.filter((lemma) => lemma.examples.length).length
+const withExamples = lemmas.filter((lemma) => lemma.e != null).length
+const wordsWithExamples = words.filter((word) => word.e != null).length
 const stats = {
   words: words.length,
   lemmas: lemmas.length,
   sources: sources.length,
+  examples: exampleTable.length,
   withExamples,
+  wordsWithExamples,
 }
 
 const banner =
@@ -413,6 +428,7 @@ const banner =
 const js =
   banner +
   'export const sources = ' + JSON.stringify(sources) + '\n\n' +
+  'export const examples = ' + JSON.stringify(exampleTable) + '\n\n' +
   'export const lemmas = ' + JSON.stringify(lemmas) + '\n\n' +
   'export const words = ' + JSON.stringify(words) + '\n\n' +
   'export const letters = ' + JSON.stringify(letters) + '\n\n' +
@@ -425,7 +441,9 @@ console.log({
   words: words.length,
   lemmas: lemmas.length,
   sources: sources.length,
+  examples: exampleTable.length,
   withExamples,
+  wordsWithExamples,
   missingMeanings: lemmas.filter((lemma) => !lemma.english).length,
   wordsWithoutLemma: words.filter((word) => !lemmaById.has(word.l)).length,
   bytes: js.length,

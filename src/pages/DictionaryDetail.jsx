@@ -43,18 +43,14 @@ export default function DictionaryDetail() {
 
   const isForm = !!lemma && !!wordEntry && norm(wordEntry.w) !== norm(lemma.headword)
 
-  const sourceIds = wordEntry?.s?.length ? wordEntry.s : lemma?.s || []
-  const sources = data ? sourceIds.map((index) => data.sources[index]).filter(Boolean) : []
-  const sourceTotal = wordEntry?.n ?? lemma?.sn ?? sources.length
-
-  const examples = useMemo(
-    () =>
-      (lemma?.examples || []).map((example) => ({
-        ...example,
-        source: data?.sources[example.s] || null,
-      })),
-    [lemma, data],
-  )
+  const example = useMemo(() => {
+    if (!data) return null
+    const id = wordEntry?.e ?? lemma?.e
+    if (id == null) return null
+    const item = data.examples?.[id]
+    if (!item) return null
+    return { ...item, source: data.sources[item.s] || null }
+  }, [data, wordEntry, lemma])
 
   const neighbours = useMemo(() => {
     if (!data || !wordEntry) return { prev: null, next: null }
@@ -164,14 +160,6 @@ export default function DictionaryDetail() {
             <h1 className="lexicon__latin latin">{entry.latin}</h1>
             <div className="lexicon__meta">
               {entry.pos && entry.pos !== 'other' && <span className="lexicon__pos">{entry.pos}</span>}
-              {sources[0] && (
-                <Link className="lexicon__source" to={sourceHref(sources[0])}>
-                  {sourceLabel(sources[0])}
-                </Link>
-              )}
-              {sourceTotal > 1 && (
-                <span className="muted">{sourceTotal} places</span>
-              )}
             </div>
           </header>
 
@@ -196,29 +184,6 @@ export default function DictionaryDetail() {
             )}
           </section>
 
-          <section className="lexicon__sources">
-            <p className="lexicon__section-title">
-              Where it occurs
-              <span className="lexicon__section-count">
-                {sources.length}
-                {sourceTotal > sources.length ? ` of ${sourceTotal}` : ''}
-              </span>
-            </p>
-            <ul className="lexicon__source-list">
-              {sources.map((source, index) => (
-                <li key={`${source.bookSlug}-${source.number}-${index}`}>
-                  <Link to={sourceHref(source)}>
-                    <span className="lexicon__source-book">{source.book}</span>
-                    <span className="lexicon__source-chapter">
-                      Cap. {source.roman}
-                      {source.title ? ` · ${source.title}` : ''}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-
           {entry.forms?.length > 0 && (
             <section className="lexicon__forms">
               <p className="lexicon__section-title">
@@ -235,33 +200,30 @@ export default function DictionaryDetail() {
             </section>
           )}
 
-          {examples.length > 0 && (
+          {example && (
             <section className="lexicon__passages">
               <p className="lexicon__section-title">
-                {examples[0]?.vocab ? 'From the vocabulary' : 'In the readings'}
-                <span className="lexicon__section-count">{examples.length}</span>
+                {example.vocab ? 'From the vocabulary' : 'In the readings'}
               </p>
               <ol className="lexicon__examples">
-                {examples.map((example, i) => (
-                  <li className="dict-example" key={`${example.s}-${i}`}>
-                    <p className="dict-example__latin latin">
-                      {exampleSegments(example.latin).map((segment, j) =>
-                        segment.mark ? (
-                          <mark className="dict-mark" key={j}>
-                            {segment.t}
-                          </mark>
-                        ) : (
-                          <span key={j}>{segment.t}</span>
-                        ),
-                      )}
-                    </p>
-                    {example.source && (
-                      <p className="dict-example__source">
-                        <Link to={sourceHref(example.source)}>{sourceLabel(example.source)}</Link>
-                      </p>
+                <li className="dict-example">
+                  <p className="dict-example__latin latin">
+                    {exampleSegments(example.latin).map((segment, j) =>
+                      segment.mark ? (
+                        <mark className="dict-mark" key={j}>
+                          {segment.t}
+                        </mark>
+                      ) : (
+                        <span key={j}>{segment.t}</span>
+                      ),
                     )}
-                  </li>
-                ))}
+                  </p>
+                  {example.source && (
+                    <p className="dict-example__source">
+                      <Link to={sourceHref(example.source)}>{sourceLabel(example.source)}</Link>
+                    </p>
+                  )}
+                </li>
               </ol>
             </section>
           )}

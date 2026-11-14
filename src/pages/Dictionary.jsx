@@ -128,7 +128,7 @@ export default function Dictionary() {
             </div>
             <div>
               <dt>With examples</dt>
-              <dd>{stats.withExamples.toLocaleString()}</dd>
+              <dd>{(stats.wordsWithExamples ?? stats.withExamples).toLocaleString()}</dd>
             </div>
           </dl>
         </header>
