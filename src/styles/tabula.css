@@ -232,62 +232,6 @@
   color: var(--oxblood);
 }
 
-/* ---------- Feature plates ---------- */
-
-.feature-grid {
-  gap: 1.1rem;
-  margin-top: 1.75rem;
-}
-
-/* Four steps read as one band on a wide page, a square on a narrow one. */
-@media (min-width: 1080px) {
-  .feature-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1079px) {
-  .feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.feature {
-  padding: 1.6rem 1.5rem 1.4rem;
-  border-radius: 2px;
-  box-shadow: var(--frame);
-}
-.feature::before {
-  display: none;
-}
-
-.feature__num {
-  position: static;
-  display: inline-grid;
-  place-items: center;
-  width: 2.35rem;
-  height: 2.35rem;
-  margin-bottom: 1rem;
-  border: 1px solid var(--bronze);
-  border-radius: 2px;
-  background: var(--surface-2);
-  color: var(--oxblood);
-  font-family: var(--font-display);
-  font-size: 0.86rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  box-shadow: inset 0 0 0 2px var(--surface-2), inset 0 0 0 3px var(--line-soft);
-}
-
-.feature h3 {
-  padding-right: 0;
-  font-size: 1.14rem;
-}
-.feature p {
-  font-size: 0.97rem;
-  color: var(--ink-soft);
-}
-
 /* ---------- Book features (home) ---------- */
 
 .book-feature {
@@ -324,8 +268,15 @@
   margin-top: 1.9rem;
 }
 
-.home-more {
-  margin: 1.6rem 0 0;
+/* The grouped shelf beneath the featured texts. */
+.home-shelf {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--line);
+}
+.home-shelf h3 {
+  margin: 0;
+  font-size: 1.3rem;
 }
 
 /* A little air between the shelf and the road. */

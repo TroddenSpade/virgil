@@ -36,7 +36,6 @@ function pageContext(pathname) {
   }
   const labels = {
     dictionary: 'Dictionary',
-    approach: 'Approach',
     profile: 'Profile',
     library: 'Library',
     iter: 'Iter',
@@ -100,7 +99,6 @@ export default function Header() {
           <NavLink to="/library">Library</NavLink>
           <NavLink to="/dictionary">Dictionary</NavLink>
           <NavLink to="/wordlist">Wordlist</NavLink>
-          <NavLink to="/approach">Approach</NavLink>
           <NavLink to="/profile">Profile</NavLink>
           <ThemeToggle />
         </nav>

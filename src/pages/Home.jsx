@@ -3,21 +3,9 @@ import {
   books,
   familiaRomanaBook,
   romaAeternaBook,
-  exercitiaBook,
-  latinViaOvidBook,
   companionBook,
   colloquiaBook,
   fabulaeBook,
-  sermonesBook,
-  exercitiaIIBook,
-  caesarBook,
-  epitomeBook,
-  petroniusBook,
-  arsBook,
-  companionRABook,
-  aeneisBook,
-  catilinaBook,
-  amphitryoBook,
 } from '../data/library.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
@@ -34,6 +22,123 @@ const bookCount = shelf.length
 const textCount = shelf.reduce((total, book) => total + (book.chapterCount || 0), 0)
 const stageCount = iterStages.length
 const goalBook = books.find((book) => book.isGoal)
+
+const COURSE_SLUGS = [
+  'familia-romana',
+  'roma-aeterna',
+  'learn-latin-from-the-romans',
+  'latin-via-ovid',
+]
+const PRACTICE_SLUGS = [
+  'exercitia-latina',
+  'exercitia-latina-ii',
+  'companion-to-familia-romana',
+  'companion-to-roma-aeterna',
+]
+
+const bySlug = (slug) => shelf.find((book) => book.slug === slug)
+
+const groups = [
+  {
+    label: 'The course',
+    note: 'Where the Latin begins',
+    items: COURSE_SLUGS.map(bySlug).filter(Boolean),
+  },
+  {
+    label: 'Practice & companions',
+    note: 'Exercises and explanations beside the text',
+    items: PRACTICE_SLUGS.map(bySlug).filter(Boolean),
+  },
+  {
+    label: 'Readers',
+    note: 'More Latin, from dialogue to history',
+    items: shelf.filter((book) => book.kind === 'reader'),
+  },
+]
+
+const principles = [
+  {
+    num: 'I',
+    title: 'Meaning before grammar',
+    body: 'A new word never arrives alone. It comes inside a sentence whose sense is already clear from the words you know, from a picture, or from a note in the margin.',
+  },
+  {
+    num: 'II',
+    title: 'Latin explains Latin',
+    body: 'The reading is not translated. Paraphrase, repetition and context do the work, so you learn to think in the language rather than to decode it.',
+  },
+  {
+    num: 'III',
+    title: 'Grammar after the reading',
+    body: 'Once a form has been met in the text, the Grammatica Latina names it, tables it, and shows it again in sentences you have just read.',
+  },
+  {
+    num: 'IV',
+    title: 'Practice, then go on',
+    body: 'Vocabula fixes the chapter’s words; the Pensā test them; the next chapter quietly assumes them. Nothing is left behind.',
+  },
+]
+
+const chapterSteps = [
+  {
+    num: 'I',
+    title: 'Lectio',
+    body: 'The chapter itself: a continuous Latin reading, with marginal glosses and pictures for the new words and forms.',
+  },
+  {
+    num: 'II',
+    title: 'Grammatica',
+    body: 'The grammar the reading has just shown you, with the paradigms set out as tables and tied back to the text.',
+  },
+  {
+    num: 'III',
+    title: 'Vocābula',
+    body: 'The chapter’s new words, with macra, meanings and a flashcard trainer for the ones that will not stay put.',
+  },
+  {
+    num: 'IV',
+    title: 'Pēnsa',
+    body: 'The original exercises, with instant checking and model answers — the place where reading turns into writing.',
+  },
+]
+
+const tools = [
+  {
+    mark: 'A',
+    title: 'The Lexicon',
+    body: 'Every form in the readings, its headword and sense, and the chapter it comes from. More than 30,000 words, with examples.',
+    to: '/dictionary',
+    link: 'Open the dictionary →',
+  },
+  {
+    mark: 'VIA',
+    title: 'The Iter',
+    body: 'The whole course as one road: nine stages, every lesson, and a map that remembers what you have read.',
+    to: '/iter',
+    link: 'Open the itinerary →',
+  },
+  {
+    mark: 'VERBA',
+    title: 'The wordlist',
+    body: 'Every word from the lessons you have learned, gathered for review with a schedule that remembers what you know.',
+    to: '/wordlist',
+    link: 'Open the wordlist →',
+  },
+  {
+    mark: 'LIB',
+    title: 'The Library',
+    body: 'The course, the exercise books, the companions, the readers and the authors — shelved together and labelled by grammar, theme and text.',
+    to: '/library',
+    link: 'Browse the library →',
+  },
+  {
+    mark: 'ME',
+    title: 'Your reading',
+    body: 'A local-first record of what you have read, with an optional copy in your account for another device.',
+    to: '/profile',
+    link: 'Open your profile →',
+  },
+]
 
 // The small-caps label, a rule, and a Latin note that open every section.
 function Incipit({ label, note }) {
@@ -144,46 +249,49 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <Incipit label="Ratiō" note="The method" />
-          <h2>How the project works</h2>
-          <div className="feature-grid">
-            <article className="feature card">
-              <span className="feature__num" aria-hidden="true">I</span>
-              <h3>Read from day one</h3>
-              <p>
-                Following Ørberg’s direct method, every word is explained by the words around it, by pictures and
-                by short marginal notes — so meaning comes first and grammar grows out of the reading.
-              </p>
-            </article>
-            <article className="feature card">
-              <span className="feature__num" aria-hidden="true">II</span>
-              <h3>Grammar in context</h3>
-              <p>
-                Each chapter has a <em>Grammatica Latina</em> section with clear paradigms — singular and plural,
-                the cases, the verb — always tied to sentences you have just read.
-              </p>
-            </article>
-            <article className="feature card">
-              <span className="feature__num" aria-hidden="true">III</span>
-              <h3>Practise, then move on</h3>
-              <p>
-                The original exercises (<em>Pensum A, B, C</em>) are here with instant checking and model answers,
-                and a vocabulary trainer with flashcards for every chapter.
-              </p>
-            </article>
-            <article className="feature card">
-              <span className="feature__num" aria-hidden="true">IV</span>
-              <h3>Read the authors themselves</h3>
-              <p>
-                The road ends in real Latin: unadapted texts from the great writers — Ovid, Virgil, Caesar and
-                Cicero — with vocabulary, scansion and commentary beside them, until you are reading the{' '}
-                <em>Aeneid</em> in its own words.
-              </p>
-            </article>
+          <h2>Read first, then name it</h2>
+          <p className="lead approach-lead">
+            Most courses begin with a grammar table and a list of words. This one begins with a
+            sentence. The grammar is not omitted — it is postponed until the reading has made it
+            visible.
+          </p>
+          <div className="approach-principles">
+            {principles.map((item) => (
+              <article className="approach-principle card" key={item.num}>
+                <span className="approach-principle__num" aria-hidden="true">
+                  {item.num}
+                </span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
       <section className="section-tight">
+        <div className="container">
+          <Incipit label="Capitulum" note="Inside a chapter" />
+          <h2>A chapter in four movements</h2>
+          <div className="approach-steps">
+            {chapterSteps.map((step) => (
+              <article className="approach-step" key={step.num}>
+                <span className="approach-step__num" aria-hidden="true">
+                  {step.num}
+                </span>
+                <h3>{step.title}</h3>
+                <p>{step.body}</p>
+              </article>
+            ))}
+          </div>
+          <p className="approach-note">
+            Not every book is a course: the readers, companions and original texts reuse the same
+            shape — a text, the help it needs, and a way to practise what it has taught.
+          </p>
+        </div>
+      </section>
+
+      <section className="section">
         <div className="container">
           <Incipit label="Bibliotheca" note={`${bookCount} books · ${textCount} texts`} />
           <h2>The texts</h2>
@@ -199,7 +307,7 @@ export default function Home() {
                 <h2>{familiaRomanaBook.title}</h2>
                 <p>{familiaRomanaBook.summary}</p>
                 <div className="book-feature__progress">
-                  <div className="progress" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="progress" role="progressbar" aria-label="Familia Romana progress" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
                     <div className="progress__fill" style={{ width: `${percent}%` }} />
                   </div>
                   <span className="muted" style={{ fontFamily: 'var(--font-ui)', fontSize: '0.8rem' }}>
@@ -226,7 +334,7 @@ export default function Home() {
                 <h2>{companionBook.title}</h2>
                 <p>{companionBook.summary}</p>
                 <div className="book-feature__progress">
-                  <div className="progress" role="progressbar" aria-valuenow={companionProgress.percent} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="progress" role="progressbar" aria-label="Companion progress" aria-valuenow={companionProgress.percent} aria-valuemin={0} aria-valuemax={100}>
                     <div className="progress__fill" style={{ width: `${companionProgress.percent}%` }} />
                   </div>
                   <span className="muted" style={{ fontFamily: 'var(--font-ui)', fontSize: '0.8rem' }}>
@@ -253,7 +361,7 @@ export default function Home() {
                 <h2>{colloquiaBook.title}</h2>
                 <p>{colloquiaBook.summary}</p>
                 <div className="book-feature__progress">
-                  <div className="progress" role="progressbar" aria-valuenow={colloquiaProgress.percent} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="progress" role="progressbar" aria-label="Colloquia progress" aria-valuenow={colloquiaProgress.percent} aria-valuemin={0} aria-valuemax={100}>
                     <div className="progress__fill" style={{ width: `${colloquiaProgress.percent}%` }} />
                   </div>
                   <span className="muted" style={{ fontFamily: 'var(--font-ui)', fontSize: '0.8rem' }}>
@@ -280,7 +388,7 @@ export default function Home() {
                 <h2>{fabulaeBook.title}</h2>
                 <p>{fabulaeBook.summary}</p>
                 <div className="book-feature__progress">
-                  <div className="progress" role="progressbar" aria-valuenow={fabulaeProgress.percent} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="progress" role="progressbar" aria-label="Fabulae progress" aria-valuenow={fabulaeProgress.percent} aria-valuemin={0} aria-valuemax={100}>
                     <div className="progress__fill" style={{ width: `${fabulaeProgress.percent}%` }} />
                   </div>
                   <span className="muted" style={{ fontFamily: 'var(--font-ui)', fontSize: '0.8rem' }}>
@@ -307,7 +415,7 @@ export default function Home() {
                 <h2>{romaAeternaBook.title}</h2>
                 <p>{romaAeternaBook.summary}</p>
                 <div className="book-feature__progress">
-                  <div className="progress" role="progressbar" aria-valuenow={romaProgress.percent} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="progress" role="progressbar" aria-label="Roma Aeterna progress" aria-valuenow={romaProgress.percent} aria-valuemin={0} aria-valuemax={100}>
                     <div className="progress__fill" style={{ width: `${romaProgress.percent}%` }} />
                   </div>
                   <span className="muted" style={{ fontFamily: 'var(--font-ui)', fontSize: '0.8rem' }}>
@@ -329,11 +437,40 @@ export default function Home() {
             </div>
           </div>
 
-          <p className="home-more">
-            <Link className="btn btn--ghost" to="/library">
-              See the whole shelf →
-            </Link>
-          </p>
+          <div className="home-shelf">
+            <div className="approach-section__head">
+              <h3>The whole shelf</h3>
+              <Link className="back-link" to="/library">
+                Open the library →
+              </Link>
+            </div>
+            <div className="approach-shelf">
+              {groups.map((group) => (
+                <article className="approach-shelf__group card" key={group.label}>
+                  <p className="eyebrow">{group.label}</p>
+                  <h3>{group.note}</h3>
+                  <ul>
+                    {group.items.map((book) => (
+                      <li key={book.slug}>
+                        <Link to={`/library/${book.slug}`}>
+                          <span>{book.shortTitle}</span>
+                          <span className="approach-shelf__count">
+                            {book.chapterCount || book.chapters.length}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+            {goalBook && (
+              <p className="approach-goal">
+                And at the end of the road: <span className="latin">{goalBook.latinTitle}</span> — the{' '}
+                <em>Aeneid</em>, the <em>Eclogues</em> and the <em>Georgics</em> in their own words.
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -380,6 +517,25 @@ export default function Home() {
               </li>
             )}
           </ol>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <Incipit label="Instrumenta" note="For the reader" />
+          <h2>The tools beside the text</h2>
+          <div className="approach-tools">
+            {tools.map((tool) => (
+              <Link className="approach-tool card" to={tool.to} key={tool.title}>
+                <span className="approach-tool__mark" aria-hidden="true">
+                  {tool.mark}
+                </span>
+                <h3>{tool.title}</h3>
+                <p>{tool.body}</p>
+                <span className="approach-tool__link">{tool.link}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

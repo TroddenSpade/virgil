@@ -4902,77 +4902,6 @@ button.lesson__keywords-label:focus-visible {
 
 /* ---------- Approach · the method as a printed guide ---------- */
 
-.approach-hero {
-  position: relative;
-  margin-top: 1.4rem;
-  padding: clamp(1.8rem, 4.5vw, 3.2rem);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  box-shadow:
-    inset 0 0 0 3px var(--surface),
-    inset 0 0 0 4px var(--line-soft),
-    var(--shadow-sm);
-  overflow: hidden;
-}
-.approach-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--bronze), var(--patina) 55%, transparent);
-  opacity: 0.85;
-}
-.approach-hero__watermark {
-  position: absolute;
-  right: clamp(-0.5rem, 1vw, 1.5rem);
-  top: 46%;
-  transform: translateY(-50%);
-  font-family: var(--font-display);
-  font-size: clamp(5rem, 12vw, 10rem);
-  line-height: 1;
-  letter-spacing: 0.06em;
-  color: var(--bronze);
-  opacity: 0.055;
-  pointer-events: none;
-  user-select: none;
-}
-.approach-hero__copy {
-  position: relative;
-  z-index: 1;
-  max-width: 58ch;
-}
-.approach-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  margin-top: 1.4rem;
-}
-.approach-hero__stats {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 1.8rem 0 0;
-  padding-top: 1.2rem;
-  border-top: 1px solid var(--line);
-}
-.approach-hero__stats dt {
-  font-family: var(--font-ui);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-.approach-hero__stats dd {
-  margin: 0.2rem 0 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
-  line-height: 1;
-  color: var(--ink);
-}
 .approach-section {
   margin-top: clamp(2.6rem, 6vw, 4.5rem);
 }
@@ -5017,69 +4946,6 @@ button.lesson__keywords-label:focus-visible {
   font-size: 0.93rem;
   line-height: 1.6;
   color: var(--ink-soft);
-}
-.approach-stages {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
-  margin: 1.6rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-.approach-stage {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  height: 100%;
-  padding: 1rem 1.05rem;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  background: var(--surface);
-  color: inherit;
-  text-decoration: none;
-  transition: transform 0.15s ease, border-color 0.15s ease;
-}
-.approach-stage:hover {
-  transform: translateY(-2px);
-  border-color: var(--bronze-soft);
-}
-.approach-stage__num {
-  flex: none;
-  padding-top: 0.15rem;
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  color: var(--bronze);
-}
-.approach-stage__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-.approach-stage__latin {
-  font-size: 0.95rem;
-  color: var(--bronze-deep);
-}
-.approach-stage__title {
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  line-height: 1.3;
-  color: var(--ink);
-}
-.approach-stage__blurb {
-  font-size: 0.82rem;
-  line-height: 1.45;
-  color: var(--ink-faint);
-}
-.approach-stage__count {
-  flex: none;
-  margin-left: auto;
-  font-family: var(--font-ui);
-  font-size: 0.56rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  white-space: nowrap;
 }
 .approach-steps {
   display: grid;
@@ -5162,7 +5028,7 @@ button.lesson__keywords-label:focus-visible {
 }
 .approach-tools {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 1rem;
   margin-top: 1.6rem;
 }
@@ -5206,14 +5072,6 @@ button.lesson__keywords-label:focus-visible {
   text-transform: uppercase;
   color: var(--bronze);
 }
-.approach-close__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.7rem;
-  margin-top: 1.4rem;
-}
-
 /* ---------- Profile · a personal reading tabula ---------- */
 
 .profile-hero {
@@ -5488,9 +5346,6 @@ button.lesson__keywords-label:focus-visible {
   .approach-tools {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .approach-stages {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .profile-stages {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -5510,12 +5365,8 @@ button.lesson__keywords-label:focus-visible {
   .approach-principles,
   .approach-steps,
   .approach-tools,
-  .approach-stages,
   .approach-shelf {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .approach-hero__stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .approach-section__head,
   .profile-section__head {

@@ -17,8 +17,8 @@ export default function Footer() {
           <Link to="/library">Library</Link>
           <Link to="/iter">Iter</Link>
           <Link to="/dictionary">Dictionary</Link>
+          <Link to="/wordlist">Wordlist</Link>
           <Link to="/profile">Profile</Link>
-          <Link to="/approach">Approach</Link>
         </nav>
 
         <div className="site-footer__family">

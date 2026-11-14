@@ -134,7 +134,7 @@ src/
 │     ├─ outline.js
 │     └─ capitulum-01..40.js
 ├─ components/                   # Reading, GrammarSection, Vocabulary, Pensum, …
-├─ pages/                        # Home, Library, BookPage, ChapterPage, Approach
+├─ pages/                        # Home, Library, BookPage, ChapterPage, Wordlist, Profile
 └─ hooks/                        # localStorage progress + PWA install prompt
 ```
 
