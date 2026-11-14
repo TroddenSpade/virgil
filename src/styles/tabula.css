@@ -960,6 +960,145 @@
   opacity: 0.6;
 }
 
+/* The closing slider: one famous line at a time, with its source. */
+.motto-slider {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.5rem, 1.5vw, 1.2rem);
+}
+.motto-slider:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 55%, transparent);
+  outline-offset: 5px;
+}
+.motto-slider__stage {
+  display: grid;
+  place-items: center;
+  min-height: clamp(12rem, 22vw, 15rem);
+}
+.motto-slider .motto {
+  width: 100%;
+  animation: motto-in 0.35s ease;
+}
+@keyframes motto-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.motto-slider__arrow {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.motto-slider__arrow:hover {
+  color: var(--bronze);
+  border-color: var(--bronze-soft);
+  transform: scale(1.04);
+}
+.motto-slider__arrow:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 55%, transparent);
+  outline-offset: 3px;
+}
+.motto-slider__meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem 1rem;
+  margin-top: 0.9rem;
+}
+.motto-slider__count {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+}
+.motto-slider__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.32rem;
+  max-width: 22rem;
+}
+.motto-slider__dots button {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--line-strong);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.motto-slider__dots button:hover {
+  opacity: 1;
+  background: var(--bronze-soft);
+}
+.motto-slider__dots button.is-active {
+  opacity: 1;
+  background: var(--bronze);
+  transform: scale(1.45);
+}
+.motto-slider__dots button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 55%, transparent);
+  outline-offset: 2px;
+}
+.motto__translation {
+  max-width: 52ch;
+  margin: 0 auto 1.2rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+@media (max-width: 720px) {
+  .motto-slider {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .motto-slider__stage {
+    min-height: 18rem;
+  }
+  .motto-slider__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .motto-slider__arrow:hover {
+    transform: translateY(-50%) scale(1.04);
+  }
+  .motto-slider__arrow--prev {
+    left: 0.55rem;
+  }
+  .motto-slider__arrow--next {
+    right: 0.55rem;
+  }
+  .motto-slider__dots {
+    max-width: 14rem;
+  }
+}
+
 /* ---------- Small screens ---------- */
 
 /* The engraving draws in as the leaf narrows. */

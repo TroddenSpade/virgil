@@ -21,6 +21,7 @@ import {
 } from '../data/library.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
+import VirgilLines from '../components/VirgilLines.jsx'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
@@ -384,10 +385,7 @@ export default function Home() {
 
       <section className="section-tight">
         <div className="container">
-          <blockquote className="motto">
-            <p className="motto__latin latin">Arma virumque canō, Troiae quī prīmus ab ōrīs</p>
-            <footer className="motto__source">Vergil, Aeneid I.1</footer>
-          </blockquote>
+          <VirgilLines />
         </div>
       </section>
     </>
