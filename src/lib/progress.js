@@ -1,11 +1,11 @@
 // The local-first progress document and the small helpers that turn it into
 // something the profile page can read. The same shape is stored in Supabase.
 
-import { familiaRomanaBook, romaAeternaBook, exercitiaBook, latinViaOvidBook, companionBook, colloquiaBook, fabulaeBook, sermonesBook, exercitiaIIBook, caesarBook, epitomeBook, petroniusBook, arsBook, companionRABook, aeneisBook, catilinaBook, amphitryoBook } from '../data/library.js'
+import { familiaRomanaBook, romaAeternaBook, exercitiaBook, latinViaOvidBook, learnLatinBook, companionBook, colloquiaBook, fabulaeBook, sermonesBook, exercitiaIIBook, caesarBook, epitomeBook, petroniusBook, arsBook, companionRABook, aeneisBook, catilinaBook, amphitryoBook } from '../data/library.js'
 
 export const PROGRESS_VERSION = 1
 
-export const TRACKED_BOOKS = [familiaRomanaBook, romaAeternaBook, exercitiaBook, latinViaOvidBook, companionBook, colloquiaBook, fabulaeBook, sermonesBook, exercitiaIIBook, caesarBook, epitomeBook, petroniusBook, arsBook, companionRABook, aeneisBook, catilinaBook, amphitryoBook].map((book) => ({
+export const TRACKED_BOOKS = [familiaRomanaBook, romaAeternaBook, exercitiaBook, latinViaOvidBook, learnLatinBook, companionBook, colloquiaBook, fabulaeBook, sermonesBook, exercitiaIIBook, caesarBook, epitomeBook, petroniusBook, arsBook, companionRABook, aeneisBook, catilinaBook, amphitryoBook].map((book) => ({
   id: book.id,
   title: book.title,
   shortTitle: book.shortTitle,
