@@ -8,7 +8,7 @@ import {
   summarizeProgress,
 } from '../lib/progress.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
-import { buildWordlist } from '../lib/wordlist.js'
+import { useWordlist } from '../hooks/useWordlist.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
@@ -68,7 +68,7 @@ export default function Profile() {
 
   const local = useMemo(() => readLocalProgress(), [revision])
   const localSummary = useMemo(() => summarizeProgress(local), [local])
-  const wordlistCount = useMemo(() => buildWordlist(local).words.length, [local])
+  const { stats: wordStats } = useWordlist()
   const remoteSummary = useMemo(
     () => (remote ? summarizeProgress(remote.progress) : null),
     [remote],
@@ -120,6 +120,22 @@ export default function Profile() {
       next,
     }
   }, [revision])
+
+  const reviewTarget = wordStats.due > 0
+    ? { to: '/wordlist/review?mode=due', label: `Review ${wordStats.due} due →` }
+    : wordStats.new > 0
+      ? { to: '/wordlist/review?mode=new', label: `Learn ${wordStats.new} new →` }
+      : { to: '/wordlist/review', label: 'Open review →' }
+
+  const wordEncouragement = wordStats.due > 0
+    ? `${wordStats.due} ${wordStats.due === 1 ? 'word is' : 'words are'} ready to return${
+        wordStats.new > 0
+          ? `, and ${wordStats.new} new ${wordStats.new === 1 ? 'word is' : 'words are'} waiting`
+          : ''
+      }. A few minutes now is worth more than a long session later.`
+    : wordStats.new > 0
+      ? `${wordStats.new} ${wordStats.new === 1 ? 'word is' : 'words are'} waiting for a first meeting. Ten is a good day’s work.`
+      : 'Nothing is due. The next words return when their intervals come round.'
 
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1)
@@ -363,6 +379,85 @@ export default function Profile() {
                   </Link>
                 ))}
               </div>
+            </section>
+
+            <section className="profile-section">
+              <div className="profile-section__head">
+                <div>
+                  <p className="eyebrow">Tabula verborum</p>
+                  <h2>Your wordlist</h2>
+                </div>
+                <Link className="back-link" to="/wordlist">
+                  Open the wordlist →
+                </Link>
+              </div>
+
+              {wordStats.total === 0 ? (
+                <section className="profile-wordlist profile-wordlist--empty card">
+                  <div>
+                    <h3>No words yet.</h3>
+                    <p>
+                      Mark a chapter as learned and its printed vocabulary joins your list. Then a
+                      few quiet minutes of review will keep it with you.
+                    </p>
+                  </div>
+                  <Link className="btn btn--primary" to="/iter">
+                    Open the itinerary →
+                  </Link>
+                </section>
+              ) : (
+                <section className="profile-wordlist card">
+                  <div className="profile-wordlist__head">
+                    <div>
+                      <p className="profile-wordlist__percent">
+                        {wordStats.percentReviewed}
+                        <span>%</span>
+                      </p>
+                      <p className="profile-wordlist__label">
+                        of {wordStats.total.toLocaleString()} words reviewed
+                      </p>
+                    </div>
+                    <Link className="btn btn--primary" to={reviewTarget.to}>
+                      {reviewTarget.label}
+                    </Link>
+                  </div>
+
+                  <div
+                    className="progress"
+                    role="progressbar"
+                    aria-label="Words reviewed"
+                    aria-valuenow={wordStats.percentReviewed}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div
+                      className="progress__fill"
+                      style={{ width: `${wordStats.percentReviewed}%` }}
+                    />
+                  </div>
+
+                  <dl className="profile-wordlist__stats">
+                    <div>
+                      <dt>Due now</dt>
+                      <dd>{wordStats.due}</dd>
+                    </div>
+                    <div>
+                      <dt>New</dt>
+                      <dd>{wordStats.new}</dd>
+                    </div>
+                    <div>
+                      <dt>Learning</dt>
+                      <dd>{wordStats.learning}</dd>
+                    </div>
+                    <div>
+                      <dt>Mature</dt>
+                      <dd>{wordStats.mature}</dd>
+                    </div>
+                  </dl>
+
+                  <p className="profile-wordlist__note">{wordEncouragement}</p>
+                </section>
+              )}
             </section>
 
             <section className="profile-section">
@@ -677,8 +772,10 @@ export default function Profile() {
               <p className="eyebrow">After the lesson</p>
               <h3>Your wordlist</h3>
               <p>
-                {wordlistCount
-                  ? `${wordlistCount.toLocaleString()} words from your learned chapters, with a review session that remembers what you know.`
+                {wordStats.total
+                  ? `${wordStats.total.toLocaleString()} words from your learned chapters${
+                      wordStats.due ? ` · ${wordStats.due} due now` : ''
+                    }. A short review keeps them with you.`
                   : 'Every word from the chapters you learn, gathered in one place for review.'}
               </p>
               <span>Open the wordlist →</span>

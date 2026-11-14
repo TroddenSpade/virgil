@@ -207,14 +207,14 @@ export default function Home() {
                   word lists before you read. Just Latin, understood from the very first page.
                 </p>
                 <div className="hero__actions">
-                  <Link
-                    className="btn btn--primary"
-                    to={`/library/${familiaRomanaBook.slug}/${firstChapter.slug}`}
-                  >
-                    Begin Capitulum I →
+                  <Link className="btn btn--primary" to="/iter">
+                    Open the itinerary →
                   </Link>
-                  <Link className="btn btn--ghost" to="/iter">
-                    Open the itinerary
+                  <Link className="btn btn--ghost" to="/library">
+                    Visit the library
+                  </Link>
+                  <Link className="btn btn--ghost" to="/wordlist/review">
+                    Review the wordlist
                   </Link>
                 </div>
               </div>

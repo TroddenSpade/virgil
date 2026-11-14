@@ -5290,6 +5290,82 @@ button.lesson__keywords-label:focus-visible {
   font-size: 0.64rem;
   color: var(--ink-faint);
 }
+.profile-wordlist {
+  padding: clamp(1.3rem, 3vw, 1.7rem);
+}
+.profile-wordlist__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+}
+.profile-wordlist__percent {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  line-height: 0.95;
+  color: var(--oxblood);
+}
+.profile-wordlist__percent span {
+  margin-left: 0.08em;
+  font-size: 0.36em;
+  color: var(--bronze);
+}
+.profile-wordlist__label {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.profile-wordlist .progress {
+  margin-top: 1rem;
+}
+.profile-wordlist__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+  margin: 1.1rem 0 0;
+}
+.profile-wordlist__stats dt {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.profile-wordlist__stats dd {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.profile-wordlist__note {
+  max-width: 66ch;
+  margin: 1.1rem 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.profile-wordlist--empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.profile-wordlist--empty h3 {
+  margin: 0.1rem 0 0.35rem;
+}
+.profile-wordlist--empty p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--ink-soft);
+}
 .profile-account__intro {
   max-width: 64ch;
   margin-top: -0.3rem;
@@ -5381,6 +5457,13 @@ button.lesson__keywords-label:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
   .profile-continue {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .profile-wordlist__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .profile-wordlist--empty {
     align-items: flex-start;
     flex-direction: column;
   }
