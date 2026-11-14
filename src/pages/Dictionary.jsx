@@ -50,20 +50,28 @@ export default function Dictionary() {
     [entries],
   )
 
+  const searchIndex = useMemo(
+    () =>
+      entries.map((entry) => ({
+        entry,
+        hay: norm(
+          `${entry.latin} ${entry.headword} ${entry.english} ${(entry.forms || []).join(' ')}`,
+        ),
+      })),
+    [entries],
+  )
+
   const filtered = useMemo(() => {
     const q = norm(query).trim()
-    return entries.filter((entry) => {
-      if (letter !== 'all' && entry.letter !== letter) return false
-      if (pos !== 'all' && entry.posGroup !== pos) return false
-      if (!q) return true
-      if (entry.search) return entry.search.includes(q)
-      return (
-        norm(entry.latin).includes(q) ||
-        norm(entry.headword).includes(q) ||
-        norm(entry.english).includes(q)
-      )
-    })
-  }, [entries, query, letter, pos])
+    return searchIndex
+      .filter(({ entry, hay }) => {
+        if (letter !== 'all' && entry.letter !== letter) return false
+        if (pos !== 'all' && entry.posGroup !== pos) return false
+        if (!q) return true
+        return hay.includes(q)
+      })
+      .map(({ entry }) => entry)
+  }, [searchIndex, query, letter, pos])
 
   useEffect(() => {
     setVisible(PAGE_SIZE)

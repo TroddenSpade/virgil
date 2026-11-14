@@ -158,8 +158,9 @@ for (const dir of dirs) {
 /* ---------- Curated vocabulary ---------- */
 const curated = new Map()
 const addSource = (map, source) => {
-  const key = `${source.bookSlug}:${source.number}`
-  if (!map.has(key)) map.set(key, source)
+  if (!map.has(source.bookSlug)) {
+    map.set(source.bookSlug, { book: source.book, bookSlug: source.bookSlug })
+  }
 }
 
 for (const { slug, book, chapters } of books) {
@@ -270,7 +271,7 @@ for (const { slug, book, chapters } of books) {
             latin: form,
             meanings: new Set([analysis.de.mean.trim()]),
             poses: new Set([label === 'noun' && gender ? `noun (${gender}.)` : label]),
-            forms: new Set(),
+            formMap: new Map(),
             sources: new Map(),
             examples: [],
             curated: false,
@@ -278,11 +279,15 @@ for (const { slug, book, chapters } of books) {
           entries.set(key, entry)
         }
 
-        entry.forms.add(token)
+        const formKey = norm(token)
+        const existingForm = entry.formMap.get(formKey)
+        if (!existingForm || (/[A-Z]/.test(existingForm) && !/[A-Z]/.test(token))) {
+          entry.formMap.set(formKey, token)
+        }
         addSource(entry.sources, source)
-        formIndex[norm(token)] = key
+        formIndex[formKey] = key
 
-        if (entry.examples.length < 3) {
+        if (!entry.examples.length) {
           const marked = sentence.replace(
             new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
             `{{${token}}}`,
@@ -305,7 +310,7 @@ for (const [key, curatedEntry] of curated) {
       latin: curatedEntry.latin,
       meanings: new Set(),
       poses: new Set(),
-      forms: new Set(),
+      formMap: new Map(),
       sources: new Map(),
       examples: [],
       curated: true,
@@ -330,7 +335,7 @@ const list = [...entries.entries()]
   .map(([key, entry]) => {
     const english = mergeSenses(entry.meanings)
     const poses = [...new Set([...entry.poses].map(normalisePos).filter(Boolean))]
-    const forms = [...entry.forms].sort((a, b) => a.localeCompare(b))
+    const forms = [...entry.formMap.values()].sort((a, b) => a.localeCompare(b))
     const pos = poses.join('; ')
     const headword = entry.head
     const letter = norm(headword).replace(/^[^a-z]+/, '')[0] || ''
@@ -345,7 +350,6 @@ const list = [...entries.entries()]
       forms,
       sources: [...entry.sources.values()],
       examples: entry.examples,
-      search: norm(`${entry.latin} ${headword} ${english} ${forms.join(' ')}`),
     }
   })
   .filter((entry) => entry.english)
