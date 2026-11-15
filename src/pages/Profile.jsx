@@ -8,6 +8,7 @@ import {
   summarizeProgress,
 } from '../lib/progress.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
+import { DAILY_TARGET, habitStats } from '../lib/review.js'
 import { useWordlist } from '../hooks/useWordlist.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
@@ -75,7 +76,16 @@ export default function Profile() {
 
   const local = useMemo(() => readLocalProgress(), [revision])
   const localSummary = useMemo(() => summarizeProgress(local), [local])
-  const { stats: wordStats, studiedChapters } = useWordlist()
+  const {
+    stats: wordStats,
+    studiedChapters,
+    review,
+    now,
+  } = useWordlist()
+  const habit = useMemo(
+    () => habitStats(review, now, DAILY_TARGET),
+    [review, now],
+  )
   const remoteSummary = useMemo(
     () => (remote ? summarizeProgress(remote.progress) : null),
     [remote],
@@ -287,8 +297,8 @@ export default function Profile() {
                 <>
                   <p className="profile-hero__wordlist-note">
                     {studiedChapters === 0
-                      ? 'Mark a chapter as learned and its printed vocabulary joins the list.'
-                      : 'The lessons you have marked so far print no vocabulary.'}
+                      ? 'Mark a chapter as learned and every word from it joins the list.'
+                      : 'The lessons you have marked so far contain no indexed words.'}
                   </p>
                   <Link
                     className="back-link"
@@ -396,6 +406,75 @@ export default function Profile() {
                 </Link>
               </section>
             )}
+
+            <section className="profile-habit card" aria-labelledby="profile-habit-title">
+              <div className="profile-habit__head">
+                <div>
+                  <p className="eyebrow">Hodiē</p>
+                  <h2 id="profile-habit-title">The daily habit</h2>
+                </div>
+                <p className={`profile-habit__streak${habit.streak > 0 ? ' is-live' : ''}`}>
+                  <span className="profile-habit__streak-mark" aria-hidden="true">✦</span>
+                  {habit.streak > 0 ? `${habit.streak}-day streak` : 'No streak yet'}
+                </p>
+              </div>
+
+              <div className="profile-habit__body">
+                <div className="profile-habit__today">
+                  <p className="profile-habit__today-line">
+                    <span className="profile-habit__today-label">Hodiē</span>
+                    <span className="profile-habit__today-dot" aria-hidden="true">·</span>
+                    <span className="profile-habit__today-count">
+                      {habit.today} of {habit.target}
+                    </span>
+                  </p>
+                  <p className="profile-habit__today-caption">reviews today</p>
+                  <div
+                    className="progress"
+                    role="progressbar"
+                    aria-label="Reviews today"
+                    aria-valuenow={Math.min(habit.today, habit.target)}
+                    aria-valuemin={0}
+                    aria-valuemax={habit.target}
+                    aria-valuetext={`${habit.today} of ${habit.target} reviews today`}
+                  >
+                    <div className="progress__fill" style={{ width: `${habit.percent}%` }} />
+                  </div>
+                  <p className="profile-habit__note">
+                    {habit.today >= habit.target
+                      ? 'Today’s target is met.'
+                      : `${habit.target - habit.today} ${
+                          habit.target - habit.today === 1 ? 'review' : 'reviews'
+                        } to today’s target.`}
+                  </p>
+                </div>
+
+                <div
+                  className="profile-habit__week"
+                  role="group"
+                  aria-label="Reviews over the last seven days"
+                >
+                  {habit.week.map((day) => (
+                    <div
+                      className={`profile-habit__day${day.isToday ? ' is-today' : ''}`}
+                      key={day.key}
+                      title={`${day.label}: ${day.count} ${
+                        day.count === 1 ? 'review' : 'reviews'
+                      }`}
+                    >
+                      <span className="profile-habit__bar" aria-hidden="true">
+                        <span
+                          className="profile-habit__bar-fill"
+                          style={{ height: `${day.height}%` }}
+                        />
+                      </span>
+                      <span className="profile-habit__day-label">{day.label}</span>
+                      <span className="profile-habit__day-count">{day.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
             <section className="profile-section">
               <div className="profile-section__head">

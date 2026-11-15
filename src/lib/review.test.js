@@ -2,15 +2,19 @@ import { describe, expect, it } from 'vitest'
 import {
   AGAIN_MS,
   BOX_INTERVALS,
+  DAILY_TARGET,
   DAY_MS,
   DEFAULT_NEW_PER_SESSION,
   MAX_BOX,
   buildSession,
+  dayKey,
   dueFor,
   emptyReview,
+  habitStats,
   intervalLabel,
   normalizeReview,
   rateReview,
+  reviewStreak,
   reviewStats,
   statusOf,
 } from './review.js'
@@ -156,6 +160,94 @@ describe('rateReview', () => {
     const review = emptyReview()
     rateReview(review, 'aqua', 'good', NOW)
     expect(review.words).toEqual({})
+  })
+})
+
+describe('daily habit', () => {
+  it('bumps one count for each review on the local day', () => {
+    const first = rateReview(emptyReview(), 'aqua', 'good', NOW)
+    expect(first.days[dayKey(NOW)]).toBe(1)
+
+    const second = rateReview(first, 'terra', 'again', NOW)
+    expect(second.days[dayKey(NOW)]).toBe(2)
+  })
+
+  it('normalizes the day log and drops junk entries', () => {
+    const result = normalizeReview({
+      days: {
+        '2024-01-01': 3,
+        'not-a-day': 4,
+        '2024-01-02': 0,
+        '2024-01-03': -2,
+      },
+    })
+    expect(result.days).toEqual({ '2024-01-01': 3 })
+  })
+
+  it('seeds the day log from old last-review timestamps', () => {
+    const result = normalizeReview({
+      words: {
+        aqua: { seen: 1, box: 1, due: NOW, last: NOW },
+        terra: { seen: 1, box: 1, due: NOW, last: NOW },
+        ignis: { seen: 1, box: 1, due: NOW, last: NOW - DAY_MS },
+      },
+    })
+    expect(result.days[dayKey(NOW)]).toBe(2)
+    expect(result.days[dayKey(NOW - DAY_MS)]).toBe(1)
+  })
+
+  it('counts a streak through today', () => {
+    const review = {
+      ...emptyReview(),
+      days: {
+        [dayKey(NOW)]: 2,
+        [dayKey(NOW - DAY_MS)]: 1,
+        [dayKey(NOW - 2 * DAY_MS)]: 3,
+      },
+    }
+    expect(reviewStreak(review, NOW)).toBe(3)
+  })
+
+  it('keeps a streak alive through yesterday', () => {
+    const review = {
+      ...emptyReview(),
+      days: {
+        [dayKey(NOW - DAY_MS)]: 1,
+        [dayKey(NOW - 2 * DAY_MS)]: 1,
+      },
+    }
+    expect(reviewStreak(review, NOW)).toBe(2)
+  })
+
+  it('drops a streak after a full empty day', () => {
+    const review = {
+      ...emptyReview(),
+      days: { [dayKey(NOW - 2 * DAY_MS)]: 5 },
+    }
+    expect(reviewStreak(review, NOW)).toBe(0)
+  })
+
+  it('summarises today and the last seven days', () => {
+    const review = {
+      ...emptyReview(),
+      days: {
+        [dayKey(NOW)]: 12,
+        [dayKey(NOW - DAY_MS)]: 4,
+      },
+    }
+    const habit = habitStats(review, NOW)
+
+    expect(habit.today).toBe(12)
+    expect(habit.target).toBe(DAILY_TARGET)
+    expect(habit.percent).toBe(60)
+    expect(habit.streak).toBe(2)
+    expect(habit.week).toHaveLength(7)
+    expect(habit.week[6]).toMatchObject({
+      count: 12,
+      isToday: true,
+      height: 60,
+    })
+    expect(habit.week[5]).toMatchObject({ count: 4, height: 20 })
   })
 })
 

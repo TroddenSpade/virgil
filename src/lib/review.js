@@ -21,6 +21,10 @@ export const MAX_BOX = BOX_INTERVALS.length - 1
 
 export const DEFAULT_NEW_PER_SESSION = 20
 export const NEW_PER_SESSION_OPTIONS = [10, 20, 30, 50]
+export const DAILY_TARGET = 20
+
+const DAY_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
+const DAY_HISTORY = 400
 
 export const RATINGS = [
   { key: 'again', label: 'Again', tone: 'again' },
@@ -47,10 +51,83 @@ function clampInt(value, min, max, fallback = 0) {
   return Math.min(max, Math.max(min, Math.round(number)))
 }
 
+/** The local calendar day of a timestamp, as YYYY-MM-DD. */
+export function dayKey(value = Date.now()) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function dateFromDayKey(key) {
+  const [year, month, day] = key.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function shiftDayKey(key, amount) {
+  const date = dateFromDayKey(key)
+  date.setDate(date.getDate() + amount)
+  return dayKey(date)
+}
+
+function normalizeDays(value) {
+  if (!isObject(value)) return {}
+  const days = {}
+  for (const [key, raw] of Object.entries(value)) {
+    if (!DAY_KEY_PATTERN.test(key)) continue
+    const count = clampInt(raw, 0, 1_000_000, 0)
+    if (count > 0) days[key] = count
+  }
+  return days
+}
+
+// Older review documents only know when each word was last seen. Use those
+// timestamps once to seed the day log, so an existing streak is not lost when
+// this version first loads.
+function daysFromWords(words) {
+  const days = {}
+  for (const state of Object.values(words)) {
+    if (!state?.last) continue
+    const key = dayKey(state.last)
+    if (!key) continue
+    days[key] = (days[key] || 0) + 1
+  }
+  return days
+}
+
+function pruneDays(days, now) {
+  const today = dayKey(now)
+  if (!today) return days
+  const cutoff = shiftDayKey(today, -DAY_HISTORY)
+  const kept = {}
+  for (const [key, count] of Object.entries(days)) {
+    if (key >= cutoff) kept[key] = count
+  }
+  return kept
+}
+
+function streakFromDays(days, now) {
+  let cursor = dayKey(now)
+  if (!cursor) return 0
+  if (!days[cursor]) {
+    cursor = shiftDayKey(cursor, -1)
+    if (!days[cursor]) return 0
+  }
+  let streak = 0
+  while (days[cursor]) {
+    streak += 1
+    cursor = shiftDayKey(cursor, -1)
+  }
+  return streak
+}
+
 export function emptyReview() {
   return {
     version: REVIEW_VERSION,
     words: {},
+    days: {},
     settings: { newPerSession: DEFAULT_NEW_PER_SESSION },
   }
 }
@@ -89,9 +166,14 @@ export function normalizeReview(value) {
     DEFAULT_NEW_PER_SESSION,
   )
 
+  const days = isObject(source.days)
+    ? normalizeDays(source.days)
+    : daysFromWords(words)
+
   return {
     version: REVIEW_VERSION,
     words,
+    days,
     settings: { newPerSession },
   }
 }
@@ -151,13 +233,68 @@ export function rateReview(review, key, rating, now = Date.now()) {
     lapses: (current?.lapses || 0) + (rating === 'again' ? 1 : 0),
     last: now,
   }
+
+  const base = isObject(review) ? review : emptyReview()
+  const days = isObject(base.days)
+    ? normalizeDays(base.days)
+    : daysFromWords(base.words || {})
+  const today = dayKey(now)
+  if (today) days[today] = (days[today] || 0) + 1
+
   return {
-    ...(isObject(review) ? review : emptyReview()),
+    ...base,
     version: REVIEW_VERSION,
     words: {
-      ...(review?.words || {}),
+      ...(base.words || {}),
       [key]: next,
     },
+    days: pruneDays(days, now),
+  }
+}
+
+/** Consecutive days with at least one review, allowing today to be empty. */
+export function reviewStreak(review, now = Date.now()) {
+  return streakFromDays(normalizeDays(review?.days), now)
+}
+
+/**
+ * The daily habit at a glance: today's count against the target, a seven-day
+ * strip, and the current streak. Bar heights are relative to the busiest day
+ * in the strip (or the target, whichever is larger).
+ */
+export function habitStats(review, now = Date.now(), target = DAILY_TARGET) {
+  const days = normalizeDays(review?.days)
+  const wanted = clampInt(target, 1, 1000, DAILY_TARGET)
+  const todayKey = dayKey(now)
+  const today = todayKey ? days[todayKey] || 0 : 0
+  const week = []
+  let ceiling = wanted
+
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const key = todayKey ? shiftDayKey(todayKey, -offset) : ''
+    const count = key ? days[key] || 0 : 0
+    if (count > ceiling) ceiling = count
+    week.push({
+      key,
+      label: key
+        ? dateFromDayKey(key).toLocaleDateString('en-US', { weekday: 'short' })
+        : '',
+      count,
+      isToday: offset === 0,
+      height: 0,
+    })
+  }
+
+  for (const day of week) {
+    day.height = Math.round((day.count / ceiling) * 100)
+  }
+
+  return {
+    today,
+    target: wanted,
+    percent: Math.min(100, Math.round((today / wanted) * 100)),
+    streak: streakFromDays(days, now),
+    week,
   }
 }
 

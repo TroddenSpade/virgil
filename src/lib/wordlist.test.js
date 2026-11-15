@@ -4,6 +4,7 @@ import {
   buildWordlist,
   cleanText,
   headwordOf,
+  readingWordKey,
   wordKey,
 } from './wordlist.js'
 
@@ -38,6 +39,7 @@ describe('headwordOf', () => {
 
   it('keeps true enclitics and rejects stray suffixes', () => {
     expect(headwordOf('-ne')).toBe('-ne')
+    expect(headwordOf('-ne?')).toBe('-ne?')
     expect(headwordOf('-que')).toBe('-que')
     expect(headwordOf('-ectum')).toBe('')
   })
@@ -64,21 +66,39 @@ describe('wordKey', () => {
   })
 })
 
+describe('readingWordKey', () => {
+  it('keeps dictionary enclitics on their own cards', () => {
+    expect(readingWordKey('ne')).toBe('-ne')
+    expect(readingWordKey('nē')).toBe('ne')
+    expect(readingWordKey('que')).toBe('-que')
+    expect(readingWordKey('ve')).toBe('-ve')
+  })
+
+  it('finds a key for abbreviation and parser fragments', () => {
+    expect(readingWordKey('Cn')).toBe('cn')
+    expect(readingWordKey('pr')).toBe('pr')
+    expect(readingWordKey('zzz')).toBe('zzz')
+  })
+})
+
 describe('buildWordlist', () => {
   it('is empty without progress', () => {
     const result = buildWordlist({})
     expect(result.words).toEqual([])
     expect(result.studiedChapters).toBe(0)
+    expect(result.contributingChapters).toBe(0)
     expect(result.vocabularyChapters).toBe(0)
   })
 
-  it('gathers the printed vocabulary of learned chapters', () => {
+  it('gathers printed vocabulary and reading lemmas', () => {
     const result = buildWordlist({
       books: { [familiaRomanaBook.id]: [1, 2, 3] },
     })
 
     expect(result.studiedChapters).toBe(3)
+    expect(result.contributingChapters).toBe(3)
     expect(result.vocabularyChapters).toBe(3)
+    expect(result.readingVocabularyChapters).toBe(3)
     expect(result.words.length).toBeGreaterThan(0)
     expect(result.sourceBooks.map((book) => book.id)).toEqual([
       familiaRomanaBook.id,
@@ -100,13 +120,58 @@ describe('buildWordlist', () => {
     expect(new Set(keys).size).toBe(keys.length)
   })
 
-  it('counts learned chapters even when they print no vocabulary', () => {
+  it('adds every reading lemma from a learned chapter', () => {
+    const reading = {
+      lemmas: [
+        ['aqua', 'water', 'noun'],
+        ['ne', 'question particle', 'particle'],
+        ['nē', 'lest', 'conjunction'],
+        ['Cn', 'Gnaeus (abbreviation)', 'noun'],
+      ],
+      chapters: { [`${caesarBook.id}:1`]: [0, 1, 2, 3] },
+    }
+    const result = buildWordlist(
+      { books: { [caesarBook.id]: [1] } },
+      reading,
+    )
+
+    expect(result.contributingChapters).toBe(1)
+    expect(result.vocabularyChapters).toBe(0)
+    expect(result.words.map((word) => word.key).sort()).toEqual([
+      '-ne',
+      'aqua',
+      'cn',
+      'ne',
+    ])
+  })
+
+  it('merges a printed word with the same reading lemma', () => {
+    const reading = {
+      lemmas: [['fluvius', 'river (from the reading)', 'noun']],
+      chapters: { [`${familiaRomanaBook.id}:1`]: [0] },
+    }
+    const result = buildWordlist(
+      { books: { [familiaRomanaBook.id]: [1] } },
+      reading,
+    )
+    const word = result.words.find((item) => item.key === 'fluvius')
+
+    expect(word).toBeTruthy()
+    expect(word.sources).toHaveLength(1)
+    expect(word.sourceCount).toBe(1)
+    expect(word.primarySense).toBeTruthy()
+  })
+
+  it('uses the reading index for books without printed vocabulary', () => {
     const result = buildWordlist({
       books: { [caesarBook.id]: [1] },
     })
     expect(result.studiedChapters).toBe(1)
     expect(result.vocabularyChapters).toBe(0)
-    expect(result.words).toEqual([])
+    expect(result.contributingChapters).toBe(1)
+    expect(result.readingVocabularyChapters).toBe(1)
+    expect(result.words.length).toBeGreaterThan(0)
+    expect(result.sourceBooks.map((book) => book.id)).toEqual([caesarBook.id])
   })
 
   it('accepts a plain map of book id to chapter numbers', () => {

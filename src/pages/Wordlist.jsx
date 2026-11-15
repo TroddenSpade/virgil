@@ -132,11 +132,11 @@ function EmptyWordlist({ studiedChapters }) {
       </div>
       <div>
         <p className="eyebrow">{waiting ? 'Nōndum verba' : 'Nōn sunt verba'}</p>
-        <h2>{waiting ? 'Your wordlist is waiting.' : 'These lessons print no vocabulary.'}</h2>
+        <h2>{waiting ? 'Your wordlist is waiting.' : 'No words yet from these lessons.'}</h2>
         <p className="lead">
           {waiting
             ? 'Mark a chapter as learned and its words will appear here automatically. The list follows your progress: add a chapter, add its words; take it back, and the words leave again.'
-            : 'The wordlist draws on the vocabulary printed in Familia Romana, Roma Aeterna, Exercitia Latina, Latin via Ovid, and the two Companions. The chapters you have marked so far do not carry a printed wordlist.'}
+            : 'The wordlist gathers the printed vocabulary and the reading vocabulary of every chapter you mark. The chapters you have marked so far contain no indexed words.'}
         </p>
         <div className="wordlist-empty__actions">
           <Link className="btn btn--primary" to="/iter">
@@ -159,7 +159,7 @@ export default function Wordlist() {
     review,
     now,
     studiedChapters,
-    vocabularyChapters,
+    contributingChapters,
   } = useWordlist()
 
   const [query, setQuery] = useState('')
@@ -260,9 +260,10 @@ export default function Wordlist() {
             <p className="eyebrow">Tabula verborum</p>
             <h1>My wordlist</h1>
             <p className="lead wordlist-hero__lead">
-              Every word from every lesson you have marked as learned. Mark a
-              chapter and its vocabulary enters the list; unmark it and the
-              words leave again.
+              Every word from every lesson you have marked as learned — the
+              vocabulary it prints and every word in its reading. Mark a
+              chapter and its words enter the list; unmark it and they leave
+              again.
             </p>
             <div className="wordlist-hero__actions">
               <Link className="btn btn--primary" to={primaryAction.to}>
@@ -277,8 +278,8 @@ export default function Wordlist() {
           <div className="wordlist-hero__progress">
             <p className="wordlist-hero__number">{stats.total}</p>
             <p className="wordlist-hero__label">
-              words from {vocabularyChapters} learned{' '}
-              {vocabularyChapters === 1 ? 'lesson' : 'lessons'} with vocabulary
+              words from {contributingChapters} learned{' '}
+              {contributingChapters === 1 ? 'lesson' : 'lessons'}
             </p>
             <div
               className="progress"
@@ -452,14 +453,16 @@ export default function Wordlist() {
         <div className="wordlist-notes">
           <p>
             <strong>The list follows your progress.</strong> Marking a chapter
-            adds its printed vocabulary; unmarking it removes those words. Your
-            review history stays on this device, so a word returns with its
-            place if you come back to the chapter.
+            adds every word it prints and every word found in its reading;
+            unmarking it removes those words. Your review history stays on this
+            device, so a word returns with its place if you come back to the
+            chapter.
           </p>
           <p>
-            <strong>Where the words come from.</strong> The vocabulary printed
-            in the course books and companions. Reading editions without a
-            vocabulary section add no words to the list.
+            <strong>Where the words come from.</strong> Every book in the
+            library: the vocabulary printed in the course books and companions,
+            plus every dictionary lemma found in the readings of the chapters
+            you mark. Names and rare one-off words are included.
           </p>
         </div>
       </div>

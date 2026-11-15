@@ -1,6 +1,9 @@
-// The personal wordlist: every word printed in the vocabulary of a chapter
-// the learner has marked as learned. It is derived state — nothing is stored
-// here. The review history is kept separately in lib/review.js.
+// The personal wordlist: every word from every chapter the learner has marked
+// as learned. Two sources feed it:
+//   - the vocabulary printed in the chapter, when the book has one;
+//   - every dictionary lemma found in the chapter's reading.
+// It is derived state — nothing is stored here. The review history is kept
+// separately in lib/review.js.
 //
 // Vocabulary entries across the library come in two shapes:
 //   { latin, english, pos }                  (course books)
@@ -11,6 +14,7 @@
 // a stable headword, a readable display form, and a small set of senses.
 
 import {
+  books as libraryBooks,
   familiaRomanaBook,
   romaAeternaBook,
   exercitiaBook,
@@ -18,6 +22,10 @@ import {
   companionBook,
   companionRABook,
 } from '../data/library.js'
+import {
+  readingChapters as generatedReadingChapters,
+  readingLemmas as generatedReadingLemmas,
+} from '../data/reading-vocabulary.generated.js'
 
 const VOCABULARY_SOURCE_BOOKS = [
   familiaRomanaBook,
@@ -28,8 +36,19 @@ const VOCABULARY_SOURCE_BOOKS = [
   companionRABook,
 ]
 
+// Keep the familiar order of the six books with printed vocabulary, then add
+// the rest of the library so every edition gets a stable place in the list.
+const SOURCE_BOOKS = [
+  ...VOCABULARY_SOURCE_BOOKS,
+  ...libraryBooks.filter(
+    (book) =>
+      book.chapters?.length &&
+      !VOCABULARY_SOURCE_BOOKS.some((known) => known.id === book.id),
+  ),
+]
+
 const BOOK_ORDER = new Map(
-  VOCABULARY_SOURCE_BOOKS.map((book, index) => [book.id, index]),
+  SOURCE_BOOKS.map((book, index) => [book.id, index]),
 )
 
 export const VOCABULARY_BOOKS = VOCABULARY_SOURCE_BOOKS.filter((book) =>
@@ -39,6 +58,7 @@ export const VOCABULARY_BOOKS = VOCABULARY_SOURCE_BOOKS.filter((book) =>
 const KIND_ORDER = [
   'noun',
   'verb',
+  'participle',
   'adjective',
   'adverb',
   'pronoun',
@@ -54,6 +74,7 @@ const KIND_ORDER = [
 const KIND_LABELS = {
   noun: 'noun',
   verb: 'verb',
+  participle: 'participle',
   adjective: 'adjective',
   adverb: 'adverb',
   pronoun: 'pronoun',
@@ -109,7 +130,7 @@ export function headwordOf(latin) {
   if (!head || !VOWEL.test(head) || /[+{}]/.test(head)) return ''
   // A handful of Companion rows are stray principal-part suffixes
   // ("-ectum", "-tactum"). Only the true enclitics begin with a hyphen.
-  if (/^-/.test(head) && !/^-(?:ne|que|ve)$/i.test(head)) return ''
+  if (/^-/.test(head) && !/^-(?:ne|que|ve)\??$/i.test(head)) return ''
   return head
 }
 
@@ -124,6 +145,35 @@ export function wordKey(latin) {
   // Keep the enclitic hyphen: "-ne" is the question particle, "nē" is
   // "lest". Without it the two would share one review card.
   return /^-/.test(head) ? `-${key}` : key
+}
+
+// Whitaker's indexes the enclitics without their hyphen. They must keep the
+// same review cards as the printed "-ne", "-que" and "-ve" vocabulary.
+const READING_KEY_OVERRIDES = new Map([
+  ['ne', '-ne'],
+  ['que', '-que'],
+  ['ve', '-ve'],
+])
+
+/**
+ * The review key for a dictionary lemma.
+ *
+ * A handful of lemmas are abbreviations or parser fragments ("Cn", "pr",
+ * "zzz") that the vocabulary parser rejects because they have no vowel. They
+ * still belong to the wordlist, so fall back to their folded spelling.
+ */
+export function readingWordKey(headword) {
+  const clean = cleanText(headword)
+  if (!clean) return ''
+  const exact = clean.toLowerCase()
+  if (READING_KEY_OVERRIDES.has(exact)) return READING_KEY_OVERRIDES.get(exact)
+  return (
+    wordKey(clean) ||
+    stripMacra(clean)
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  )
 }
 
 /** The principal parts printed after the headword, cleaned for display. */
@@ -530,35 +580,48 @@ function finalizeWord(key, entries) {
   }
 }
 
+const DEFAULT_READING_VOCABULARY = {
+  lemmas: generatedReadingLemmas,
+  chapters: generatedReadingChapters,
+}
+
 /**
  * Build the wordlist from a progress document ({ books: { [id]: number[] } })
  * or a plain map of book id to learned chapter numbers.
+ *
+ * A learned chapter contributes both its printed vocabulary (when it has one)
+ * and every dictionary lemma found in its reading. The optional second
+ * argument exists so tests can supply a small reading index; production uses
+ * the generated one.
  */
-export function buildWordlist(progress) {
-  const books = progress?.books && typeof progress.books === 'object'
+export function buildWordlist(
+  progress,
+  readingVocabulary = DEFAULT_READING_VOCABULARY,
+) {
+  const learned = progress?.books && typeof progress.books === 'object'
     ? progress.books
     : progress && typeof progress === 'object'
       ? progress
       : {}
 
-  const studiedChapters = Object.values(books).reduce(
+  const studiedChapters = Object.values(learned).reduce(
     (sum, numbers) => sum + (Array.isArray(numbers) ? numbers.length : 0),
     0,
   )
 
   const collected = new Map()
   const chapterSources = []
-  let vocabularyChapters = 0
+  let contributingChapters = 0
+  let printedVocabularyChapters = 0
+  let readingVocabularyChapters = 0
 
-  for (const book of VOCABULARY_BOOKS) {
-    const done = new Set(Array.isArray(books[book.id]) ? books[book.id] : [])
+  for (const book of SOURCE_BOOKS) {
+    const done = new Set(Array.isArray(learned[book.id]) ? learned[book.id] : [])
     if (!done.size) continue
 
     for (const chapter of book.chapters) {
       if (!done.has(chapter.number)) continue
-      if (!chapter.vocabulary?.length) continue
 
-      vocabularyChapters += 1
       const source = {
         bookId: book.id,
         bookTitle: book.title,
@@ -574,9 +637,10 @@ export function buildWordlist(progress) {
           slug: chapter.slug,
         }),
       }
-      chapterSources.push(source)
+      let added = 0
+      let readingAdded = 0
 
-      for (const entry of chapter.vocabulary) {
+      for (const entry of chapter.vocabulary || []) {
         const key = wordKey(entry.latin)
         if (!key) continue
         const parsed = {
@@ -590,7 +654,40 @@ export function buildWordlist(progress) {
         }
         if (!collected.has(key)) collected.set(key, [])
         collected.get(key).push(parsed)
+        added += 1
       }
+
+      const readingIndexes =
+        readingVocabulary?.chapters?.[`${book.id}:${chapter.number}`]
+      if (Array.isArray(readingIndexes)) {
+        for (const index of readingIndexes) {
+          const lemma = readingVocabulary?.lemmas?.[index]
+          if (!Array.isArray(lemma)) continue
+          const [headword, english, posGroup] = lemma
+          const key = readingWordKey(headword)
+          if (!key) continue
+          const parsed = {
+            key,
+            headword,
+            principal: '',
+            display: headword,
+            kind: KIND_LABELS[posGroup] ? posGroup : 'other',
+            english,
+            source,
+            reading: true,
+          }
+          if (!collected.has(key)) collected.set(key, [])
+          collected.get(key).push(parsed)
+          added += 1
+          readingAdded += 1
+        }
+      }
+
+      if (chapter.vocabulary?.length) printedVocabularyChapters += 1
+      if (readingAdded) readingVocabularyChapters += 1
+      if (!added) continue
+      contributingChapters += 1
+      chapterSources.push(source)
     }
   }
 
@@ -619,6 +716,9 @@ export function buildWordlist(progress) {
     chapterSources,
     sourceBooks,
     studiedChapters,
-    vocabularyChapters,
+    contributingChapters,
+    printedVocabularyChapters,
+    readingVocabularyChapters,
+    vocabularyChapters: printedVocabularyChapters,
   }
 }
