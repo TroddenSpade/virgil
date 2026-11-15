@@ -657,6 +657,9 @@ main {
   /* The full navigation moves into a hamburger dropdown. */
   .site-nav__toggle {
     display: inline-flex;
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
     padding: 0.5rem 0.55rem;
     color: var(--ink);
   }
