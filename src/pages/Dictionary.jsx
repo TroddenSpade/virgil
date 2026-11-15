@@ -101,6 +101,8 @@ export default function Dictionary() {
     setVisible(PAGE_SIZE)
   }, [query, letter, pos])
 
+  if (!data && !error) return <Loading />
+
   return (
     <section className="section dictionary-page">
       <div className="container">
@@ -135,10 +137,6 @@ export default function Dictionary() {
         </header>
 
         {error && <p className="notice">Could not load the dictionary. {error.message}</p>}
-
-        {!data && !error && (
-          <Loading hint="Gathering every form, lemma, and reading from the course." />
-        )}
 
         {data && (
           <>

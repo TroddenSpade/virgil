@@ -114,21 +114,7 @@ export default function DictionaryDetail() {
     )
   }
 
-  if (!data) {
-    return (
-      <section className="section dictionary-leaf-page">
-        <div className="container-narrow">
-          {crumb}
-          <h1>Dictionary</h1>
-          <Loading
-            compact
-            title="Loading the dictionary"
-            hint="Finding this entry and its forms in the lexicon."
-          />
-        </div>
-      </section>
-    )
-  }
+  if (!data) return <Loading />
 
   if (!entry) {
     return (

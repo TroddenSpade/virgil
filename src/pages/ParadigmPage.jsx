@@ -81,21 +81,7 @@ export default function ParadigmPage() {
     )
   }
 
-  if (!data || !rules) {
-    return (
-      <section className="section paradigm-page">
-        <div className="container-narrow">
-          <Link to={wordHref(word)} className="back-link">← Back to the entry</Link>
-          <h1>Paradigm</h1>
-          <Loading
-            compact
-            title="Loading the paradigm"
-            hint="Assembling the forms from Whitaker’s Words."
-          />
-        </div>
-      </section>
-    )
-  }
+  if (!data || !rules) return <Loading title="Loading the paradigm" />
 
   if (!lemma) {
     return (
