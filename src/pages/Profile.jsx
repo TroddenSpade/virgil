@@ -233,13 +233,7 @@ export default function Profile() {
       <div className="container">
         <header className="profile-hero rise">
           <div className="profile-hero__copy">
-            <div className="profile-hero__eyebrow">
-              <h1 className="eyebrow">Tabula persōnālis</h1>
-              <span className={`profile-pill profile-pill--${status.tone}`}>
-                <span className="profile-pill__dot" />
-                {status.label}
-              </span>
-            </div>
+            <h1 className="visually-hidden">Profile</h1>
 
             <section
               className="profile-habit profile-habit--hero"
@@ -353,6 +347,13 @@ export default function Profile() {
           </div>
 
           <div className="profile-hero__progress">
+            <div className="profile-hero__progress-head">
+              <h2 className="profile-hero__progress-title">Your progress</h2>
+              <span className={`profile-pill profile-pill--${status.tone}`}>
+                <span className="profile-pill__dot" />
+                {status.label}
+              </span>
+            </div>
             <p className="profile-hero__percent">
               {localSummary.percent}
               <span>%</span>

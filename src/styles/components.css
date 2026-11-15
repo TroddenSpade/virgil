@@ -5276,14 +5276,23 @@ button.lesson__keywords-label:focus-visible {
     inset 0 0 0 4px var(--line-soft),
     var(--shadow-sm);
 }
-.profile-hero__eyebrow {
+.profile-hero__progress-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.7rem 1.2rem;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.9rem;
 }
-.profile-hero__eyebrow .eyebrow,
-.profile-hero__eyebrow .profile-pill {
+.profile-hero__progress-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.profile-hero__progress-head .profile-pill {
   margin: 0;
 }
 .profile-hero__actions {
@@ -5592,6 +5601,9 @@ button.lesson__keywords-label:focus-visible {
 }
 .profile-section {
   margin-top: 2.6rem;
+}
+.profile-main > .profile-section:first-child {
+  margin-top: 0;
 }
 .profile-section__head {
   display: flex;
