@@ -157,6 +157,7 @@ Question exercises are `{ q: '…', a: '…' }` pairs that the learner can revea
 npm install      # install dependencies
 npm run dev      # start the dev server at http://localhost:5173
 npm run build    # production build into dist/
+npm test         # run the wordlist, review, and lexicon tests (Vitest)
 npm run preview  # serve the production build (needed to test the PWA)
 ```
 
