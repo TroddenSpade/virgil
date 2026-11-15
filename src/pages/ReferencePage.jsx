@@ -3,6 +3,7 @@ import { getBook, getSource } from '../data/library.js'
 import { useSourceChapter } from '../hooks/useSourceChapter.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
 import { buildSections } from '../lib/sections.js'
+import { LexiconControls, LexiconText, useLexiconMode } from '../components/Lexicon.jsx'
 
 export default function ReferencePage() {
   const { bookSlug, chapterId } = useParams()
@@ -13,9 +14,14 @@ export default function ReferencePage() {
   return <Reader book={book} chapterId={chapterId} />
 }
 
+function ReferenceLine({ text, lexicon }) {
+  if (!lexicon.enabled || !lexicon.index) return text
+  return <LexiconText text={text} index={lexicon.index} />
+}
+
 /* Render a chapter's blocks. Numbered items ("li") are gathered into ordered
    lists so exercises keep their own numbering, exactly as in the book. */
-function BlockList({ blocks }) {
+function BlockList({ blocks, lexicon }) {
   if (!Array.isArray(blocks)) return null
   const out = []
   let list = null
@@ -27,7 +33,7 @@ function BlockList({ blocks }) {
         <ol className="reference-text__list" start={list.start} key={`l${key++}`}>
           {list.items.map((text, i) => (
             <li className="reference-text__li" key={i}>
-              {text}
+              <ReferenceLine text={text} lexicon={lexicon} />
             </li>
           ))}
         </ol>,
@@ -52,7 +58,7 @@ function BlockList({ blocks }) {
     } else {
       out.push(
         <p className="reference-text__p" key={`p${key++}`}>
-          {block.text}
+          <ReferenceLine text={block.text} lexicon={lexicon} />
         </p>,
       )
     }
@@ -85,6 +91,7 @@ function Reader({ book, chapterId }) {
   const index = chapters.findIndex((c) => c.id === chapterId)
   const chapter = chapters[index]
   const { status, data, error } = useSourceChapter(book.sourceSlug, chapterId)
+  const lexicon = useLexiconMode()
 
   // Regroup the flat heading/paragraph blocks into the numbered sections used
   // by the written lessons (I Lectio, II Grammatica, III Vocabula, IV Pensa…).
@@ -129,6 +136,12 @@ function Reader({ book, chapterId }) {
           <p className="reader__status notice">Could not load this chapter. {error?.message || ''}</p>
         )}
 
+        {status === 'ready' && (
+          <div className="reader__toolbar">
+            <LexiconControls mode={lexicon} />
+          </div>
+        )}
+
         {status === 'ready' && sections && (
           <div className="lesson__layout">
             <aside className="lesson__rail">
@@ -162,7 +175,7 @@ function Reader({ book, chapterId }) {
                   </div>
 
                   <div className={`reference-text${latinText}`}>
-                    <BlockList blocks={section.blocks} />
+                    <BlockList blocks={section.blocks} lexicon={lexicon} />
                   </div>
                 </section>
               ))}
@@ -173,7 +186,7 @@ function Reader({ book, chapterId }) {
 
         {status === 'ready' && !sections && (
           <div className={`reader__body reference-text${latinText}`} style={{ marginTop: '2.5rem' }}>
-            <BlockList blocks={data?.blocks} />
+            <BlockList blocks={data?.blocks} lexicon={lexicon} />
             <MarginNotes lines={data?.margin} />
           </div>
         )}

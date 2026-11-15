@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import { Inline } from './Commentary.jsx'
+import { LexiconControls, LexiconText, useLexiconMode } from './Lexicon.jsx'
+
+function ReadingText({ text, lexicon }) {
+  if (!lexicon.enabled || !lexicon.index) return <Inline text={text} />
+  return <LexiconText text={text} index={lexicon.index} />
+}
 
 export default function Reading({ readings }) {
   const [showNotes, setShowNotes] = useState(true)
+  const lexicon = useLexiconMode()
 
   if (!readings?.length) return null
 
@@ -10,13 +17,14 @@ export default function Reading({ readings }) {
 
   return (
     <div className="readings">
-      {hasNotes && (
-        <div className="readings__bar">
+      <div className="readings__bar">
+        {hasNotes && (
           <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowNotes((v) => !v)}>
             {showNotes ? 'Hide marginal notes' : 'Show marginal notes'}
           </button>
-        </div>
-      )}
+        )}
+        <LexiconControls mode={lexicon} />
+      </div>
 
       {readings.map((reading, index) => (
         <section key={reading.id || index} className="reading rise" id={reading.id}>
@@ -31,12 +39,12 @@ export default function Reading({ readings }) {
             <div className="reading__text latin">
               {reading.personae && (
                 <div className="reading__personae">
-                  <Inline text={reading.personae} />
+                  <ReadingText text={reading.personae} lexicon={lexicon} />
                 </div>
               )}
               {reading.paragraphs.map((p, i) => (
                 <p key={i}>
-                  <Inline text={p} />
+                  <ReadingText text={p} lexicon={lexicon} />
                 </p>
               ))}
             </div>
