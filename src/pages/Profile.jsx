@@ -152,29 +152,10 @@ export default function Profile() {
       ? { to: '/wordlist/review?mode=new', label: `Learn ${wordStats.new} new →` }
       : { to: '/wordlist/review', label: 'Open review →' }
 
-  const nextLesson = path.next?.lesson || null
-  const hasReviews = wordStats.due > 0 || wordStats.new > 0
-  const dailyTargetMet = habit.today >= habit.target
-  const guidedSession = Boolean(nextLesson && hasReviews && !dailyTargetMet)
-  const sessionAction = (() => {
-    if (!nextLesson) {
-      return hasReviews && !dailyTargetMet
-        ? { to: '/wordlist/review?mode=mixed', label: 'Start today’s session →' }
-        : { to: '/iter', label: 'Open the itinerary →' }
-    }
-    if (dailyTargetMet || !hasReviews) {
-      return { to: nextLesson.href, label: 'Continue to today’s reading →' }
-    }
-    const params = new URLSearchParams({
-      mode: 'mixed',
-      next: nextLesson.href,
-      nextLabel: `${nextLesson.bookShort} ${nextLesson.roman} — ${nextLesson.title}`,
-    })
-    return {
-      to: `/wordlist/review?${params.toString()}`,
-      label: 'Start today’s session →',
-    }
-  })()
+  const sessionAction = {
+    to: '/hodie',
+    label: 'Start today’s session →',
+  }
 
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1)
@@ -348,11 +329,9 @@ export default function Profile() {
                 <Link className="btn btn--primary btn--sm" to={sessionAction.to}>
                   {sessionAction.label}
                 </Link>
-                {guidedSession && (
-                  <span className="profile-habit__action-note">
-                    Reviews first, then {nextLesson.bookShort} {nextLesson.roman}.
-                  </span>
-                )}
+                <span className="profile-habit__action-note">
+                  Reviews · 5-form drill · today’s reading
+                </span>
               </div>
             </section>
 

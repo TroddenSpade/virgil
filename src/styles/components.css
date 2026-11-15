@@ -1311,6 +1311,171 @@ button.lesson__keywords-label:focus-visible {
     width: 100%;
   }
 }
+.hodie-hero {
+  margin: 1.2rem 0 2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.hodie-hero .lead {
+  max-width: 64ch;
+  margin-top: 0.7rem;
+}
+.hodie-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: clamp(1.3rem, 3vw, 1.8rem);
+  margin-bottom: 1.4rem;
+}
+.hodie-next .eyebrow {
+  margin-bottom: 0.35rem;
+}
+.hodie-next h2 {
+  margin: 0.1rem 0 0;
+  font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+}
+.hodie-steps {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hodie-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+}
+.hodie-step.is-active {
+  border-color: var(--bronze-soft);
+  box-shadow: inset 3px 0 0 var(--bronze);
+}
+.hodie-step.is-done {
+  background: var(--surface-2);
+}
+.hodie-step__num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--bronze);
+}
+.hodie-step.is-done .hodie-step__num {
+  color: var(--on-accent);
+  background: var(--patina);
+  border-color: var(--patina);
+}
+.hodie-step__body {
+  display: grid;
+  flex: 1;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.hodie-step__title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.hodie-step__detail {
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+.hodie-step__status {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.hodie-step.is-done .hodie-step__status {
+  color: var(--patina);
+}
+.hodie-step.is-active .hodie-step__status {
+  color: var(--bronze);
+}
+.hodie-step__actions {
+  margin-top: 0.4rem;
+}
+.hodie-step__actions .btn {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.6rem;
+}
+.hodie-complete,
+.hodie-empty {
+  padding: clamp(1.8rem, 4vw, 2.8rem);
+  text-align: center;
+}
+.hodie-complete h2,
+.hodie-empty h2 {
+  margin: 0.1rem 0 0.7rem;
+}
+.hodie-complete .lead,
+.hodie-empty .lead {
+  max-width: 54ch;
+  margin-inline: auto;
+}
+.hodie-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.6rem 0;
+  padding: 1.1rem 0;
+  text-align: left;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.hodie-summary dt {
+  font-family: var(--font-ui);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.hodie-summary dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.hodie-summary__reading {
+  font-family: var(--font-serif) !important;
+  font-size: 0.92rem !important;
+  line-height: 1.4 !important;
+}
+.hodie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+}
+@media (max-width: 620px) {
+  .hodie-next {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .hodie-summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+  .hodie-actions {
+    justify-content: flex-start;
+  }
+}
 .reading {
   position: relative;
   padding: clamp(1.6rem, 3.4vw, 2.6rem);

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import Loading from '../components/Loading.jsx'
 import { useParadigm } from '../hooks/useParadigm.js'
 import { paradigmHref, wordHref } from '../lib/dictionary.js'
 import { principalParts } from '../lib/grammar.js'
+import { markDrillDone } from '../lib/hodie-session.js'
 import {
   answerMatches,
   buildPracticeQuestions,
@@ -17,6 +18,16 @@ const SESSION_LENGTH = 10
 
 export default function ParadigmPracticePage() {
   const { word } = useParams()
+  const [searchParams] = useSearchParams()
+  const requestedCount = Number(searchParams.get('count'))
+  const sessionLength = [5, 10, 20].includes(requestedCount)
+    ? requestedCount
+    : SESSION_LENGTH
+  const returnParam = searchParams.get('returnTo')
+  const returnTo =
+    returnParam && returnParam.startsWith('/') && !returnParam.startsWith('//')
+      ? returnParam
+      : ''
   const { lemma, entries, error, loading } = useParadigm(word)
   const [practice, setPractice] = useState(() => readPractice())
   const [phase, setPhase] = useState('intro')
@@ -78,7 +89,7 @@ export default function ParadigmPracticePage() {
   }
 
   const start = () => {
-    const nextQuestions = buildPracticeQuestions(entries, stats, SESSION_LENGTH)
+    const nextQuestions = buildPracticeQuestions(entries, stats, sessionLength)
     setQuestions(nextQuestions)
     setIndex(0)
     setAnswer('')
@@ -114,9 +125,20 @@ export default function ParadigmPracticePage() {
     finish(choice.slot === current.answerSlot)
   }
 
+  const finishSession = () => {
+    if (returnTo === '/hodie' && questions.length > 0 && score.total >= questions.length) {
+      markDrillDone({
+        correct: score.correct,
+        total: score.total,
+        lemmaId: lemma.id,
+      })
+    }
+    setPhase('done')
+  }
+
   const advance = () => {
     if (index + 1 >= questions.length) {
-      setPhase('done')
+      finishSession()
       return
     }
     setIndex((value) => value + 1)
@@ -143,7 +165,7 @@ export default function ParadigmPracticePage() {
                 Question {index + 1} of {questions.length}
               </p>
             </div>
-            <button type="button" className="back-link" onClick={() => setPhase('done')}>
+            <button type="button" className="back-link" onClick={finishSession}>
               End session
             </button>
           </header>
@@ -286,8 +308,17 @@ export default function ParadigmPracticePage() {
             )}
 
             <div className="practice-done__actions">
+              {returnTo && (
+                <Link className="btn btn--primary" to={returnTo}>
+                  Back to today’s session →
+                </Link>
+              )}
               {entries.length > 0 && (
-                <button type="button" className="btn btn--primary" onClick={start}>
+                <button
+                  type="button"
+                  className={`btn ${returnTo ? 'btn--ghost' : 'btn--primary'}`}
+                  onClick={start}
+                >
                   Practise again
                 </button>
               )}
@@ -342,7 +373,7 @@ export default function ParadigmPracticePage() {
         <div className="practice-start">
           {entries.length > 0 ? (
             <button type="button" className="btn btn--primary" onClick={start}>
-              Begin practice · {Math.min(SESSION_LENGTH, entries.length)} questions →
+              Begin practice · {Math.min(sessionLength, entries.length)} questions →
             </button>
           ) : (
             <p className="notice">No forms are available for this word yet.</p>

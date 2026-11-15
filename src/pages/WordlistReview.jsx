@@ -77,6 +77,11 @@ export default function WordlistReview() {
       ? nextParam
       : ''
   const nextLabel = searchParams.get('nextLabel') || 'the next reading'
+  const returnParam = searchParams.get('returnTo')
+  const returnTo =
+    returnParam && returnParam.startsWith('/') && !returnParam.startsWith('//')
+      ? returnParam
+      : ''
 
   const [mode, setMode] = useState(initialMode)
   const [newPerSession, setNewPerSession] = useState(
@@ -251,7 +256,7 @@ export default function WordlistReview() {
       <section className="section review-page">
         <div className="container-narrow">
           <nav className="dict-crumb">
-            <Link to="/wordlist">← Wordlist</Link>
+            <Link to={returnTo || '/wordlist'}>{returnTo ? '← Today' : '← Wordlist'}</Link>
             <span aria-hidden="true">·</span>
             <span>Review</span>
           </nav>
@@ -268,6 +273,12 @@ export default function WordlistReview() {
               <p className="review-guided">
                 <span className="review-guided__label">Today’s session</span>{' '}
                 Reviews first, then <strong>{nextLabel}</strong>.
+              </p>
+            )}
+            {returnTo && !nextHref && (
+              <p className="review-guided">
+                <span className="review-guided__label">Today’s session</span>{' '}
+                Reviews first, then back to Hodiē for the form drill.
               </p>
             )}
           </header>
@@ -392,7 +403,7 @@ export default function WordlistReview() {
       <section className="section review-page">
         <div className="container-narrow">
           <nav className="dict-crumb">
-            <Link to="/wordlist">← Wordlist</Link>
+            <Link to={returnTo || '/wordlist'}>{returnTo ? '← Today' : '← Wordlist'}</Link>
             <span aria-hidden="true">·</span>
             <span>Review</span>
           </nav>
@@ -401,7 +412,7 @@ export default function WordlistReview() {
             <p className="eyebrow">Finis</p>
             <h1>
               {ratings
-                ? nextHref
+                ? nextHref || returnTo
                   ? 'Today’s reviews complete'
                   : 'Session complete'
                 : 'Nothing due'}
@@ -454,9 +465,14 @@ export default function WordlistReview() {
             )}
 
             <div className="review-done__actions">
+              {returnTo && (
+                <Link className="btn btn--primary" to={returnTo}>
+                  Back to today’s session →
+                </Link>
+              )}
               <button
                 type="button"
-                className={`btn ${nextHref ? 'btn--ghost' : 'btn--primary'}`}
+                className={`btn ${nextHref || returnTo ? 'btn--ghost' : 'btn--primary'}`}
                 onClick={() => setPhase('setup')}
               >
                 Plan another session
@@ -476,7 +492,7 @@ export default function WordlistReview() {
       <section className="section review-page">
         <div className="container-narrow">
           <nav className="dict-crumb">
-            <Link to="/wordlist">← Wordlist</Link>
+            <Link to={returnTo || '/wordlist'}>{returnTo ? '← Today' : '← Wordlist'}</Link>
           </nav>
           <p className="muted">There is no card to show.</p>
         </div>

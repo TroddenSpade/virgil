@@ -9,6 +9,7 @@ import ParadigmPracticePage from './pages/ParadigmPracticePage.jsx'
 import Wordlist from './pages/Wordlist.jsx'
 import WordlistReview from './pages/WordlistReview.jsx'
 import Profile from './pages/Profile.jsx'
+import HodiePage from './pages/HodiePage.jsx'
 import BookPage from './pages/BookPage.jsx'
 import ChapterPage from './pages/ChapterPage.jsx'
 import ExtraPage from './pages/ExtraPage.jsx'
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="wordlist/review" element={<WordlistReview />} />
         <Route path="iter" element={<Iter />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="hodie" element={<HodiePage />} />
         <Route path="library/:bookSlug" element={<BookPage />} />
         <Route path="library/:bookSlug/read/:chapterId" element={<ReferencePage />} />
         <Route path="library/:bookSlug/extra/:extraSlug" element={<ExtraPage />} />
