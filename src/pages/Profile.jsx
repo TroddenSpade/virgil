@@ -247,7 +247,7 @@ export default function Profile() {
               aria-labelledby="profile-habit-title"
             >
               <div className="profile-habit__head">
-                <h2 id="profile-habit-title" className="eyebrow profile-habit__title">
+                <h2 id="profile-habit-title" className="profile-habit__title">
                   The daily habit
                 </h2>
                 <p className={`profile-habit__streak${habit.streak > 0 ? ' is-live' : ''}`}>
