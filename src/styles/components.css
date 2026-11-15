@@ -5691,7 +5691,20 @@ button.lesson__keywords-label:focus-visible {
   margin: 0.1rem 0 0;
 }
 .profile-habit__title {
+  position: relative;
   margin: 0;
+  padding-left: 2.9rem;
+  color: var(--bronze);
+}
+.profile-habit__title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2.2rem;
+  height: 2px;
+  background: currentColor;
+  transform: translateY(-50%);
 }
 .profile-habit__streak {
   margin: 0;
