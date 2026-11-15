@@ -1026,6 +1026,9 @@ button.lesson__keywords-label:focus-visible {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+.paradigm-actions {
+  margin-top: 1rem;
+}
 .paradigm-groups {
   display: grid;
   gap: 1.1rem;
@@ -1103,6 +1106,209 @@ button.lesson__keywords-label:focus-visible {
 @media (max-width: 720px) {
   .paradigm-list {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+.practice-hero {
+  margin: 1.2rem 0 2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.practice-hero__principal {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  color: var(--ink-soft);
+}
+.practice-hero .lead {
+  max-width: 62ch;
+  margin-top: 0.8rem;
+}
+.practice-weak {
+  margin: 1.4rem 0;
+  padding: 1rem 1.1rem;
+  background: var(--surface-2);
+  border-left: 3px solid var(--bronze);
+}
+.practice-weak ul {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.practice-weak li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.6rem;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+.practice-weak li small {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.practice-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1.2rem;
+  margin-top: 1.6rem;
+}
+.practice-session-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.practice-session-count {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.practice-progress {
+  margin: 0.9rem 0 1.4rem;
+}
+.practice-card {
+  padding: clamp(1.4rem, 3vw, 2rem);
+}
+.practice-prompt {
+  margin: 0.3rem 0 1.2rem;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.practice-prompt strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.practice-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: stretch;
+}
+.practice-input {
+  flex: 1;
+  min-width: 12rem;
+  padding: 0.75rem 0.9rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.practice-input:focus {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 55%, transparent);
+  outline-offset: 1px;
+}
+.practice-form-display {
+  margin: 0 0 1.2rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.1;
+  color: var(--oxblood);
+}
+.practice-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.practice-choice {
+  padding: 0.7rem 0.8rem;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.practice-choice:hover:not(:disabled) {
+  border-color: var(--bronze-soft);
+  color: var(--ink);
+}
+.practice-choice:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 55%, transparent);
+  outline-offset: 2px;
+}
+.practice-choice.is-correct {
+  color: var(--laurel);
+  border-color: color-mix(in srgb, var(--laurel) 45%, var(--line));
+  background: color-mix(in srgb, var(--laurel) 8%, var(--surface));
+}
+.practice-choice.is-wrong {
+  color: var(--oxblood);
+  border-color: color-mix(in srgb, var(--oxblood) 45%, var(--line));
+  background: color-mix(in srgb, var(--oxblood) 7%, var(--surface));
+}
+.practice-feedback {
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-soft);
+}
+.practice-feedback__title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.practice-feedback.is-correct .practice-feedback__title {
+  color: var(--laurel);
+}
+.practice-feedback.is-wrong .practice-feedback__title {
+  color: var(--oxblood);
+}
+.practice-feedback__answer {
+  margin: 0.35rem 0 0.9rem;
+  font-family: var(--font-serif);
+  color: var(--ink-soft);
+}
+.practice-done {
+  padding: clamp(1.8rem, 4vw, 2.8rem);
+  text-align: center;
+}
+.practice-done .lead {
+  max-width: 52ch;
+  margin-inline: auto;
+}
+.practice-done .practice-weak {
+  text-align: left;
+}
+.practice-done__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+}
+@media (max-width: 620px) {
+  .practice-choices {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .practice-form {
+    flex-direction: column;
+  }
+  .practice-input {
+    width: 100%;
   }
 }
 .reading {
@@ -5896,6 +6102,21 @@ button.lesson__keywords-label:focus-visible {
   line-height: 1.45;
   color: var(--ink-soft);
 }
+.profile-habit__action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.9rem;
+  margin-top: 1.1rem;
+}
+.profile-habit__action-note {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
 .profile-habit__week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -6687,6 +6908,25 @@ button.lesson__keywords-label:focus-visible {
 .review-hero .lead {
   max-width: 64ch;
 }
+.review-guided {
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface-2);
+  border-left: 3px solid var(--bronze);
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.review-guided__label {
+  margin-right: 0.45rem;
+  font-family: var(--font-ui);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
 
 .review-empty {
   padding: clamp(1.8rem, 4vw, 2.6rem);
@@ -7158,6 +7398,17 @@ button.lesson__keywords-label:focus-visible {
   font-family: var(--font-ui);
   font-size: 0.76rem;
   color: var(--ink-faint);
+}
+.review-guided-next {
+  max-width: 34rem;
+  margin: 1.6rem auto;
+  padding: 1.2rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.review-guided-next h2 {
+  margin: 0.1rem 0 0.9rem;
+  font-size: clamp(1.3rem, 2.6vw, 1.8rem);
 }
 .review-done__actions {
   display: flex;

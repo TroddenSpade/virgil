@@ -5,6 +5,7 @@ import {
   dictionaryKeys,
   hasDefinition,
   norm,
+  paradigmHref,
   wordHref,
 } from '../lib/dictionary.js'
 import { principalParts } from '../lib/grammar.js'
@@ -63,8 +64,8 @@ export default function ParadigmPage() {
   }, [data, wordEntry, lookupKeys])
 
   const entries = useMemo(
-    () => (lemma && rules ? buildParadigm(lemma, rules) : []),
-    [lemma, rules],
+    () => (lemma && rules ? buildParadigm(lemma, rules, data?.surfaceForms) : []),
+    [lemma, rules, data],
   )
   const groups = useMemo(() => groupParadigm(entries), [entries])
   const principal = lemma ? principalParts(lemma.latin) : []
@@ -116,6 +117,14 @@ export default function ParadigmPage() {
             {lemma.pos && lemma.pos !== 'other' ? lemma.pos : 'lexicon'}
             {hasDefinition(lemma.english) ? ` · ${lemma.english}` : ''}
           </p>
+          <div className="paradigm-actions">
+            <Link
+              className="btn btn--primary btn--sm"
+              to={`${paradigmHref(lemma.headword)}/practice`}
+            >
+              Practise these forms →
+            </Link>
+          </div>
         </header>
 
         {entries.length === 0 ? (

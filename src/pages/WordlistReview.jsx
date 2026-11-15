@@ -71,6 +71,12 @@ export default function WordlistReview() {
   const initialMode = ['mixed', 'due', 'new'].includes(requestedMode)
     ? requestedMode
     : 'mixed'
+  const nextParam = searchParams.get('next')
+  const nextHref =
+    nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+      ? nextParam
+      : ''
+  const nextLabel = searchParams.get('nextLabel') || 'the next reading'
 
   const [mode, setMode] = useState(initialMode)
   const [newPerSession, setNewPerSession] = useState(
@@ -258,6 +264,12 @@ export default function WordlistReview() {
               a week, a fortnight, a month, and beyond. A word you miss comes
               back in this session; a word you know well waits longer.
             </p>
+            {nextHref && (
+              <p className="review-guided">
+                <span className="review-guided__label">Today’s session</span>{' '}
+                Reviews first, then <strong>{nextLabel}</strong>.
+              </p>
+            )}
           </header>
 
           {words.length === 0 ? (
@@ -387,7 +399,13 @@ export default function WordlistReview() {
 
           <div className="review-done card">
             <p className="eyebrow">Finis</p>
-            <h1>{ratings ? 'Session complete' : 'Nothing due'}</h1>
+            <h1>
+              {ratings
+                ? nextHref
+                  ? 'Today’s reviews complete'
+                  : 'Session complete'
+                : 'Nothing due'}
+            </h1>
             <p className="lead">
               {ratings
                 ? `You reviewed ${reviewedKeys.size} ${
@@ -425,10 +443,20 @@ export default function WordlistReview() {
                   : 'Mark a chapter to add more words to the list.'}
             </p>
 
+            {nextHref && (
+              <div className="review-guided-next">
+                <p className="eyebrow">Proxima statiō</p>
+                <h2>{nextLabel}</h2>
+                <Link className="btn btn--primary" to={nextHref}>
+                  Continue to today’s reading →
+                </Link>
+              </div>
+            )}
+
             <div className="review-done__actions">
               <button
                 type="button"
-                className="btn btn--primary"
+                className={`btn ${nextHref ? 'btn--ghost' : 'btn--primary'}`}
                 onClick={() => setPhase('setup')}
               >
                 Plan another session
