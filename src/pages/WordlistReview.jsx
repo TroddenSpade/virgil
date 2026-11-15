@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useWordlist } from '../hooks/useWordlist.js'
 import {
@@ -89,6 +89,20 @@ export default function WordlistReview() {
   const [ratings, setRatings] = useState(0)
   const [reviewedKeys, setReviewedKeys] = useState(() => new Set())
   const [sessionMode, setSessionMode] = useState('mixed')
+  const promptRef = useRef(null)
+  const answerRef = useRef(null)
+
+  // A new card should take keyboard focus, so screen readers announce the
+  // word and Space/Enter keeps working without hunting for the button.
+  useEffect(() => {
+    if (phase === 'session') promptRef.current?.focus()
+  }, [phase, index])
+
+  // The reverse when the answer appears: focus the revealed text so it is
+  // read out, while the 1–4 keys grade directly.
+  useEffect(() => {
+    if (phase === 'session' && revealed) answerRef.current?.focus()
+  }, [phase, revealed])
 
   useEffect(() => {
     if (requestedMode && ['mixed', 'due', 'new'].includes(requestedMode)) {
@@ -491,13 +505,24 @@ export default function WordlistReview() {
             </div>
 
             <div className="review-card__prompt">
-              <p className="review-card__latin latin">{current.headword}</p>
+              <p
+                className="review-card__latin latin"
+                lang="la"
+                tabIndex={-1}
+                ref={promptRef}
+              >
+                {current.headword}
+              </p>
               {current.principal && (
-                <p className="review-card__principal latin">
+                <p className="review-card__principal latin" lang="la">
                   {current.principal}
                 </p>
               )}
             </div>
+
+            <p className="visually-hidden" role="status">
+              {`Card ${ratings + 1} of ${ratings + remaining}`}
+            </p>
 
             {!revealed ? (
               <button
@@ -508,7 +533,11 @@ export default function WordlistReview() {
                 Reveal answer
               </button>
             ) : (
-              <div className="review-card__back">
+              <div
+                className="review-card__back"
+                ref={answerRef}
+                tabIndex={-1}
+              >
                 <dl className="review-senses">
                   {current.senseGroups.length > 0 ? (
                     current.senseGroups.map((group) => (
@@ -551,23 +580,24 @@ export default function WordlistReview() {
           </article>
 
           {revealed ? (
-            <div className="review-actions">
-              {RATINGS.map((rating) => (
-                <button
-                  type="button"
-                  key={rating.key}
-                  className={`review-rate review-rate--${rating.tone}`}
-                  onClick={() => rate(rating.key)}
-                >
-                  <span>{rating.label}</span>
-                  <small>{intervalLabel(rating.key, currentState)}</small>
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="review-actions">
+                {RATINGS.map((rating) => (
+                  <button
+                    type="button"
+                    key={rating.key}
+                    className={`review-rate review-rate--${rating.tone}`}
+                    onClick={() => rate(rating.key)}
+                  >
+                    <span>{rating.label}</span>
+                    <small>{intervalLabel(rating.key, currentState)}</small>
+                  </button>
+                ))}
+              </div>
+              <p className="review-keys">1–4 to grade</p>
+            </>
           ) : (
-            <p className="review-keys">
-              Space or Enter to reveal · 1–4 to grade
-            </p>
+            <p className="review-keys">Space or Enter to reveal</p>
           )}
 
           <p className="review-session__hint">

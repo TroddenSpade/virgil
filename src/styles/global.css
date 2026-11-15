@@ -122,6 +122,11 @@ button {
   color: var(--paper);
 }
 
+/* The skip link targets this programmatically; no ring is needed. */
+#main-content:focus {
+  outline: none;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

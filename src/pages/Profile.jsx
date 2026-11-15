@@ -31,7 +31,14 @@ function Snapshot({ eyebrow, tag, tone, total, totalChapters, percent, stamp, em
         </div>
         <span className={`tag ${tone || ''}`}>{tag}</span>
       </div>
-      <div className="progress" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+      <div
+        className="progress"
+        role="progressbar"
+        aria-label={`${eyebrow} progress`}
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div className="progress__fill" style={{ width: `${percent}%` }} />
       </div>
       <p className="profile-snapshot__stamp">
@@ -254,6 +261,7 @@ export default function Profile() {
             <div
               className="progress"
               role="progressbar"
+              aria-label="Library read"
               aria-valuenow={localSummary.percent}
               aria-valuemin={0}
               aria-valuemax={100}
