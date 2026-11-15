@@ -5282,14 +5282,40 @@ button.lesson__keywords-label:focus-visible {
   align-items: center;
   gap: 0.7rem 1.2rem;
 }
-.profile-hero__lead {
-  max-width: 62ch;
+.profile-hero__eyebrow .eyebrow,
+.profile-hero__eyebrow .profile-pill {
+  margin: 0;
 }
 .profile-hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
   margin-top: 1.4rem;
+}
+.profile-hero__next {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.profile-hero__next-title {
+  margin: 0.15rem 0 0.25rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+}
+.profile-hero__next-lesson {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  color: var(--ink-soft);
+}
+.profile-hero__next-stage {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+}
+.profile-hero__next .profile-hero__actions {
+  margin-top: 1.1rem;
 }
 .profile-hero__progress {
   padding-left: 1.8rem;
@@ -5433,33 +5459,13 @@ button.lesson__keywords-label:focus-visible {
   font-size: 0.62rem;
   color: var(--ink-faint);
 }
-.profile-continue {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: clamp(1.4rem, 3vw, 2rem);
-  margin-bottom: 1.6rem;
-}
-.profile-continue h2 {
-  margin: 0.15rem 0 0.25rem;
-}
-.profile-continue__title {
-  margin: 0;
-  font-family: var(--font-serif);
-  font-size: 1.08rem;
-  color: var(--ink-soft);
-}
-.profile-continue__stage {
-  margin: 0.4rem 0 0;
-  font-family: var(--font-ui);
-  font-size: 0.68rem;
-  letter-spacing: 0.05em;
-  color: var(--ink-faint);
-}
 .profile-habit {
   padding: clamp(1.2rem, 3vw, 1.8rem);
   margin-bottom: 1.6rem;
+}
+.profile-habit--hero {
+  margin: 1.5rem 0 0;
+  padding: 0;
 }
 .profile-habit__head {
   display: flex;
@@ -5784,10 +5790,6 @@ button.lesson__keywords-label:focus-visible {
   }
   .profile-stages {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .profile-continue {
-    align-items: flex-start;
-    flex-direction: column;
   }
   .profile-wordlist__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));

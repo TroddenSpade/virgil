@@ -234,31 +234,121 @@ export default function Profile() {
         <header className="profile-hero rise">
           <div className="profile-hero__copy">
             <div className="profile-hero__eyebrow">
-              <p className="eyebrow">Tabula persōnālis</p>
+              <h1 className="eyebrow">Tabula persōnālis</h1>
               <span className={`profile-pill profile-pill--${status.tone}`}>
                 <span className="profile-pill__dot" />
                 {status.label}
               </span>
             </div>
-            <h1>My progress</h1>
-            <p className="lead profile-hero__lead">
-              A quiet record of the road so far: the chapters you have marked, the books that are
-              open, and the next stop. Everything is kept on this device first; an account copy is
-              optional.
-            </p>
-            <div className="profile-hero__actions">
+
+            <section
+              className="profile-habit profile-habit--hero"
+              aria-labelledby="profile-habit-title"
+            >
+              <div className="profile-habit__head">
+                <div>
+                  <p className="eyebrow">Hodiē</p>
+                  <h2 id="profile-habit-title">The daily habit</h2>
+                </div>
+                <p className={`profile-habit__streak${habit.streak > 0 ? ' is-live' : ''}`}>
+                  <span className="profile-habit__streak-mark" aria-hidden="true">✦</span>
+                  {habit.streak > 0 ? `${habit.streak}-day streak` : 'No streak yet'}
+                </p>
+              </div>
+
+              <div className="profile-habit__body">
+                <div className="profile-habit__today">
+                  <p className="profile-habit__today-line">
+                    <span className="profile-habit__today-label">Hodiē</span>
+                    <span className="profile-habit__today-dot" aria-hidden="true">·</span>
+                    <span className="profile-habit__today-count">
+                      {habit.today} of {habit.target}
+                    </span>
+                  </p>
+                  <p className="profile-habit__today-caption">reviews today</p>
+                  <div
+                    className="progress"
+                    role="progressbar"
+                    aria-label="Reviews today"
+                    aria-valuenow={Math.min(habit.today, habit.target)}
+                    aria-valuemin={0}
+                    aria-valuemax={habit.target}
+                    aria-valuetext={`${habit.today} of ${habit.target} reviews today`}
+                  >
+                    <div className="progress__fill" style={{ width: `${habit.percent}%` }} />
+                  </div>
+                  <p className="profile-habit__note">
+                    {habit.today >= habit.target
+                      ? 'Today’s target is met.'
+                      : `${habit.target - habit.today} ${
+                          habit.target - habit.today === 1 ? 'review' : 'reviews'
+                        } to today’s target.`}
+                  </p>
+                </div>
+
+                <div
+                  className="profile-habit__week"
+                  role="group"
+                  aria-label="Reviews over the last seven days"
+                >
+                  {habit.week.map((day) => (
+                    <div
+                      className={`profile-habit__day${day.isToday ? ' is-today' : ''}`}
+                      key={day.key}
+                      title={`${day.label}: ${day.count} ${
+                        day.count === 1 ? 'review' : 'reviews'
+                      }`}
+                    >
+                      <span className="profile-habit__bar" aria-hidden="true">
+                        <span
+                          className="profile-habit__bar-fill"
+                          style={{ height: `${day.height}%` }}
+                        />
+                      </span>
+                      <span className="profile-habit__day-label">{day.label}</span>
+                      <span className="profile-habit__day-count">{day.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <div className="profile-hero__next">
+              <p className="eyebrow">The next stop</p>
               {path.next ? (
-                <Link className="btn btn--primary" to={path.next.lesson.href}>
-                  Continue · {path.next.lesson.bookShort} {path.next.lesson.roman} →
-                </Link>
+                <>
+                  <h2 className="profile-hero__next-title">
+                    {path.next.lesson.bookShort} · {path.next.lesson.roman}
+                  </h2>
+                  <p className="profile-hero__next-lesson">{path.next.lesson.title}</p>
+                  <p className="profile-hero__next-stage">
+                    Stage {ROMAN[path.next.index] || path.next.index + 1} ·{' '}
+                    <span className="latin">{path.next.stage.latin}</span> — {path.next.stage.title}
+                  </p>
+                </>
               ) : (
-                <Link className="btn btn--primary" to="/library">
-                  Begin the course →
-                </Link>
+                <>
+                  <h2 className="profile-hero__next-title">Begin the course</h2>
+                  <p className="profile-hero__next-lesson">
+                    Open the first lesson of the itinerary and start reading.
+                  </p>
+                </>
               )}
-              <Link className="btn btn--ghost" to="/iter">
-                Open the itinerary
-              </Link>
+
+              <div className="profile-hero__actions">
+                {path.next ? (
+                  <Link className="btn btn--primary" to={path.next.lesson.href}>
+                    Continue · {path.next.lesson.bookShort} {path.next.lesson.roman} →
+                  </Link>
+                ) : (
+                  <Link className="btn btn--primary" to="/library">
+                    Begin the course →
+                  </Link>
+                )}
+                <Link className="btn btn--ghost" to="/iter">
+                  Open the itinerary
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -388,94 +478,6 @@ export default function Profile() {
 
         <div className="profile-layout">
           <div className="profile-main">
-            {path.next && (
-              <section className="profile-continue card">
-                <div>
-                  <p className="eyebrow">The next stop</p>
-                  <h2>
-                    {path.next.lesson.bookShort} · {path.next.lesson.roman}
-                  </h2>
-                  <p className="profile-continue__title">{path.next.lesson.title}</p>
-                  <p className="profile-continue__stage">
-                    Stage {ROMAN[path.next.index] || path.next.index + 1} ·{' '}
-                    <span className="latin">{path.next.stage.latin}</span> — {path.next.stage.title}
-                  </p>
-                </div>
-                <Link className="btn btn--primary" to={path.next.lesson.href}>
-                  Read this chapter →
-                </Link>
-              </section>
-            )}
-
-            <section className="profile-habit card" aria-labelledby="profile-habit-title">
-              <div className="profile-habit__head">
-                <div>
-                  <p className="eyebrow">Hodiē</p>
-                  <h2 id="profile-habit-title">The daily habit</h2>
-                </div>
-                <p className={`profile-habit__streak${habit.streak > 0 ? ' is-live' : ''}`}>
-                  <span className="profile-habit__streak-mark" aria-hidden="true">✦</span>
-                  {habit.streak > 0 ? `${habit.streak}-day streak` : 'No streak yet'}
-                </p>
-              </div>
-
-              <div className="profile-habit__body">
-                <div className="profile-habit__today">
-                  <p className="profile-habit__today-line">
-                    <span className="profile-habit__today-label">Hodiē</span>
-                    <span className="profile-habit__today-dot" aria-hidden="true">·</span>
-                    <span className="profile-habit__today-count">
-                      {habit.today} of {habit.target}
-                    </span>
-                  </p>
-                  <p className="profile-habit__today-caption">reviews today</p>
-                  <div
-                    className="progress"
-                    role="progressbar"
-                    aria-label="Reviews today"
-                    aria-valuenow={Math.min(habit.today, habit.target)}
-                    aria-valuemin={0}
-                    aria-valuemax={habit.target}
-                    aria-valuetext={`${habit.today} of ${habit.target} reviews today`}
-                  >
-                    <div className="progress__fill" style={{ width: `${habit.percent}%` }} />
-                  </div>
-                  <p className="profile-habit__note">
-                    {habit.today >= habit.target
-                      ? 'Today’s target is met.'
-                      : `${habit.target - habit.today} ${
-                          habit.target - habit.today === 1 ? 'review' : 'reviews'
-                        } to today’s target.`}
-                  </p>
-                </div>
-
-                <div
-                  className="profile-habit__week"
-                  role="group"
-                  aria-label="Reviews over the last seven days"
-                >
-                  {habit.week.map((day) => (
-                    <div
-                      className={`profile-habit__day${day.isToday ? ' is-today' : ''}`}
-                      key={day.key}
-                      title={`${day.label}: ${day.count} ${
-                        day.count === 1 ? 'review' : 'reviews'
-                      }`}
-                    >
-                      <span className="profile-habit__bar" aria-hidden="true">
-                        <span
-                          className="profile-habit__bar-fill"
-                          style={{ height: `${day.height}%` }}
-                        />
-                      </span>
-                      <span className="profile-habit__day-label">{day.label}</span>
-                      <span className="profile-habit__day-count">{day.count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-
             <section className="profile-section">
               <div className="profile-section__head">
                 <div>
