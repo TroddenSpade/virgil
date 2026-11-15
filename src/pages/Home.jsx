@@ -163,7 +163,7 @@ export default function Home() {
   const fabulaeProgress = useProgress(fabulaeBook.id, fabulaeBook.chapterCount)
 
   return (
-    <>
+    <div className="home-page">
       <section className="hero">
         <div className="container">
           {/* The framed leaf: the dedicatory box, with the poet's sketch
@@ -544,6 +544,6 @@ export default function Home() {
           <VirgilLines />
         </div>
       </section>
-    </>
+    </div>
   )
 }
