@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAccount } from '../lib/account.jsx'
 import {
-  progressFingerprint,
-  readLocalProgress,
   readBookProgress,
   summarizeProgress,
 } from '../lib/progress.js'
+import {
+  readLocalStudy,
+  studyFingerprint,
+} from '../lib/study-sync.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
 import { DAILY_TARGET, habitStats } from '../lib/review.js'
 import { useWordlist } from '../hooks/useWordlist.js'
@@ -74,23 +76,29 @@ export default function Profile() {
   const [confirmLoad, setConfirmLoad] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const local = useMemo(() => readLocalProgress(), [revision])
-  const localSummary = useMemo(() => summarizeProgress(local), [local])
   const {
     stats: wordStats,
     studiedChapters,
     review,
     now,
   } = useWordlist()
+  const localStudy = useMemo(
+    () => readLocalStudy(),
+    [revision, wordStats, review],
+  )
+  const local = localStudy.progress
+  const localSummary = useMemo(() => summarizeProgress(local), [local])
   const habit = useMemo(
     () => habitStats(review, now, DAILY_TARGET),
     [review, now],
   )
   const remoteSummary = useMemo(
-    () => (remote ? summarizeProgress(remote.progress) : null),
+    () => (remote ? summarizeProgress(remote.study?.progress || remote.progress) : null),
     [remote],
   )
-  const inSync = Boolean(remote) && progressFingerprint(local) === progressFingerprint(remote.progress)
+  const inSync =
+    Boolean(remote) &&
+    studyFingerprint(localStudy) === studyFingerprint(remote.study || remote.progress)
   const signedIn = authState === 'signed-in'
   const remoteDate = formatDate(remote?.updatedAt)
   const syncedDate = formatDate(lastSyncedAt)
@@ -239,7 +247,7 @@ export default function Profile() {
     const result = await deleteRemote()
     setConfirmDelete(false)
     if (result.ok) {
-      setNotice({ tone: 'ok', text: 'Saved copy deleted. This device still has your progress.' })
+      setNotice({ tone: 'ok', text: 'Saved copy deleted. This device still has your study state.' })
     } else {
       setNotice({ tone: 'error', text: result.error || 'Could not delete the saved copy.' })
     }
@@ -249,7 +257,7 @@ export default function Profile() {
     await signOut()
     setConfirmLoad(false)
     setConfirmDelete(false)
-    setNotice({ tone: 'ok', text: 'Signed out. Your progress stays on this device.' })
+    setNotice({ tone: 'ok', text: 'Signed out. Your study state stays on this device.' })
   }
 
   return (
@@ -588,8 +596,9 @@ export default function Profile() {
                 </span>
               </div>
               <p className="muted profile-account__intro">
-                Sign in with an email link to keep a copy of your learned chapters in Supabase and
-                load it on another device. Without an account, everything still works offline.
+                Sign in with an email link to keep a copy of your learned chapters, saved words,
+                known words, and review history in Supabase, and load it on another device.
+                Without an account, everything still works offline.
               </p>
 
               {!configured ? (
@@ -597,14 +606,14 @@ export default function Profile() {
                   <p className="eyebrow">Sync is off in this build</p>
                   <h3>Local-first by default.</h3>
                   <p>
-                    Your progress lives on this device, and the whole course works offline. To
+                    Your study state lives on this device, and the whole course works offline. To
                     enable email sign-in, set <code>VITE_SUPABASE_URL</code> and{' '}
                     <code>VITE_SUPABASE_ANON_KEY</code> before building. The README has the exact
                     Supabase setup steps.
                   </p>
                   <p className="small muted">
-                    Nothing is lost by waiting: your learned chapters are already saved in this
-                    browser.
+                    Nothing is lost by waiting: your learned chapters, saved words, and review
+                    history are already saved in this browser.
                   </p>
                 </section>
               ) : authState === 'loading' ? (
@@ -713,8 +722,9 @@ export default function Profile() {
                   {confirmLoad && remote && (
                     <div className="profile-confirm" role="alert">
                       <p>
-                        <strong>Replace this device’s progress?</strong> The learned chapters here
-                        will be overwritten by the account copy from {remoteDate || 'your account'}.
+                        <strong>Replace this device’s study state?</strong> The learned chapters,
+                        saved words, known words, and review history here will be overwritten by
+                        the account copy from {remoteDate || 'your account'}.
                       </p>
                       <div className="profile-actions">
                         <button
@@ -791,8 +801,8 @@ export default function Profile() {
                     <p className="eyebrow">Saved copy</p>
                     <h3>Delete the account copy</h3>
                     <p className="small muted">
-                      This removes the copy in Supabase. The progress on this device stays exactly
-                      where it is.
+                      This removes the copy in Supabase. The study state on this device stays
+                      exactly where it is.
                     </p>
                   </div>
                   {confirmDelete ? (
@@ -866,6 +876,10 @@ export default function Profile() {
                   to the readers.
                 </li>
                 <li>
+                  <strong>Your study words.</strong> Hand-saved words, words marked known, and the
+                  review history behind them.
+                </li>
+                <li>
                   <strong>Not your preferences.</strong> Theme and install settings stay on this
                   device.
                 </li>
@@ -876,7 +890,7 @@ export default function Profile() {
               <p className="eyebrow">Local first</p>
               <p>
                 The reader never waits for the network. Saving to your account is a deliberate copy,
-                and loading the account copy asks before it replaces this device’s progress.
+                and loading the account copy asks before it replaces this device’s study state.
               </p>
               <p className="small muted">
                 The public Supabase key can only reach the signed-in user’s own row; row-level

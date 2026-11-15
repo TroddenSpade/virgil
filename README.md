@@ -49,9 +49,10 @@ node scripts/build-dictionary.mjs   # writes src/data/dictionary.generated.js
 
 ### Profile and cross-device progress
 
-The **My Profile** page at `/profile` is local-first. Progress always lives in this browser; sign in
-with an email link to keep a copy in Supabase and load it on another device. Only learned chapters
-travel — theme and install preferences stay on the device.
+The **My Profile** page at `/profile` is local-first. Study state always lives in this browser;
+sign in with an email link to keep a copy in Supabase and load it on another device. Learned
+chapters, hand-saved and known words, and review history travel together — theme and install
+preferences stay on the device.
 
 To enable sync in a deployment:
 

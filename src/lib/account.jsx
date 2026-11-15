@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { loadSupabase, supabaseConfigured } from './supabase.js'
 import {
-  applyLocalProgress,
-  normalizeProgress,
-  readLocalProgress,
-} from './progress.js'
+  applyLocalStudy,
+  normalizeStudy,
+  readLocalStudy,
+  studyDocument,
+} from './study-sync.js'
 
 const AccountContext = createContext(null)
 const TABLE = 'virgil_progress'
@@ -20,7 +21,7 @@ function readableError(error) {
     return 'Sync storage is not set up yet. Run supabase/schema.sql in the Supabase SQL editor, then try again.'
   }
   if (/Failed to fetch|NetworkError|Load failed|fetch failed|network/i.test(message)) {
-    return 'Could not reach the sync server. Your progress is still safe on this device; check your connection and try again.'
+    return 'Could not reach the sync server. Your study state is still safe on this device; check your connection and try again.'
   }
   if (/Expected 3 parts in JWT|Invalid JWT|JWT expired|invalid claim/i.test(message)) {
     return 'The sign-in session has expired. Sign out, then request a new email link.'
@@ -28,7 +29,7 @@ function readableError(error) {
   if (/rate limit|too many requests/i.test(message)) {
     return 'Too many sign-in attempts. Wait a minute, then ask for another link.'
   }
-  return message || 'Something went wrong. Your progress is still safe on this device.'
+  return message || 'Something went wrong. Your study state is still safe on this device.'
 }
 
 function offline() {
@@ -118,8 +119,10 @@ export function AccountProvider({ children }) {
         return null
       }
 
+      const study = normalizeStudy(data.data)
       const record = {
-        progress: normalizeProgress(data.data),
+        study,
+        progress: study.progress,
         updatedAt: data.updated_at || new Date().toISOString(),
       }
       setRemote(record)
@@ -194,15 +197,15 @@ export function AccountProvider({ children }) {
     if (offline()) {
       return {
         ok: false,
-        error: 'You are offline. Your progress stays on this device and can be saved when you reconnect.',
+        error: 'You are offline. Your study state stays on this device and can be saved when you reconnect.',
       }
     }
 
     setOperation('saving')
     setError(null)
     const savedAt = new Date().toISOString()
-    const progress = normalizeProgress(readLocalProgress())
-    const document = { ...progress, savedAt }
+    const study = readLocalStudy()
+    const document = { ...studyDocument(study), savedAt }
 
     try {
       const { error: saveError } = await client.from(TABLE).upsert(
@@ -215,7 +218,7 @@ export function AccountProvider({ children }) {
       )
       if (saveError) throw saveError
 
-      setRemote({ progress, updatedAt: savedAt })
+      setRemote({ study, progress: study.progress, updatedAt: savedAt })
       setLastSyncedAt(savedAt)
       setOperation('idle')
       return { ok: true, savedAt }
@@ -250,7 +253,7 @@ export function AccountProvider({ children }) {
         return { ok: false, error: 'There is no account copy yet. Save this device first.' }
       }
 
-      const applied = applyLocalProgress(data.data)
+      const applied = applyLocalStudy(data.data)
       if (!applied.ok) {
         setOperation('idle')
         setError(applied.error)
@@ -258,10 +261,20 @@ export function AccountProvider({ children }) {
       }
 
       const updatedAt = data.updated_at || new Date().toISOString()
-      setRemote({ progress: applied.progress, updatedAt })
+      const remoteStudy = normalizeStudy(data.data)
+      setRemote({
+        study: remoteStudy,
+        progress: remoteStudy.progress,
+        updatedAt,
+      })
       setLastSyncedAt(new Date().toISOString())
       setOperation('idle')
-      return { ok: true, progress: applied.progress, updatedAt }
+      return {
+        ok: true,
+        study: applied.study,
+        progress: applied.study.progress,
+        updatedAt,
+      }
     } catch (caught) {
       const message = readableError(caught)
       setError(message)

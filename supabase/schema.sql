@@ -1,8 +1,8 @@
--- Virgil progress sync
+-- Virgil study sync
 -- Run this once in the Supabase SQL editor (Dashboard → SQL → New query).
 --
--- Each signed-in user owns exactly one row containing the whole progress
--- document: the chapters marked as learned in Familia Romana and Roma Aeterna.
+-- Each signed-in user owns exactly one row containing the whole study
+-- document: learned chapters, hand-saved and known words, and review history.
 -- Row-level security makes the public anon key safe to ship in the web bundle:
 -- clients can only read and write their own row.
 

@@ -188,6 +188,27 @@ export function readReview() {
   }
 }
 
+/** Replace the review document and let mounted hooks hear about it. */
+export function writeReview(value) {
+  const next = normalizeReview(value)
+  if (typeof window === 'undefined') return next
+  try {
+    window.localStorage.setItem(REVIEW_KEY, JSON.stringify(next))
+  } catch {
+    return next
+  }
+  try {
+    window.dispatchEvent(
+      new CustomEvent('virgil:storage', {
+        detail: { key: REVIEW_KEY, value: next },
+      }),
+    )
+  } catch {
+    /* older browsers can ignore the live update; storage is still written */
+  }
+  return next
+}
+
 export function stateFor(review, key) {
   return review?.words?.[key] || null
 }
