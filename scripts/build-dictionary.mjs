@@ -9,8 +9,11 @@
 // Headwords with a printed vocabulary meaning keep that meaning; the rest
 // take Whitaker's. Every listed word therefore has a sense.
 import { createEngine, dictionaryForm } from 'whitakers-words/node'
-import { readdirSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
+import { parseInflectsFile } from '../node_modules/whitakers-words/dist/lib/parsers/inflects.js'
+import { matchAndResolve } from '../node_modules/whitakers-words/dist/lib/engine/word-analysis.js'
+import { parseLabel, qualityKey } from '../src/lib/grammar.js'
 
 const DATA = new URL('../src/data/', import.meta.url)
 const OUT = new URL('../src/data/dictionary.generated.js', import.meta.url)
@@ -18,8 +21,18 @@ const OUT_READING = new URL(
   '../src/data/reading-vocabulary.generated.js',
   import.meta.url,
 )
+const OUT_PARADIGM = new URL(
+  '../src/data/paradigm-rules.generated.js',
+  import.meta.url,
+)
 
 const engine = createEngine()
+const inflects = parseInflectsFile(
+  readFileSync(
+    new URL('../node_modules/whitakers-words/data/INFLECTS.LAT', import.meta.url),
+    'utf8',
+  ),
+)
 
 const LETTER = 'A-Za-zĀĒĪŌŪȲāēīōūȳ'
 const TOKEN = /[A-Za-zĀĒĪŌŪȲāēīōūȳÆæŒœ]+/g
@@ -252,10 +265,69 @@ function bestAnalysis(token) {
   return best
 }
 
+/* A compact signature for the dictionary part, used to share one set of
+   paradigm-ending recipes among every lemma with the same inflection. */
+function partSignature(part) {
+  if (!part?.pofs) return ''
+  switch (part.pofs) {
+    case 'N':
+      return `N|${part.n.decl.which}.${part.n.decl.var}|${part.n.gender}|${part.n.kind}`
+    case 'V':
+      return `V|${part.v.con.which}.${part.v.con.var}|${part.v.kind}`
+    case 'ADJ':
+      return `ADJ|${part.adj.decl.which}.${part.adj.decl.var}|${part.adj.co}`
+    case 'ADV':
+      return `ADV|${part.adv.co}`
+    case 'PRON':
+      return `PRON|${part.pron.decl.which}.${part.pron.decl.var}|${part.pron.kind}`
+    case 'PACK':
+      return `PACK|${part.pack.decl.which}.${part.pack.decl.var}|${part.pack.kind}`
+    case 'NUM':
+      return `NUM|${part.num.decl.which}.${part.num.decl.var}|${part.num.sort}`
+    case 'PREP':
+      return `PREP|${part.prep.obj}`
+    default:
+      return part.pofs
+  }
+}
+
 const lemmaMap = new Map()
 const wordMap = new Map()
+const surfaceMap = new Map()
 const exampleTable = []
 const exampleIds = new Map()
+
+/* The reader needs the exact printed form to keep macra and case distinct:
+   Rōma (nominative) and Rōmā (ablative) fold to one dictionary key, but they
+   are different study cards. Store one best surface form per exact spelling. */
+function noteSurface(token, lemmaKey, labels) {
+  const key = String(token || '').toLowerCase()
+  if (!key || !lemmaKey) return
+  const existing = surfaceMap.get(key)
+  if (existing) {
+    if (/[A-Z]/.test(existing.w) && !/[A-Z]/.test(token)) existing.w = token
+    return
+  }
+  surfaceMap.set(key, { w: token, l: lemmaKey, g: labels.join(' · ') })
+}
+
+/* Whitaker's returns every possible parse of a form. Keep the analyses that
+   belong to the lemma we chose, so a popover can be honest about forms such
+   as puellae (genitive/dative/locative singular, nominative/vocative plural). */
+function labelsFor(token) {
+  const parsed = engine.parseWord(norm(token))
+  const results = (parsed.results || []).filter((result) => result.de?.mean)
+  const best = bestAnalysis(token)
+  if (!best) return []
+  const bestLemma = norm(lemmaOf(dictionaryForm(best.de)))
+  const labels = []
+  for (const result of results) {
+    if (norm(lemmaOf(dictionaryForm(result.de))) !== bestLemma) continue
+    const label = parseLabel(result.ir.qual)
+    if (label && !labels.includes(label)) labels.push(label)
+  }
+  return labels
+}
 
 /* One shared table of example sentences; each word points at the sentence
    where it first occurs. */
@@ -313,6 +385,7 @@ for (const { slug, book, chapters } of books) {
           entry = {
             head: lemma,
             latin: form,
+            de: analysis.de,
             meanings: new Set([analysis.de.mean.trim()]),
             poses: new Set([label === 'noun' && gender ? `noun (${gender}.)` : label]),
             formMap: new Map(),
@@ -321,6 +394,8 @@ for (const { slug, book, chapters } of books) {
           }
           lemmaMap.set(key, entry)
         }
+
+        noteSurface(token, key, labelsFor(token))
 
         const formKey = norm(token)
         const existingForm = entry.formMap.get(formKey)
@@ -345,10 +420,12 @@ for (const { slug, book, chapters } of books) {
 /* Merge the printed vocabulary into the reading lemmas. */
 for (const [key, curatedEntry] of curated) {
   let entry = lemmaMap.get(key)
+  const analysis = bestAnalysis(curatedEntry.head)
   if (!entry) {
     entry = {
       head: curatedEntry.head,
       latin: curatedEntry.latin,
+      de: analysis?.de || null,
       meanings: new Set(),
       poses: new Set(),
       formMap: new Map(),
@@ -359,6 +436,8 @@ for (const [key, curatedEntry] of curated) {
   }
   entry.head = curatedEntry.head
   entry.latin = curatedEntry.latin
+  if (!entry.de && analysis?.de) entry.de = analysis.de
+  if (analysis?.ir?.qual) noteSurface(curatedEntry.head, key, labelsFor(curatedEntry.head))
   if (curatedEntry.meanings.size) entry.meanings = new Set(curatedEntry.meanings)
   if (curatedEntry.poses.size) entry.poses = new Set(curatedEntry.poses)
   const citation = curatedEntry.latin || curatedEntry.head
@@ -385,6 +464,10 @@ const lemmas = [...lemmaMap.entries()]
   .map(([key, entry]) => {
     const english = mergeSenses(entry.meanings)
     const poses = [...new Set([...entry.poses].map(normalisePos).filter(Boolean))]
+    const de = entry.de || null
+    const stems = de
+      ? de.stems.map((stem) => (stem && stem !== 'zzz' ? stem : ''))
+      : []
     const lemma = {
       id: key,
       headword: entry.head,
@@ -392,6 +475,8 @@ const lemmas = [...lemmaMap.entries()]
       pos: poses.join('; '),
       posGroup: posGroup(poses[0] || ''),
       english,
+      stems,
+      sig: de ? partSignature(de.part) : '',
       forms: [...entry.formMap.values()].sort((a, b) => a.localeCompare(b)),
       e: entry.e,
       s: [...entry.sourceIds].slice(0, 12),
@@ -415,6 +500,38 @@ const words = [...wordMap.values()]
     e: word.e ?? lemmaById.get(word.l)?.e ?? null,
   }))
   .sort((a, b) => norm(a.w).localeCompare(norm(b.w)))
+
+const surfaceForms = [...surfaceMap.values()]
+  .filter((form) => form.l && form.g)
+  .sort((a, b) => a.w.localeCompare(b.w))
+
+/* ---------- Paradigm recipes ----------
+   One shared set of stem/suffix rules per inflection signature. The reader
+   combines these with a lemma's stems to build its full paradigm on demand,
+   so the dictionary stays a reasonable size. The first form for each
+   grammatical slot wins; Whitaker's lists the ordinary form before the rarer
+   variants. */
+const partBySignature = new Map()
+for (const entry of lemmaMap.values()) {
+  if (!entry.de) continue
+  const sig = partSignature(entry.de.part)
+  if (sig && !partBySignature.has(sig)) partBySignature.set(sig, entry.de.part)
+}
+
+const paradigmRules = {}
+for (const [sig, part] of partBySignature) {
+  const bySlot = new Map()
+  for (let stemKey = 1; stemKey <= 4; stemKey += 1) {
+    for (const ir of inflects) {
+      const resolved = matchAndResolve(ir, part, stemKey)
+      if (!resolved) continue
+      const slot = qualityKey(resolved.qual)
+      if (!slot || bySlot.has(slot)) continue
+      bySlot.set(slot, [stemKey, resolved.ending.suf, slot])
+    }
+  }
+  paradigmRules[sig] = [...bySlot.values()]
+}
 
 /* ---------- Compact index for the personal wordlist ----------
    The dictionary's public lemma entries cap their source list at 12 to keep
@@ -458,6 +575,8 @@ const stats = {
   examples: exampleTable.length,
   withExamples,
   wordsWithExamples,
+  surfaceForms: surfaceForms.length,
+  paradigmSignatures: Object.keys(paradigmRules).length,
 }
 
 const banner =
@@ -471,10 +590,22 @@ const js =
   'export const examples = ' + JSON.stringify(exampleTable) + '\n\n' +
   'export const lemmas = ' + JSON.stringify(lemmas) + '\n\n' +
   'export const words = ' + JSON.stringify(words) + '\n\n' +
+  'export const surfaceForms = ' + JSON.stringify(surfaceForms) + '\n\n' +
   'export const letters = ' + JSON.stringify(letters) + '\n\n' +
   'export const stats = ' + JSON.stringify(stats) + '\n'
 
 writeFileSync(OUT, js, 'utf8')
+
+const paradigmBanner =
+  '// AUTO-GENERATED by scripts/build-dictionary.mjs — do not edit by hand.\n' +
+  '// Shared stem/suffix recipes for the full paradigm view, keyed by the\n' +
+  "// inflection signature stored on each lemma.\n"
+
+const paradigmJs =
+  paradigmBanner +
+  'export const paradigmRules = ' + JSON.stringify(paradigmRules) + '\n'
+
+writeFileSync(OUT_PARADIGM, paradigmJs, 'utf8')
 
 const readingBanner =
   '// AUTO-GENERATED by scripts/build-dictionary.mjs — do not edit by hand.\n' +
@@ -498,10 +629,13 @@ console.log({
   examples: exampleTable.length,
   withExamples,
   wordsWithExamples,
+  surfaceForms: surfaceForms.length,
+  paradigmSignatures: Object.keys(paradigmRules).length,
   missingMeanings: lemmas.filter((lemma) => !lemma.english).length,
   wordsWithoutLemma: words.filter((word) => !lemmaById.has(word.l)).length,
   readingLemmas: readingLemmas.length,
   readingChapters: Object.keys(readingChapters).length,
   bytes: js.length,
+  paradigmBytes: paradigmJs.length,
   readingBytes: readingJs.length,
 })

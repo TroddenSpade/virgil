@@ -82,6 +82,11 @@ describe('lexicon index', () => {
       { w: 'rīpam', l: 'ripa' },
       { w: 'Rōma', l: 'roma' },
     ],
+    surfaceForms: [
+      { w: 'rīpam', l: 'ripa', g: 'accusative singular feminine' },
+      { w: 'Rōma', l: 'roma', g: 'nominative singular feminine' },
+      { w: 'Rōmā', l: 'roma', g: 'ablative singular feminine' },
+    ],
   }
 
   const index = buildLexiconIndex(data)
@@ -107,6 +112,20 @@ describe('lexicon index', () => {
       fromLemma: true,
       lemma: { id: 'ripa' },
     })
+  })
+
+  it('returns the parse for an exact surface form', () => {
+    expect(lookupLexicon(index, 'rīpam')).toMatchObject({
+      form: 'rīpam',
+      parse: 'accusative singular feminine',
+      exact: true,
+      lemma: { id: 'ripa' },
+    })
+  })
+
+  it('keeps macra and case apart in the exact index', () => {
+    expect(lookupLexicon(index, 'Rōma').parse).toBe('nominative singular feminine')
+    expect(lookupLexicon(index, 'Rōmā').parse).toBe('ablative singular feminine')
   })
 
   it('returns nothing for a word outside the lexicon', () => {

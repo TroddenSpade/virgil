@@ -11,7 +11,12 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import { hasDefinition, norm, wordHref } from '../lib/dictionary.js'
+import {
+  hasDefinition,
+  norm,
+  paradigmHref,
+  wordHref,
+} from '../lib/dictionary.js'
 import {
   cachedLexicon,
   latinTokens,
@@ -19,6 +24,8 @@ import {
   lookupLexicon,
   parseReadingMarkup,
 } from '../lib/lexicon.js'
+import { formatParseList, principalParts } from '../lib/grammar.js'
+import { readingWordKey } from '../lib/wordlist.js'
 
 /**
  * The on/off state and the lazily loaded dictionary index shared by a
@@ -122,7 +129,13 @@ function positionFor(anchor, node) {
  * Render reading text with every known Latin form as a button. The button
  * opens a small gloss popover with a route into the full lexicon entry.
  */
-export const LexiconText = memo(function LexiconText({ text, index }) {
+export const LexiconText = memo(function LexiconText({
+  text,
+  index,
+  wordKeys,
+  savedWords,
+  source,
+}) {
   const nodes = useMemo(() => parseReadingMarkup(text), [text])
   const [open, setOpen] = useState(null)
   const [position, setPosition] = useState(null)
@@ -137,14 +150,14 @@ export const LexiconText = memo(function LexiconText({ text, index }) {
   }, [])
 
   const openWord = useCallback(
-    (event, entry) => {
+    (event, entry, token) => {
       const anchor = event.currentTarget
       if (open?.anchor === anchor) {
         close(true)
         return
       }
       setPosition(null)
-      setOpen({ anchor, entry })
+      setOpen({ anchor, entry, token })
     },
     [close, open],
   )
@@ -201,9 +214,18 @@ export const LexiconText = memo(function LexiconText({ text, index }) {
 
   const entry = open?.entry || null
   const lemma = entry?.lemma || null
-  const isForm =
-    Boolean(entry && lemma && !entry.fromLemma) &&
-    norm(entry.form) !== norm(lemma.headword)
+  const token = open?.token || entry?.form || ''
+  const key = lemma ? readingWordKey(lemma.headword) : ''
+  const known = Boolean(savedWords?.known?.[key])
+  const saved = Boolean(savedWords?.saved?.[key])
+  const inWordlist = saved || Boolean(wordKeys?.has(key))
+  const isForm = Boolean(lemma) && norm(token) !== norm(lemma.headword)
+  const parts = lemma ? principalParts(lemma.latin) : []
+  const principal =
+    parts.length > 1 && norm(parts[0]) === norm(lemma.headword)
+      ? parts.slice(1).join(', ')
+      : parts.join(', ')
+  const parse = formatParseList(entry?.parse)
   const sense =
     lemma && hasDefinition(lemma.english)
       ? lemma.english
@@ -229,7 +251,7 @@ export const LexiconText = memo(function LexiconText({ text, index }) {
           key={`word${partIndex}`}
           aria-haspopup="dialog"
           title={`Look up ${part.value}`}
-          onClick={(event) => openWord(event, found)}
+          onClick={(event) => openWord(event, found, part.value)}
         >
           {part.value}
         </button>
@@ -264,7 +286,7 @@ export const LexiconText = memo(function LexiconText({ text, index }) {
           >
             <div className="lex-popover__head">
               <p className="lex-popover__word latin" id={titleId}>
-                {entry.form}
+                {token}
               </p>
               <button
                 type="button"
@@ -276,9 +298,11 @@ export const LexiconText = memo(function LexiconText({ text, index }) {
               </button>
             </div>
 
-            {isForm && (
-              <p className="lex-popover__lemma">
-                form of <span className="latin">{lemma.headword}</span>
+            {(parse || isForm) && (
+              <p className="lex-popover__parse">
+                {parse}
+                {parse && isForm && ' of '}
+                {isForm && <span className="latin">{lemma.headword}</span>}
               </p>
             )}
 
@@ -290,17 +314,90 @@ export const LexiconText = memo(function LexiconText({ text, index }) {
               {sense}
             </p>
 
+            {principal && (
+              <p className="lex-popover__principal">
+                <span className="lex-popover__principal-label">Principal parts</span>{' '}
+                <span className="latin">{principal}</span>
+              </p>
+            )}
+
+            <div className="lex-popover__study">
+              {known ? (
+                <button
+                  type="button"
+                  className="lex-popover__action is-on"
+                  aria-pressed="true"
+                  onClick={() => savedWords?.unknow(key)}
+                >
+                  ✓ Known · Undo
+                </button>
+              ) : (
+                <>
+                  {saved ? (
+                    <button
+                      type="button"
+                      className="lex-popover__action is-on"
+                      onClick={() => savedWords?.remove(key)}
+                    >
+                      ✓ In wordlist · Remove
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="lex-popover__action"
+                      disabled={inWordlist}
+                      title={
+                        inWordlist
+                          ? 'Already in your wordlist from a learned chapter — use “I know this” to set it aside'
+                          : undefined
+                      }
+                      onClick={() =>
+                        savedWords?.save({
+                          key,
+                          headword: lemma.headword,
+                          principal,
+                          english: lemma.english,
+                          posGroup: lemma.posGroup,
+                          form: token,
+                          source,
+                        })
+                      }
+                    >
+                      {inWordlist ? '✓ In wordlist' : '+ Save to wordlist'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="lex-popover__action lex-popover__action--quiet"
+                    onClick={() => savedWords?.know(key)}
+                  >
+                    I know this
+                  </button>
+                </>
+              )}
+            </div>
+
             <div className="lex-popover__foot">
               <span className="lex-popover__pos">
                 {lemma.posGroup && lemma.posGroup !== 'other' ? lemma.posGroup : 'lexicon'}
               </span>
-              <Link
-                className="lex-popover__link"
-                to={wordHref(entry.form)}
-                onClick={() => close(false)}
-              >
-                Full entry →
-              </Link>
+              <span className="lex-popover__links">
+                <Link
+                  className="lex-popover__link"
+                  to={paradigmHref(lemma.headword)}
+                  onClick={() => close(false)}
+                >
+                  Paradigm
+                </Link>
+                <span aria-hidden="true">·</span>
+                <Link
+                  className="lex-popover__link"
+                  to={wordHref(token)}
+                  onClick={() => close(false)}
+                >
+                  Full entry →
+                </Link>
+              </span>
             </div>
           </div>,
           document.body,

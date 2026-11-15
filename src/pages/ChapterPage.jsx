@@ -89,6 +89,18 @@ function Lesson({ book, chapter }) {
   const sectionNum = (id) => sections.find((section) => section.id === id)?.num
 
   const active = useScrollSpy(sections.map((s) => s.id))
+  const readingSource = {
+    bookId: book.id,
+    bookTitle: book.title,
+    bookShort: book.shortTitle,
+    bookSlug: book.slug,
+    number: chapter.number,
+    roman: chapter.roman,
+    title: chapter.title,
+    latinTitle: chapter.latinTitle,
+    slug: chapter.slug,
+    href: `/library/${book.slug}/${chapter.slug}`,
+  }
 
   return (
     <article className={`lesson${isCommentary ? ' lesson--commentary' : ''}${book.kind === 'coursebook' ? ' lesson--coursebook' : ''}`}>
@@ -170,7 +182,7 @@ function Lesson({ book, chapter }) {
                       latin={sections.find((section) => section.id === 'lectio')?.label || 'Lēctiō'}
                       english="reading"
                     />
-                    <Reading readings={chapter.readings} />
+                    <Reading readings={chapter.readings} source={readingSource} />
                   </section>
                 )}
 
@@ -223,7 +235,7 @@ function Lesson({ book, chapter }) {
                       latin={sections.find((section) => section.id === 'lectio')?.label || 'Lēctiō'}
                       english="reading"
                     />
-                    <Reading readings={chapter.readings} />
+                    <Reading readings={chapter.readings} source={readingSource} />
                   </section>
                 )}
 

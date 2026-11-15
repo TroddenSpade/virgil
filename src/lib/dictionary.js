@@ -78,6 +78,10 @@ export function wordHref(headword) {
   return `/dictionary/${encodeURIComponent(dictionaryKey(headword))}`
 }
 
+export function paradigmHref(headword) {
+  return `${wordHref(headword)}/paradigm`
+}
+
 // Split an example around its {{highlighted}} forms, returning plain objects
 // so this stays a framework-free module.
 export function exampleSegments(text) {

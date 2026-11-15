@@ -1,15 +1,31 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Inline } from './Commentary.jsx'
 import { LexiconControls, LexiconText, useLexiconMode } from './Lexicon.jsx'
+import { useWordlist } from '../hooks/useWordlist.js'
+import { useSavedWords } from '../hooks/useSavedWords.js'
 
-function ReadingText({ text, lexicon }) {
+function ReadingText({ text, lexicon, wordKeys, savedWords, source }) {
   if (!lexicon.enabled || !lexicon.index) return <Inline text={text} />
-  return <LexiconText text={text} index={lexicon.index} />
+  return (
+    <LexiconText
+      text={text}
+      index={lexicon.index}
+      wordKeys={wordKeys}
+      savedWords={savedWords}
+      source={source}
+    />
+  )
 }
 
-export default function Reading({ readings }) {
+export default function Reading({ readings, source }) {
   const [showNotes, setShowNotes] = useState(true)
   const lexicon = useLexiconMode()
+  const wordlist = useWordlist({ active: lexicon.enabled })
+  const savedWords = useSavedWords()
+  const wordKeys = useMemo(
+    () => new Set(wordlist.words.map((word) => word.key)),
+    [wordlist.words],
+  )
 
   if (!readings?.length) return null
 
@@ -39,12 +55,24 @@ export default function Reading({ readings }) {
             <div className="reading__text latin">
               {reading.personae && (
                 <div className="reading__personae">
-                  <ReadingText text={reading.personae} lexicon={lexicon} />
+                  <ReadingText
+                    text={reading.personae}
+                    lexicon={lexicon}
+                    wordKeys={wordKeys}
+                    savedWords={savedWords}
+                    source={source}
+                  />
                 </div>
               )}
               {reading.paragraphs.map((p, i) => (
                 <p key={i}>
-                  <ReadingText text={p} lexicon={lexicon} />
+                  <ReadingText
+                    text={p}
+                    lexicon={lexicon}
+                    wordKeys={wordKeys}
+                    savedWords={savedWords}
+                    source={source}
+                  />
                 </p>
               ))}
             </div>

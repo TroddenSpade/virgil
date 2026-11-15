@@ -62,6 +62,7 @@ function WordRow({ word, state, now }) {
           <span className={`word-status word-status--${status.key}`}>
             {status.label}
           </span>
+          {word.saved && <span className="word-row__saved">saved</span>}
           {word.firstSource && (
             <span className="word-row__source">
               {sourceLabel(word.firstSource)}
@@ -94,7 +95,7 @@ function WordRow({ word, state, now }) {
 
         <div className="word-row__sources">
           <p className="word-row__section-title">
-            In your learned chapters
+            Where you met it
             <span className="word-row__section-count">{word.sourceCount}</span>
           </p>
           <ul className="word-sources">
@@ -135,8 +136,8 @@ function EmptyWordlist({ studiedChapters }) {
         <h2>{waiting ? 'Your wordlist is waiting.' : 'No words yet from these lessons.'}</h2>
         <p className="lead">
           {waiting
-            ? 'Mark a chapter as learned and its words will appear here automatically. The list follows your progress: add a chapter, add its words; take it back, and the words leave again.'
-            : 'The wordlist gathers the printed vocabulary and the reading vocabulary of every chapter you mark. The chapters you have marked so far contain no indexed words.'}
+            ? 'Mark a chapter as learned and its words will appear here automatically — or turn on Lexicon mode in a reading and save a word you want to keep. The list follows your progress: add a chapter, add its words; take it back, and the words leave again.'
+            : 'The wordlist gathers the printed vocabulary and the reading vocabulary of every chapter you mark, plus any words you save from a reading. The chapters you have marked so far contain no indexed words.'}
         </p>
         <div className="wordlist-empty__actions">
           <Link className="btn btn--primary" to="/iter">
@@ -160,6 +161,7 @@ export default function Wordlist() {
     now,
     studiedChapters,
     contributingChapters,
+    savedCount,
   } = useWordlist()
 
   const [query, setQuery] = useState('')
@@ -261,9 +263,10 @@ export default function Wordlist() {
             <h1>My wordlist</h1>
             <p className="lead wordlist-hero__lead">
               Every word from every lesson you have marked as learned — the
-              vocabulary it prints and every word in its reading. Mark a
-              chapter and its words enter the list; unmark it and they leave
-              again.
+              vocabulary it prints and every word in its reading — plus any
+              word you save while reading. Mark a chapter and its words enter
+              the list; unmark it and they leave again. Words you already know
+              can be set aside.
             </p>
             <div className="wordlist-hero__actions">
               <Link className="btn btn--primary" to={primaryAction.to}>
@@ -280,6 +283,7 @@ export default function Wordlist() {
             <p className="wordlist-hero__label">
               words from {contributingChapters} learned{' '}
               {contributingChapters === 1 ? 'lesson' : 'lessons'}
+              {savedCount > 0 ? ` · ${savedCount} saved` : ''}
             </p>
             <div
               className="progress"

@@ -179,4 +179,73 @@ describe('buildWordlist', () => {
     expect(result.studiedChapters).toBe(1)
     expect(result.words.length).toBeGreaterThan(0)
   })
+
+  it('adds a hand-saved word once', () => {
+    const result = buildWordlist({}, undefined, {
+      saved: {
+        ripa: {
+          key: 'ripa',
+          headword: 'rīpa',
+          principal: '-ae',
+          english: 'bank, shore',
+          posGroup: 'noun',
+        },
+      },
+      known: {},
+    })
+
+    expect(result.words).toHaveLength(1)
+    expect(result.words[0]).toMatchObject({
+      key: 'ripa',
+      headword: 'rīpa',
+      saved: true,
+      sourceCount: 1,
+    })
+    expect(result.savedCount).toBe(1)
+  })
+
+  it('does not duplicate a word already in the learned chapters', () => {
+    const base = buildWordlist({
+      books: { [familiaRomanaBook.id]: [1] },
+    })
+    const target = base.words[0]
+    const result = buildWordlist(
+      { books: { [familiaRomanaBook.id]: [1] } },
+      undefined,
+      {
+        saved: {
+          [target.key]: {
+            key: target.key,
+            headword: target.headword,
+            principal: target.principal,
+            english: target.primarySense,
+            posGroup: target.kind,
+          },
+        },
+        known: {},
+      },
+    )
+
+    const matches = result.words.filter((word) => word.key === target.key)
+    expect(matches).toHaveLength(1)
+    expect(matches[0].saved).toBe(true)
+  })
+
+  it('sets known words aside without removing their saved state', () => {
+    const result = buildWordlist({}, undefined, {
+      saved: {
+        ripa: {
+          key: 'ripa',
+          headword: 'rīpa',
+          principal: '-ae',
+          english: 'bank, shore',
+          posGroup: 'noun',
+        },
+      },
+      known: { ripa: Date.now() },
+    })
+
+    expect(result.words).toHaveLength(0)
+    expect(result.knownCount).toBe(1)
+  })
 })

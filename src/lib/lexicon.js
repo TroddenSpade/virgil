@@ -94,6 +94,17 @@ export function buildLexiconIndex(data) {
     lemmaByWord.set(norm(lemma.headword), lemma)
   }
 
+  // Exact surface forms preserve macra and case, so Rōma and Rōmā keep
+  // different parses even though they fold to the same dictionary key.
+  const surface = new Map()
+  for (const form of data?.surfaceForms || []) {
+    const lemma = lemmaById.get(form?.l)
+    if (!lemma || !form?.w) continue
+    surface.set(form.w.toLowerCase(), { form: form.w, lemma, parse: form.g || '' })
+  }
+
+  // The folded index is the safety net for spellings the readings do not
+  // contain (for example an OCR form without macra).
   const forms = new Map()
   for (const word of data?.words || []) {
     const lemma = lemmaById.get(word?.l)
@@ -103,19 +114,24 @@ export function buildLexiconIndex(data) {
     forms.set(key, { form: word.w, lemma })
   }
 
-  return { forms, lemmas: lemmaByWord }
+  return { surface, forms, lemmas: lemmaByWord }
 }
 
 /** Find the gloss for one token, preferring its exact inflected form. */
 export function lookupLexicon(index, token) {
+  if (!index) return null
+  const exactKey = String(token || '').toLowerCase()
   const key = norm(token)
-  if (!index || !key) return null
+  if (!key) return null
+
+  const exact = index.surface?.get(exactKey)
+  if (exact) return { ...exact, fromLemma: false, exact: true }
 
   const form = index.forms.get(key)
-  if (form) return { ...form, fromLemma: false }
+  if (form) return { ...form, parse: '', fromLemma: false, exact: false }
 
   const lemma = index.lemmas.get(key)
-  if (lemma) return { form: lemma.headword, lemma, fromLemma: true }
+  if (lemma) return { form: lemma.headword, lemma, parse: '', fromLemma: true, exact: false }
 
   return null
 }

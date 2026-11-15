@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { readLocalProgress } from '../lib/progress.js'
 import { buildWordlist } from '../lib/wordlist.js'
+import { readSavedWords, subscribeSavedWords } from '../lib/saved-words.js'
 import {
   REVIEW_KEY,
   emptyReview,
@@ -23,7 +24,20 @@ function isProgressKey(key) {
  * (`storage`). Review state lives under its own key and is normalized on the
  * way in and out, so a malformed or older copy can never break a session.
  */
-export function useWordlist() {
+const EMPTY_WORDLIST = {
+  words: [],
+  chapterSources: [],
+  sourceBooks: [],
+  studiedChapters: 0,
+  contributingChapters: 0,
+  savedCount: 0,
+  knownCount: 0,
+  printedVocabularyChapters: 0,
+  readingVocabularyChapters: 0,
+  vocabularyChapters: 0,
+}
+
+export function useWordlist({ active = true } = {}) {
   const [progress, setProgress] = useState(() => readLocalProgress())
 
   useEffect(() => {
@@ -43,6 +57,9 @@ export function useWordlist() {
       window.removeEventListener('virgil:storage', refresh)
     }
   }, [])
+
+  const [savedWords, setSavedWords] = useState(() => readSavedWords())
+  useEffect(() => subscribeSavedWords(() => setSavedWords(readSavedWords())), [])
 
   // The clock only needs to move the “due now” boundary while a page is open.
   const [now, setNow] = useState(() => Date.now())
@@ -67,7 +84,10 @@ export function useWordlist() {
     [setStoredReview],
   )
 
-  const wordlist = useMemo(() => buildWordlist(progress), [progress])
+  const wordlist = useMemo(
+    () => (active ? buildWordlist(progress, undefined, savedWords) : EMPTY_WORDLIST),
+    [active, progress, savedWords],
+  )
   const stats = useMemo(
     () => reviewStats(wordlist.words, review, now),
     [wordlist, review, now],

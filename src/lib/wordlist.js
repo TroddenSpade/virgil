@@ -575,7 +575,8 @@ function finalizeWord(key, entries) {
     sources,
     sourceCount: sources.length,
     firstSource: sources[0] || null,
-    order: Math.min(...sources.map(sourceOrder)),
+    saved: entries.some((entry) => entry.saved),
+    order: sources.length ? Math.min(...sources.map(sourceOrder)) : Infinity,
     haystack,
   }
 }
@@ -597,6 +598,7 @@ const DEFAULT_READING_VOCABULARY = {
 export function buildWordlist(
   progress,
   readingVocabulary = DEFAULT_READING_VOCABULARY,
+  savedWords = null,
 ) {
   const learned = progress?.books && typeof progress.books === 'object'
     ? progress.books
@@ -611,6 +613,7 @@ export function buildWordlist(
 
   const collected = new Map()
   const chapterSources = []
+  const savedSources = []
   let contributingChapters = 0
   let printedVocabularyChapters = 0
   let readingVocabularyChapters = 0
@@ -691,12 +694,70 @@ export function buildWordlist(
     }
   }
 
+  const saved = savedWords?.saved && typeof savedWords.saved === 'object'
+    ? savedWords.saved
+    : {}
+  const known = savedWords?.known && typeof savedWords.known === 'object'
+    ? savedWords.known
+    : {}
+
+  for (const entry of Object.values(saved)) {
+    const key = entry?.key
+    const headword = entry?.headword
+    if (!key || !headword) continue
+    const source = entry.source
+      ? {
+          ...entry.source,
+          bookId: entry.source.bookId || 'saved',
+          bookTitle: entry.source.bookTitle || entry.source.bookShort || 'Saved from reading',
+          bookShort: entry.source.bookShort || entry.source.bookTitle || 'Saved',
+          bookSlug: entry.source.bookSlug || '',
+          number: entry.source.number ?? 0,
+          roman: entry.source.roman || '',
+          title: entry.source.title || 'Saved from reading',
+          slug: entry.source.slug || '',
+          href: entry.source.href || '/wordlist',
+        }
+      : {
+          bookId: 'saved',
+          bookTitle: 'Saved from reading',
+          bookShort: 'Saved',
+          bookSlug: '',
+          number: 0,
+          roman: '',
+          title: 'Saved from reading',
+          slug: '',
+          href: '/wordlist',
+        }
+
+    const kind =
+      entry.posGroup && Object.prototype.hasOwnProperty.call(KIND_LABELS, entry.posGroup)
+        ? entry.posGroup
+        : 'other'
+    const principal = entry.principal || ''
+    const parsed = {
+      key,
+      headword,
+      principal,
+      display: principal ? `${headword}, ${principal}` : headword,
+      kind,
+      english: entry.english || '',
+      source,
+      reading: true,
+      saved: true,
+    }
+    if (!collected.has(key)) collected.set(key, [])
+    collected.get(key).push(parsed)
+    savedSources.push(source)
+  }
+
   const words = [...collected.entries()]
+    .filter(([key]) => !known[key])
     .map(([key, entries]) => finalizeWord(key, entries))
     .sort((a, b) => a.headword.localeCompare(b.headword, 'la'))
 
   const sourceBooks = []
-  for (const source of chapterSources) {
+  for (const source of [...chapterSources, ...savedSources]) {
     let item = sourceBooks.find((book) => book.id === source.bookId)
     if (!item) {
       item = {
@@ -717,6 +778,8 @@ export function buildWordlist(
     sourceBooks,
     studiedChapters,
     contributingChapters,
+    savedCount: words.filter((word) => word.saved).length,
+    knownCount: Object.keys(known).length,
     printedVocabularyChapters,
     readingVocabularyChapters,
     vocabularyChapters: printedVocabularyChapters,

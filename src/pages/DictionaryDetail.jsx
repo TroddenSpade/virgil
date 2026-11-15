@@ -5,6 +5,7 @@ import {
   dictionaryKeys,
   hasDefinition,
   wordHref,
+  paradigmHref,
   sourceHref,
   sourceLabel,
   exampleSegments,
@@ -191,6 +192,10 @@ export default function DictionaryDetail() {
               .
             </p>
           )}
+
+          <p className="lexicon__paradigm-link">
+            <Link to={paradigmHref(lemma.headword)}>Full paradigm →</Link>
+          </p>
 
           <section className="lexicon__sense">
             <p className="lexicon__section-title">Sense</p>

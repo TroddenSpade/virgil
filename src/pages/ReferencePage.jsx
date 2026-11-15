@@ -1,7 +1,10 @@
+import { useMemo } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getBook, getSource } from '../data/library.js'
 import { useSourceChapter } from '../hooks/useSourceChapter.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
+import { useWordlist } from '../hooks/useWordlist.js'
+import { useSavedWords } from '../hooks/useSavedWords.js'
 import { buildSections } from '../lib/sections.js'
 import { LexiconControls, LexiconText, useLexiconMode } from '../components/Lexicon.jsx'
 
@@ -14,14 +17,22 @@ export default function ReferencePage() {
   return <Reader book={book} chapterId={chapterId} />
 }
 
-function ReferenceLine({ text, lexicon }) {
+function ReferenceLine({ text, lexicon, wordKeys, savedWords, source }) {
   if (!lexicon.enabled || !lexicon.index) return text
-  return <LexiconText text={text} index={lexicon.index} />
+  return (
+    <LexiconText
+      text={text}
+      index={lexicon.index}
+      wordKeys={wordKeys}
+      savedWords={savedWords}
+      source={source}
+    />
+  )
 }
 
 /* Render a chapter's blocks. Numbered items ("li") are gathered into ordered
    lists so exercises keep their own numbering, exactly as in the book. */
-function BlockList({ blocks, lexicon }) {
+function BlockList({ blocks, lexicon, wordKeys, savedWords, source }) {
   if (!Array.isArray(blocks)) return null
   const out = []
   let list = null
@@ -33,7 +44,13 @@ function BlockList({ blocks, lexicon }) {
         <ol className="reference-text__list" start={list.start} key={`l${key++}`}>
           {list.items.map((text, i) => (
             <li className="reference-text__li" key={i}>
-              <ReferenceLine text={text} lexicon={lexicon} />
+              <ReferenceLine
+                text={text}
+                lexicon={lexicon}
+                wordKeys={wordKeys}
+                savedWords={savedWords}
+                source={source}
+              />
             </li>
           ))}
         </ol>,
@@ -58,7 +75,13 @@ function BlockList({ blocks, lexicon }) {
     } else {
       out.push(
         <p className="reference-text__p" key={`p${key++}`}>
-          <ReferenceLine text={block.text} lexicon={lexicon} />
+          <ReferenceLine
+            text={block.text}
+            lexicon={lexicon}
+            wordKeys={wordKeys}
+            savedWords={savedWords}
+            source={source}
+          />
         </p>,
       )
     }
@@ -92,6 +115,30 @@ function Reader({ book, chapterId }) {
   const chapter = chapters[index]
   const { status, data, error } = useSourceChapter(book.sourceSlug, chapterId)
   const lexicon = useLexiconMode()
+  const wordlist = useWordlist({ active: lexicon.enabled })
+  const savedWords = useSavedWords()
+  const wordKeys = useMemo(
+    () => new Set(wordlist.words.map((word) => word.key)),
+    [wordlist.words],
+  )
+  const readerSource = useMemo(
+    () =>
+      chapter
+        ? {
+            bookId: book.id,
+            bookTitle: book.title,
+            bookShort: book.shortTitle,
+            bookSlug: book.slug,
+            number: chapter.number,
+            roman: chapter.roman,
+            title: chapter.title,
+            latinTitle: chapter.latinTitle,
+            slug: chapter.slug || chapter.id,
+            href: `/library/${book.slug}/read/${chapter.id}`,
+          }
+        : null,
+    [book, chapter],
+  )
 
   // Regroup the flat heading/paragraph blocks into the numbered sections used
   // by the written lessons (I Lectio, II Grammatica, III Vocabula, IV Pensa…).
@@ -175,7 +222,13 @@ function Reader({ book, chapterId }) {
                   </div>
 
                   <div className={`reference-text${latinText}`}>
-                    <BlockList blocks={section.blocks} lexicon={lexicon} />
+                    <BlockList
+                      blocks={section.blocks}
+                      lexicon={lexicon}
+                      wordKeys={wordKeys}
+                      savedWords={savedWords}
+                      source={readerSource}
+                    />
                   </div>
                 </section>
               ))}
@@ -186,7 +239,13 @@ function Reader({ book, chapterId }) {
 
         {status === 'ready' && !sections && (
           <div className={`reader__body reference-text${latinText}`} style={{ marginTop: '2.5rem' }}>
-            <BlockList blocks={data?.blocks} lexicon={lexicon} />
+            <BlockList
+              blocks={data?.blocks}
+              lexicon={lexicon}
+              wordKeys={wordKeys}
+              savedWords={savedWords}
+              source={readerSource}
+            />
             <MarginNotes lines={data?.margin} />
           </div>
         )}
