@@ -34,8 +34,8 @@ const inflects = parseInflectsFile(
   ),
 )
 
-const LETTER = 'A-Za-zĀĒĪŌŪȲāēīōūȳ'
-const TOKEN = /[A-Za-zĀĒĪŌŪȲāēīōūȳÆæŒœ]+/g
+const LETTER = 'A-Za-zĀĒĪŌŪȲÿŸāēīōūȳ'
+const TOKEN = /[A-Za-zĀĒĪŌŪȲÿŸāēīōūȳÆæŒœ]+/g
 const AGE_SCORE = { X: 30, B: 20, C: 10, D: 0, A: -10 }
 const FREQ_SCORE = { A: 20, B: 10, C: 5, D: 0, E: -5, F: -10 }
 
@@ -46,6 +46,7 @@ const norm = (s) =>
     .replace(/æ/g, 'ae')
     .replace(/œ/g, 'oe')
     .replace(/j/g, 'i')
+    .replace(/-/g, '')
     .toLowerCase()
     .trim()
 
@@ -235,8 +236,14 @@ function sentencesOf(chapter) {
       const parts = String(paragraph).split(/(?<=[.!?])\s+(?=[A-ZĀĒĪŌŪȲ"“])/)
       for (const raw of parts) {
         const text = raw.trim()
-        if (text.length > 14 && text.length < 420) out.push(text)
+        if (text.length > 14) out.push({ text, note: false })
       }
+    }
+    // Marginal notes are part of the book too: their words must be in the
+    // lexicon even when they never occur in the running text.
+    for (const note of reading.notes || []) {
+      const text = `${note.term || ''} ${note.gloss || ''}`.trim()
+      if (text.length >= 8) out.push({ text, note: true })
     }
   }
   return out
@@ -293,6 +300,7 @@ function partSignature(part) {
 
 const lemmaMap = new Map()
 const wordMap = new Map()
+const unknownTokens = []
 const surfaceMap = new Map()
 const exampleTable = []
 const exampleIds = new Map()
@@ -365,13 +373,18 @@ for (const { slug, book, chapters } of books) {
     }
     const sid = sourceId(source)
     for (const sentence of sentencesOf(chapter)) {
-      for (const match of sentence.matchAll(TOKEN)) {
+      for (const match of sentence.text.matchAll(TOKEN)) {
         const token = match[0]
         if (token.length < 2) continue
         if (/^[IVXLCDM]+$/.test(token)) continue
 
         const analysis = bestAnalysis(token)
-        if (!analysis) continue
+        if (!analysis) {
+          if (!sentence.note && token.length >= 2) {
+            unknownTokens.push({ token, sentence: sentence.text, sid })
+          }
+          continue
+        }
 
         const form = cleanForm(dictionaryForm(analysis.de))
         const lemma = lemmaOf(form)
@@ -405,7 +418,7 @@ for (const { slug, book, chapters } of books) {
         entry.sourceIds.add(sid)
         const word = addWord(token, key, sid)
         if (word && word.e == null) {
-          const marked = sentence.replace(
+          const marked = sentence.text.replace(
             new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
             `{{${token}}}`,
           )
@@ -456,6 +469,104 @@ for (const [key, curatedEntry] of curated) {
     if (sid != null) entry.e = addExample(citation, sid, true)
   }
   if (headWord && headWord.e == null) headWord.e = entry.e
+}
+
+/* ---------- Resolve the rest of the reading vocabulary ----------
+   Whitaker's does not know every proper name, Greek loanword or archaic
+   syncopated form.  For those, fall back to the printed vocabulary: strip an
+   enclitic and parse the base, or match the longest curated prefix. */
+const curatedKeys = [...curated.keys()]
+function bestCuratedPrefix(t) {
+  let best = null
+  let bestLen = 0
+  for (const key of curatedKeys) {
+    if (key.length < 3) continue
+    let n = 0
+    while (n < key.length && n < t.length && key[n] === t[n]) n++
+    const need = key.length <= 6 ? 3 : 4
+    if (n >= need && n > bestLen) {
+      bestLen = n
+      best = key
+    }
+  }
+  return best ? best : null
+}
+function ensureLemma(analysis) {
+  const form = cleanForm(dictionaryForm(analysis.de))
+  const lemma = lemmaOf(form)
+  if (!lemma) return null
+  const key = norm(lemma)
+  if (!lemmaMap.has(key)) {
+    const label = POS_LABEL[analysis.de.part.pofs] || 'other'
+    const gender = analysis.de.part.n?.gender?.toLowerCase()
+    lemmaMap.set(key, {
+      head: lemma,
+      latin: form,
+      de: analysis.de,
+      meanings: new Set([analysis.de.mean.trim()]),
+      poses: new Set([label === 'noun' && gender ? `noun (${gender}.)` : label]),
+      formMap: new Map(),
+      sourceIds: new Set(),
+      e: null,
+    })
+  }
+  return key
+}
+function resolveToken(token) {
+  const t = norm(token)
+  const aliases = {
+    mavult: 'malo', mavolt: 'malo', mavoluit: 'malo',
+    diibus: 'deus', deibus: 'deus', di: 'deus', dii: 'deus',
+    nosse: 'novisse', coisse: 'coivisse', coiisse: 'coivisse',
+    offla: 'offa', dupunduarius: 'dupondiarius',
+    eundem: 'idem', eandem: 'idem', eiusdem: 'idem', naenias: 'nenia', tisicus: 'phthisicus',
+    exierat: 'exeo', abistis: 'abeo', fefellitus: 'fallo',
+  }
+  if (aliases[t]) {
+    const a = bestAnalysis(aliases[t])
+    if (a) return ensureLemma(a)
+    if (lemmaMap.has(aliases[t])) return aliases[t]
+  }
+  // Syncopated perfects: abiit -> abivit, obiit -> obivit.
+  if (t.endsWith('iit')) {
+    const a = bestAnalysis(t.slice(0, -2) + 'vit')
+    if (a) return ensureLemma(a)
+  }
+  // plovēbat (archaic) -> pluēbat.
+  if (t.startsWith('plov')) {
+    const a = bestAnalysis('plu' + t.slice(4))
+    if (a) return ensureLemma(a)
+  }
+  for (const suffix of ['que', 've', 'ne', 'met', 'st']) {
+    if (t.length > suffix.length + 2 && t.endsWith(suffix)) {
+      const base = t.slice(0, -suffix.length)
+      const analysis = bestAnalysis(base)
+      if (analysis) {
+        const lemma = lemmaOf(dictionaryForm(analysis.de))
+        if (lemma) return ensureLemma(analysis) || norm(lemma)
+      }
+      const hit = bestCuratedPrefix(base)
+      if (hit) return hit
+    }
+  }
+  return bestCuratedPrefix(t)
+}
+for (const u of unknownTokens) {
+  const key = resolveToken(u.token)
+  if (!key) continue
+  const entry = lemmaMap.get(key)
+  if (!entry) continue
+  const word = addWord(u.token, key, u.sid)
+  entry.formMap.set(norm(u.token), u.token)
+  entry.sourceIds.add(u.sid)
+  if (word && word.e == null) {
+    const marked = u.sentence.replace(
+      new RegExp(`\\b${u.token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`),
+      `{{${u.token}}}`,
+    )
+    word.e = addExample(marked, u.sid)
+  }
+  if (entry.e == null && word?.e != null) entry.e = word.e
 }
 
 /* ---------- Finalise ---------- */

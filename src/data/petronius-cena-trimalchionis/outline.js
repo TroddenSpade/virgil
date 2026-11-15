@@ -3,9 +3,9 @@ export const outline = [
     "number": 1,
     "roman": "I",
     "slug": "cena-trimalchionis",
-    "latinTitle": "CENA TRIMALCHIONIS",
+    "latinTitle": "CĒNA TRIMALCHIŌNIS",
     "title": "Cena Trimalchionis",
-    "tagline": "Petronius"
+    "tagline": "Trimalchiōnis cēna nārrātur"
   }
 ]
 
