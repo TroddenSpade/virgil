@@ -232,15 +232,6 @@ export default function Profile() {
     <section className="section profile-page">
       <div className="container">
         <header className="profile-hero rise">
-          {/* The sync status also appears in the Account section below.
-          <div className="profile-hero__status">
-            <span className={`profile-pill profile-pill--${status.tone}`}>
-              <span className="profile-pill__dot" />
-              {status.label}
-            </span>
-          </div>
-          */}
-
           <div className="profile-hero__copy">
             <h1 className="visually-hidden">Profile</h1>
 
@@ -250,7 +241,13 @@ export default function Profile() {
             >
               <div className="profile-habit__head">
                 <div>
-                  <p className="eyebrow">Consuētūdō</p>
+                  <div className="profile-habit__kicker">
+                    <span className={`profile-pill profile-pill--${status.tone}`}>
+                      <span className="profile-pill__dot" />
+                      {status.label}
+                    </span>
+                    <p className="eyebrow">Consuētūdō</p>
+                  </div>
                   <h2 id="profile-habit-title">The daily habit</h2>
                 </div>
                 <p className={`profile-habit__streak${habit.streak > 0 ? ' is-live' : ''}`}>

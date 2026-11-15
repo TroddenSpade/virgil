@@ -5689,6 +5689,18 @@ button.lesson__keywords-label:focus-visible {
 .profile-habit__head h2 {
   margin: 0.1rem 0 0;
 }
+.profile-habit__kicker {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  white-space: nowrap;
+}
+.profile-habit__kicker .profile-pill,
+.profile-habit__kicker .eyebrow {
+  margin: 0;
+}
 .profile-habit__streak {
   margin: 0;
   font-family: var(--font-ui);
