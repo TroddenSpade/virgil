@@ -3014,9 +3014,13 @@ button.lesson__keywords-label:focus-visible {
   min-width: 0;
   flex: 1;
 }
-.profile-identity h2 {
-  font-size: 1.35rem;
+.profile-identity h3 {
   margin: 0.1rem 0 0.2rem;
+  font-family: var(--font-ui);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
   overflow-wrap: anywhere;
 }
 .profile-avatar {
@@ -3164,6 +3168,31 @@ button.lesson__keywords-label:focus-visible {
   .profile-danger {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+@media (max-width: 600px) {
+  .profile-identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.35rem 0.75rem;
+  }
+  .profile-identity > div {
+    grid-column: 2;
+    min-width: 0;
+  }
+  .profile-identity .profile-avatar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+  .profile-identity .profile-pill {
+    grid-column: 2;
+    justify-self: end;
+    margin-top: 0.2rem;
+  }
+  .profile-identity h3 {
+    font-size: 0.86rem;
   }
 }
 @media (max-width: 480px) {
