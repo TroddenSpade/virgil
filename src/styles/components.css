@@ -951,6 +951,10 @@ button.lesson__keywords-label:focus-visible {
   border-color: transparent;
   color: var(--ink-faint);
 }
+.lex-popover__action--quiet:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
 .lex-popover__action.is-on {
   color: var(--laurel);
   border-color: color-mix(in srgb, var(--laurel) 35%, var(--line));

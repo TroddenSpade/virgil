@@ -369,6 +369,8 @@ export const LexiconText = memo(function LexiconText({
                   <button
                     type="button"
                     className="lex-popover__action lex-popover__action--quiet"
+                    disabled
+                    title="Not available yet"
                     onClick={() => savedWords?.know(key)}
                   >
                     I know this
