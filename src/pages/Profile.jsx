@@ -242,11 +242,11 @@ export default function Profile() {
               <div className="profile-habit__head">
                 <div>
                   <div className="profile-habit__kicker">
+                    <p className="eyebrow">Consuētūdō</p>
                     <span className={`profile-pill profile-pill--${status.tone}`}>
                       <span className="profile-pill__dot" />
                       {status.label}
                     </span>
-                    <p className="eyebrow">Consuētūdō</p>
                   </div>
                   <h2 id="profile-habit-title">The daily habit</h2>
                 </div>
