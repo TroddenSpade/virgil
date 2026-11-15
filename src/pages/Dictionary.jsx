@@ -20,6 +20,46 @@ const POS_ORDER = [
 
 const PAGE_SIZE = 120
 
+const DICTIONARY_LEAD =
+  'Every word in the readings of the course — each inflected form, its headword, its ' +
+  'English sense, the chapter it was taken from, and an example from the readings or the ' +
+  'chapter vocabulary. Headwords carry their macra, so the lexicon can be used when ' +
+  'checking or proofreading a line of Latin.'
+
+const DICTIONARY_STATS = [
+  { key: 'words', label: 'Words' },
+  { key: 'lemmas', label: 'Lemmas' },
+  { key: 'sources', label: 'Chapters' },
+  { key: 'examples', label: 'With examples' },
+]
+
+function DictionaryHero({ stats, loading = false }) {
+  return (
+    <header className="dictionary-hero">
+      <p className="eyebrow">Lexicon</p>
+      <h1>The Dictionary</h1>
+      <p className="lead dictionary-page__lead">{DICTIONARY_LEAD}</p>
+
+      <dl className="dictionary-stats" aria-busy={loading || undefined}>
+        {DICTIONARY_STATS.map(({ key, label }) => (
+          <div key={key}>
+            <dt>{label}</dt>
+            <dd>
+              {loading ? (
+                <span className="dictionary-stat-skeleton" aria-hidden="true" />
+              ) : key === 'examples' ? (
+                (stats.wordsWithExamples ?? stats.withExamples).toLocaleString()
+              ) : (
+                stats[key].toLocaleString()
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </header>
+  )
+}
+
 export default function Dictionary() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -101,40 +141,21 @@ export default function Dictionary() {
     setVisible(PAGE_SIZE)
   }, [query, letter, pos])
 
-  if (!data && !error) return <Loading />
+  if (!data && !error) {
+    return (
+      <section className="section dictionary-page dictionary-loading-page" aria-busy="true">
+        <div className="container dictionary-loading">
+          <DictionaryHero loading />
+          <Loading />
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="section dictionary-page">
       <div className="container">
-        <header className="dictionary-hero">
-          <p className="eyebrow">Lexicon</p>
-          <h1>The Dictionary</h1>
-          <p className="lead dictionary-page__lead">
-            Every word in the readings of the course — each inflected form, its headword, its
-            English sense, the chapter it was taken from, and an example from the readings or the
-            chapter vocabulary. Headwords carry their macra, so the lexicon can be used when
-            checking or proofreading a line of Latin.
-          </p>
-
-          <dl className="dictionary-stats">
-            <div>
-              <dt>Words</dt>
-              <dd>{stats.words.toLocaleString()}</dd>
-            </div>
-            <div>
-              <dt>Lemmas</dt>
-              <dd>{stats.lemmas.toLocaleString()}</dd>
-            </div>
-            <div>
-              <dt>Chapters</dt>
-              <dd>{stats.sources.toLocaleString()}</dd>
-            </div>
-            <div>
-              <dt>With examples</dt>
-              <dd>{(stats.wordsWithExamples ?? stats.withExamples).toLocaleString()}</dd>
-            </div>
-          </dl>
-        </header>
+        <DictionaryHero stats={stats} />
 
         {error && <p className="notice">Could not load the dictionary. {error.message}</p>}
 

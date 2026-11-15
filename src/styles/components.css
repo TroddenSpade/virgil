@@ -2119,6 +2119,50 @@ button.lesson__keywords-label:focus-visible {
     animation: none;
   }
 }
+.dictionary-loading-page {
+  padding-bottom: 0;
+}
+.dictionary-loading {
+  min-height: calc(100vh - var(--header-h) - 5rem);
+  display: flex;
+  flex-direction: column;
+}
+.dictionary-loading .dictionary-hero {
+  flex: none;
+}
+.dictionary-loading .loading {
+  flex: 1;
+  min-height: 0;
+  padding: 2.5rem 1rem 4rem;
+}
+.dictionary-stat-skeleton {
+  display: inline-block;
+  width: 3.8rem;
+  height: 1.15rem;
+  vertical-align: middle;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--line-soft) 0%,
+    color-mix(in srgb, var(--line-soft) 40%, var(--surface)) 50%,
+    var(--line-soft) 100%
+  );
+  background-size: 200% 100%;
+  animation: dictionary-skeleton 1.5s ease-in-out infinite;
+}
+@keyframes dictionary-skeleton {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dictionary-stat-skeleton {
+    animation: none;
+  }
+}
 .dictionary-page__lead {
   max-width: 68ch;
 }
