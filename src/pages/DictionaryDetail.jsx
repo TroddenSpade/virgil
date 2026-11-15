@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   norm,
+  dictionaryKeys,
   hasDefinition,
   wordHref,
   sourceHref,
@@ -28,18 +29,36 @@ export default function DictionaryDetail() {
     }
   }, [])
 
-  const normWord = norm(word)
-
-  const wordEntry = useMemo(
-    () => (data?.words || []).find((entry) => norm(entry.w) === normWord) || null,
-    [data, normWord],
+  const lookupKeys = useMemo(
+    () => dictionaryKeys(word).map((key) => norm(key)),
+    [word],
   )
+
+  const wordEntry = useMemo(() => {
+    for (const key of lookupKeys) {
+      const match = (data?.words || []).find((entry) => norm(entry.w) === key)
+      if (match) return match
+    }
+    return null
+  }, [data, lookupKeys])
 
   const lemma = useMemo(() => {
     if (!data) return null
     if (wordEntry) return data.lemmas.find((entry) => entry.id === wordEntry.l) || null
-    return data.lemmas.find((entry) => norm(entry.headword) === normWord) || null
-  }, [data, wordEntry, normWord])
+    for (const key of lookupKeys) {
+      const match = data.lemmas.find((entry) => norm(entry.headword) === key)
+      if (match) return match
+    }
+    return null
+  }, [data, wordEntry, lookupKeys])
+
+  // The key that actually matched, used to mark the current form and find
+  // the neighbouring entries when a messy headword was resolved leniently.
+  const normWord = wordEntry
+    ? norm(wordEntry.w)
+    : lemma
+      ? norm(lemma.headword)
+      : lookupKeys[0] || ''
 
   const isForm = !!lemma && !!wordEntry && norm(wordEntry.w) !== norm(lemma.headword)
 

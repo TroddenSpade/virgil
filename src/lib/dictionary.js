@@ -40,11 +40,42 @@ export function sourceLabel(source) {
   return [source.book, source.roman ? `Cap. ${source.roman}` : ''].filter(Boolean).join(' · ')
 }
 
+/**
+ * The lexicon key for a wordlist headword.
+ *
+ * Vocabulary rows carry display punctuation the lexicon does not: enclitics
+ * begin with a hyphen ("-ne"), interjections end with a mark ("age!"), and a
+ * compound interrogative may print several forms ("quis? quae? quid?"). The
+ * lexicon files those as "ne", "age", and "quis".
+ *
+ * Ellipsis phrases ("nōn sōlum ... sed etiam") are real lexicon entries, so
+ * only a question or exclamation mark cuts the head short. An ellipsis, a
+ * colon, or a space inside the phrase is kept.
+ */
+export function dictionaryKey(headword) {
+  let key = String(headword || '').replace(/^-+/, '')
+
+  const stop = key.search(/[?!]/)
+  if (stop !== -1) key = key.slice(0, stop)
+
+  return key
+    .replace(/[?!.,;:’‘'"…]+$/u, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Candidate keys, in order, for resolving a messy wordlist headword. */
+export function dictionaryKeys(headword) {
+  const key = dictionaryKey(headword)
+  if (!key) return []
+  const first = key.split(/\s+/)[0]
+  return [...new Set(first === key ? [key] : [key, first])]
+}
+
 export function wordHref(headword) {
   // Enclitics are printed with a hyphen in the wordlist ("-ne"), but the
   // lexicon files them under the bare word ("ne").
-  const key = String(headword || '').replace(/^-+/, '')
-  return `/dictionary/${encodeURIComponent(key)}`
+  return `/dictionary/${encodeURIComponent(dictionaryKey(headword))}`
 }
 
 // Split an example around its {{highlighted}} forms, returning plain objects
