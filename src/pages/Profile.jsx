@@ -68,7 +68,7 @@ export default function Profile() {
 
   const local = useMemo(() => readLocalProgress(), [revision])
   const localSummary = useMemo(() => summarizeProgress(local), [local])
-  const { stats: wordStats } = useWordlist()
+  const { stats: wordStats, studiedChapters } = useWordlist()
   const remoteSummary = useMemo(
     () => (remote ? summarizeProgress(remote.progress) : null),
     [remote],
@@ -126,16 +126,6 @@ export default function Profile() {
     : wordStats.new > 0
       ? { to: '/wordlist/review?mode=new', label: `Learn ${wordStats.new} new →` }
       : { to: '/wordlist/review', label: 'Open review →' }
-
-  const wordEncouragement = wordStats.due > 0
-    ? `${wordStats.due} ${wordStats.due === 1 ? 'word is' : 'words are'} ready to return${
-        wordStats.new > 0
-          ? `, and ${wordStats.new} new ${wordStats.new === 1 ? 'word is' : 'words are'} waiting`
-          : ''
-      }. A few minutes now is worth more than a long session later.`
-    : wordStats.new > 0
-      ? `${wordStats.new} ${wordStats.new === 1 ? 'word is' : 'words are'} waiting for a first meeting. Ten is a good day’s work.`
-      : 'Nothing is due. The next words return when their intervals come round.'
 
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1)
@@ -233,7 +223,7 @@ export default function Profile() {
                 {status.label}
               </span>
             </div>
-            <h1>My reading</h1>
+            <h1>My progress</h1>
             <p className="lead profile-hero__lead">
               A quiet record of the road so far: the chapters you have marked, the books that are
               open, and the next stop. Everything is kept on this device first; an account copy is
@@ -273,6 +263,83 @@ export default function Profile() {
             <p className="profile-hero__detail">
               {localSummary.total} of {localSummary.totalChapters} chapters · {startedBooks} books begun
             </p>
+
+            <div className="profile-hero__wordlist">
+              <p className="eyebrow">Tabula verborum</p>
+              <div className="profile-hero__wordlist-head">
+                <h2 className="profile-hero__wordlist-title">Your wordlist</h2>
+                {wordStats.total > 0 && (
+                  <span className="profile-hero__wordlist-percent">
+                    {wordStats.percentReviewed}% reviewed
+                  </span>
+                )}
+              </div>
+
+              {wordStats.total === 0 ? (
+                <>
+                  <p className="profile-hero__wordlist-note">
+                    {studiedChapters === 0
+                      ? 'Mark a chapter as learned and its printed vocabulary joins the list.'
+                      : 'The lessons you have marked so far print no vocabulary.'}
+                  </p>
+                  <Link
+                    className="back-link"
+                    to={studiedChapters === 0 ? '/iter' : '/wordlist'}
+                  >
+                    {studiedChapters === 0 ? 'Open the itinerary →' : 'Open the wordlist →'}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="profile-hero__wordlist-number">
+                    {wordStats.total.toLocaleString()}
+                    <span> {wordStats.total === 1 ? 'word' : 'words'}</span>
+                  </p>
+
+                  <div
+                    className="progress"
+                    role="progressbar"
+                    aria-label="Words reviewed"
+                    aria-valuenow={wordStats.percentReviewed}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div
+                      className="progress__fill"
+                      style={{ width: `${wordStats.percentReviewed}%` }}
+                    />
+                  </div>
+
+                  <dl className="profile-hero__wordlist-stats">
+                    <div>
+                      <dt>Due now</dt>
+                      <dd>{wordStats.due}</dd>
+                    </div>
+                    <div>
+                      <dt>New</dt>
+                      <dd>{wordStats.new}</dd>
+                    </div>
+                    <div>
+                      <dt>Learning</dt>
+                      <dd>{wordStats.learning}</dd>
+                    </div>
+                    <div>
+                      <dt>Mature</dt>
+                      <dd>{wordStats.mature}</dd>
+                    </div>
+                  </dl>
+
+                  <div className="profile-hero__wordlist-actions">
+                    <Link className="btn btn--primary btn--sm" to={reviewTarget.to}>
+                      {reviewTarget.label}
+                    </Link>
+                    <Link className="back-link" to="/wordlist">
+                      All words →
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </header>
 
@@ -379,85 +446,6 @@ export default function Profile() {
                   </Link>
                 ))}
               </div>
-            </section>
-
-            <section className="profile-section">
-              <div className="profile-section__head">
-                <div>
-                  <p className="eyebrow">Tabula verborum</p>
-                  <h2>Your wordlist</h2>
-                </div>
-                <Link className="back-link" to="/wordlist">
-                  Open the wordlist →
-                </Link>
-              </div>
-
-              {wordStats.total === 0 ? (
-                <section className="profile-wordlist profile-wordlist--empty card">
-                  <div>
-                    <h3>No words yet.</h3>
-                    <p>
-                      Mark a chapter as learned and its printed vocabulary joins your list. Then a
-                      few quiet minutes of review will keep it with you.
-                    </p>
-                  </div>
-                  <Link className="btn btn--primary" to="/iter">
-                    Open the itinerary →
-                  </Link>
-                </section>
-              ) : (
-                <section className="profile-wordlist card">
-                  <div className="profile-wordlist__head">
-                    <div>
-                      <p className="profile-wordlist__percent">
-                        {wordStats.percentReviewed}
-                        <span>%</span>
-                      </p>
-                      <p className="profile-wordlist__label">
-                        of {wordStats.total.toLocaleString()} words reviewed
-                      </p>
-                    </div>
-                    <Link className="btn btn--primary" to={reviewTarget.to}>
-                      {reviewTarget.label}
-                    </Link>
-                  </div>
-
-                  <div
-                    className="progress"
-                    role="progressbar"
-                    aria-label="Words reviewed"
-                    aria-valuenow={wordStats.percentReviewed}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                  >
-                    <div
-                      className="progress__fill"
-                      style={{ width: `${wordStats.percentReviewed}%` }}
-                    />
-                  </div>
-
-                  <dl className="profile-wordlist__stats">
-                    <div>
-                      <dt>Due now</dt>
-                      <dd>{wordStats.due}</dd>
-                    </div>
-                    <div>
-                      <dt>New</dt>
-                      <dd>{wordStats.new}</dd>
-                    </div>
-                    <div>
-                      <dt>Learning</dt>
-                      <dd>{wordStats.learning}</dd>
-                    </div>
-                    <div>
-                      <dt>Mature</dt>
-                      <dd>{wordStats.mature}</dd>
-                    </div>
-                  </dl>
-
-                  <p className="profile-wordlist__note">{wordEncouragement}</p>
-                </section>
-              )}
             </section>
 
             <section className="profile-section">
