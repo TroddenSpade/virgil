@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import Loading from '../components/Loading.jsx'
 import {
   norm,
   dictionaryKeys,
@@ -119,7 +120,11 @@ export default function DictionaryDetail() {
         <div className="container-narrow">
           {crumb}
           <h1>Dictionary</h1>
-          <p className="muted">Loading the dictionary…</p>
+          <Loading
+            compact
+            title="Loading the dictionary"
+            hint="Finding this entry and its forms in the lexicon."
+          />
         </div>
       </section>
     )

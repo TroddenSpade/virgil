@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Loading from '../components/Loading.jsx'
 import { norm, hasDefinition, wordHref, sourceLabel } from '../lib/dictionary.js'
 
 const POS_ORDER = [
@@ -135,7 +136,9 @@ export default function Dictionary() {
 
         {error && <p className="notice">Could not load the dictionary. {error.message}</p>}
 
-        {!data && !error && <p className="muted">Loading the dictionary…</p>}
+        {!data && !error && (
+          <Loading hint="Gathering every form, lemma, and reading from the course." />
+        )}
 
         {data && (
           <>

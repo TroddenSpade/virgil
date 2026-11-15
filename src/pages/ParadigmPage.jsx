@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import Loading from '../components/Loading.jsx'
 import {
   dictionaryKeys,
   hasDefinition,
@@ -86,7 +87,11 @@ export default function ParadigmPage() {
         <div className="container-narrow">
           <Link to={wordHref(word)} className="back-link">← Back to the entry</Link>
           <h1>Paradigm</h1>
-          <p className="muted">Loading the paradigm…</p>
+          <Loading
+            compact
+            title="Loading the paradigm"
+            hint="Assembling the forms from Whitaker’s Words."
+          />
         </div>
       </section>
     )
