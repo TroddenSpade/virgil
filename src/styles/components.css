@@ -5520,6 +5520,9 @@ button.lesson__keywords-label:focus-visible {
   padding-left: 1.8rem;
   border-left: 1px solid var(--line);
 }
+.profile-hero__progress > .eyebrow {
+  margin-bottom: 0.55rem;
+}
 .profile-hero__percent {
   margin: 0;
   font-family: var(--font-display);
@@ -5675,6 +5678,9 @@ button.lesson__keywords-label:focus-visible {
 }
 .profile-habit__head h2 {
   margin: 0.1rem 0 0;
+}
+.profile-habit__title {
+  margin: 0;
 }
 .profile-habit__streak {
   margin: 0;

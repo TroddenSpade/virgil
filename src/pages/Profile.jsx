@@ -240,10 +240,9 @@ export default function Profile() {
               aria-labelledby="profile-habit-title"
             >
               <div className="profile-habit__head">
-                <div>
-                  <p className="eyebrow">Hodiē</p>
-                  <h2 id="profile-habit-title">The daily habit</h2>
-                </div>
+                <h2 id="profile-habit-title" className="eyebrow profile-habit__title">
+                  The daily habit
+                </h2>
                 <p className={`profile-habit__streak${habit.streak > 0 ? ' is-live' : ''}`}>
                   <span className="profile-habit__streak-mark" aria-hidden="true">✦</span>
                   {habit.streak > 0 ? `${habit.streak}-day streak` : 'No streak yet'}
@@ -347,6 +346,7 @@ export default function Profile() {
           </div>
 
           <div className="profile-hero__progress">
+            <p className="eyebrow">Tabula studiōrum</p>
             <div className="profile-hero__progress-head">
               <h2 className="profile-hero__progress-title">Your progress</h2>
               <span className={`profile-pill profile-pill--${status.tone}`}>
