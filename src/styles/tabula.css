@@ -1258,11 +1258,11 @@
 .book-page--framed .book-page__note {
   max-width: none;
   margin-top: -0.5rem !important;
-  padding: 0;
-  border-left: 0;
-  background: none;
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--bronze);
+  background: var(--surface-2);
   font-family: var(--font-serif);
-  font-size: 1rem;
+  font-size: 0.98rem;
   line-height: 1.65;
   color: var(--ink-soft);
 }
