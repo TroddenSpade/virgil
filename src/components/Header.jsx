@@ -7,6 +7,7 @@ import ThemeToggle from './ThemeToggle.jsx'
 function pageContext(pathname) {
   const parts = pathname.split('/').filter(Boolean)
   if (!parts.length) return null
+  if (parts[0] === 'home') return null
   if (parts[0] === 'library') {
     if (!parts[1]) return { root: { to: '/library', label: 'Library' } }
     const book = getBook(parts[1])
@@ -64,7 +65,7 @@ export default function Header() {
   return (
     <header className={`site-header${menuOpen ? ' site-header--menu-open' : ''}`}>
       <div className="container site-header__inner">
-        <Link to="/" className="brand" aria-label="Virgil — home">
+        <Link to="/home" className="brand" aria-label="Virgil — home">
           <Logo size={40} className="brand__mark" />
           <span className="brand__text">
             <span className="brand__name">VIRGIL</span>
@@ -92,9 +93,7 @@ export default function Header() {
           className={`site-nav${menuOpen ? ' is-open' : ''}`}
           aria-label="Primary"
         >
-          <NavLink to="/" end>
-            Home
-          </NavLink>
+          <NavLink to="/home">Home</NavLink>
           <NavLink to="/iter">Iter</NavLink>
           <NavLink to="/library">Library</NavLink>
           <NavLink to="/dictionary">Dictionary</NavLink>

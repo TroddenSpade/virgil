@@ -8,7 +8,7 @@ export default function NotFound() {
         <h1>This page is not in the book.</h1>
         <p className="lead">The page you asked for could not be found.</p>
         <p>
-          <Link className="btn btn--primary" to="/">
+          <Link className="btn btn--primary" to="/home">
             Return home
           </Link>
         </p>
