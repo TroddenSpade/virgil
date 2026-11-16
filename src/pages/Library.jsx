@@ -66,7 +66,7 @@ export default function Library() {
           the Fabulae Syrae, the Sermones Romani and the Epitome Historiae Sacrae beside them. The companions offer
           chapter-by-chapter commentary on Familia Romana and Roma Aeterna, while Learn Latin from the Romans, Latin
           via Ovid, Exercitia Latina II and the Latin texts of Caesar, Vergil, Ovid, Petronius, Sallust, Cicero and
-          Plautus are here in full, and the Auctōrēs Latīnī shelf is set aside for the original works. Together
+          Plautus are here in full, and the Latīnistae shelf is set aside for the original works. Together
           they lead from your first Latin sentence to the poetry of Virgil.
         </p>
 
@@ -87,7 +87,7 @@ export default function Library() {
         {levels.map((group) => (
           <section
             key={group.id}
-            className={`library-level${group.id === 'auctores-latini' ? ' library-level--authors' : ''}`}
+            className={`library-level${group.modifier ? ` ${group.modifier}` : ''}`}
             aria-labelledby={`level-${group.id}`}
           >
             <header className="library-level__head">

@@ -121,7 +121,7 @@ Derive:
 - Shelves: add the slug to the appropriate shelf in `src/data/library.js`.
   Course and reader books go in exactly one group of `levelGroups`
   (`beginner`, `intermediate`, or `advanced`). New original Latin editions go in
-  `authorShelf`, the Latin-named **Auctōrēs Latīnī** shelf, which starts empty
+  `authorShelf`, the Latin-named **Latīnistae** shelf, which starts empty
   and is reserved for original works. A book may appear in both if it belongs
   on the learning path too.
 
@@ -451,7 +451,7 @@ npm run dev
 Check:
 
 1. `/library` — the book appears under the correct shelf (Beginner, Intermediate,
-   Advanced and/or the Auctōrēs Latīnī shelf), in the intended order, with accurate counts.
+   Advanced and/or the Latīnistae shelf), in the intended order, with accurate counts.
 2. `/library/<slug>` — book page opens; chapter cards and first-chapter link work.
 3. `/library/<slug>/<first-chapter-slug>` — reading renders with macra, italics, notes,
    vocabulary, grammar, and exercises.

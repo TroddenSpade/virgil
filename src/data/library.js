@@ -268,13 +268,14 @@ export const levelGroups = [
 // editions remain in the Advanced stage. Horace and further authors can join
 // this shelf in the same way.
 export const authorShelf = {
-  id: 'auctores-latini',
-  title: 'Auctōrēs Latīnī',
-  latin: 'Opera orīginālia',
+  id: 'latinae-periti',
+  modifier: 'library-level--collection',
+  title: 'Latīnistae',
+  latin: 'Linguae Latīnae perītī',
   description:
-    'A home for the original works of Latin literature, read in the original: Caesar and Sallust in ' +
-    'history, Cicero in oratory, Plautus and Petronius for the stage and the novel, Vergil and Ovid in ' +
-    'verse, and the authors still to come, such as Horace.',
+    'A shelf for Latinists — readers at home in the original language: Caesar and Sallust in history, ' +
+    'Cicero in oratory, Plautus and Petronius for the stage and the novel, Vergil and Ovid in verse, ' +
+    'and the authors still to come, such as Horace.',
   emptyLabel: 'new shelf',
   emptyNote:
     'The first original texts will appear here as they are added. The existing author editions remain ' +
