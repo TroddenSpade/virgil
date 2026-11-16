@@ -133,6 +133,16 @@ export function lookupLexicon(index, token) {
   const lemma = index.lemmas.get(key)
   if (lemma) return { form: lemma.headword, lemma, parse: '', fromLemma: true, exact: false }
 
+  // Inscriptions spell consonantal u as V (CVM, IVSSV). Try the u-spelling
+  // as a last resort; ordinary v-forms have already matched above.
+  const roman = key.replace(/v/g, 'u')
+  if (roman !== key) {
+    const altForm = index.forms.get(roman)
+    if (altForm) return { ...altForm, parse: '', fromLemma: false, exact: false }
+    const altLemma = index.lemmas.get(roman)
+    if (altLemma) return { form: altLemma.headword, lemma: altLemma, parse: '', fromLemma: true, exact: false }
+  }
+
   return null
 }
 

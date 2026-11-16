@@ -3070,7 +3070,7 @@ const chapter = {
       "title": "",
       "paragraphs": [
         "bonum faciātis. Deōrum beneficiō nōn emō, sed nunc quicquid ad salīvam facit, in suburbānō nāscitur eō, quod ego adhūc nōn nōvī. Dīcitur cōnfīne esse Tarracīniēnsibus et Tarentīnīs. Nunc coniungere agellīs Siciliam volō, ut cum Āfricam libuerit īre, per meōs fīnēs nāvigem. Sed nārrā tū mihi, Agamemnōn, quam contrōversiam hodiē dēclāmāstī? Ego autem sī causās nōn agō, in domūsiōnem tamen litterās didicī. Et nē mē putēs studia fastīdītum, trēs bibliothēcās habeō, ūnam Graecam, alteram Latīnam. Dīc ergō, sī mē amās, peristasim dēclāmātiōnis tuae. “",
-        "Cum dīxisset Agamemnōn: “Pauper et dīves inimīcī erant.”, ait Trimalchiō: “Quid est pauper? — Urbānē”, inquit Agamemnōn et nesciō quam contrōversiam exposuit. Statim Trimalchiō: “Hoc, inquit, sī factum est, contrōversia nōn est; Sī factum nōn est, nihil est.” Haec aliāque cum effūsissimīs prōsequerēmur laudātiōnibus: “Rogō, inquit, Agamemnōn mihi cārissime, numquid duodecim aerumnās Herculis tenēs, aut dē Ulixe fābulam, quemadmodum illī Cyclōps pollicem porcīnō extorsit? Solēbam haec ego puer apud Homērum legere. Nam Sibyllam quidem Cūmīs ego ipse oculīs meīs vīdī in ampullā pendēre, et cum illī puerī dīcerent: ” Sibilla, tī thēlīs? “, respondēbat illa: ”apothanin thēlō“.",
+        "Cum dīxisset Agamemnōn: “Pauper et dīves inimīcī erant.”, ait Trimalchiō: “Quid est pauper? — Urbānē”, inquit Agamemnōn et nesciō quam contrōversiam exposuit. Statim Trimalchiō: “Hoc, inquit, sī factum est, contrōversia nōn est; Sī factum nōn est, nihil est.” Haec aliāque cum effūsissimīs prōsequerēmur laudātiōnibus: “Rogō, inquit, Agamemnōn mihi cārissime, numquid duodecim aerumnās Herculis tenēs, aut dē Ulixe fābulam, quemadmodum illī Cyclōps pollicem porcīnō extorsit? Solēbam haec ego puer apud Homērum legere. Nam Sibyllam quidem Cūmīs ego ipse oculīs meīs vīdī in ampullā pendēre, et cum illī puerī dīcerent: ” Sibylla, tī thēlīs? “, respondēbat illa: ”apothanin thēlō“.",
         "49 Nōndum efflāverat omnia, cum repositōrium cum sūe ingentī mēnsam occupāvit. Mīrārī nōs celeritātem coepimus,"
       ],
       "notes": [
@@ -6003,11 +6003,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "wonder",
-      "english": "admit",
-      "pos": ""
-    },
-    {
       "latin": "admīrātiō",
       "english": "",
       "pos": ""
@@ -6436,11 +6431,6 @@ const chapter = {
       "latin": "argfimentum",
       "english": "subject, plot",
       "pos": "noun (n.)"
-    },
-    {
-      "latin": "argfitare",
-      "english": "talk about, babble",
-      "pos": ""
     },
     {
       "latin": "ariēs",
@@ -7063,11 +7053,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "catēna-aef",
-      "english": "chain",
-      "pos": ""
-    },
-    {
       "latin": "catēnārius",
       "english": "on a chain, chained",
       "pos": ""
@@ -7156,11 +7141,6 @@ const chapter = {
       "latin": "sēstertium",
       "english": "lion) sesterces",
       "pos": ""
-    },
-    {
-      "latin": "centōnārins",
-      "english": "rag dealer [?]",
-      "pos": "noun (m.)"
     },
     {
       "latin": "cerasinus",
@@ -7353,8 +7333,8 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "cocus",
-      "english": "cook",
+      "latin": "cocus, -ī m",
+      "english": "a cook",
       "pos": "noun (m.)"
     },
     {
@@ -7853,11 +7833,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "comicen",
-      "english": "trumpeter",
-      "pos": "noun (m.)"
-    },
-    {
       "latin": "corōllārium",
       "english": "garland, reward",
       "pos": "noun (n.)"
@@ -7920,11 +7895,6 @@ const chapter = {
     {
       "latin": "crātīcula",
       "english": "gridiron, grill",
-      "pos": ""
-    },
-    {
-      "latin": "ctēber",
-      "english": "frequent",
       "pos": ""
     },
     {
@@ -8008,9 +7978,9 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "culīna",
-      "english": "kitchen",
-      "pos": ""
+      "latin": "culīna, -ae f",
+      "english": "a kitchen",
+      "pos": "noun (f.)"
     },
     {
       "latin": "culpa",
@@ -8138,8 +8108,8 @@ const chapter = {
       "pos": "noun (n.)"
     },
     {
-      "latin": "decuria",
-      "english": "decuria, group of ten",
+      "latin": "decuria, -ae f",
+      "english": "a decury",
       "pos": "noun (f.)"
     },
     {
@@ -8255,11 +8225,6 @@ const chapter = {
     {
       "latin": "dē-scendere",
       "english": "go down, come down",
-      "pos": ""
-    },
-    {
-      "latin": "dē-sinerc",
-      "english": "finish, stop",
       "pos": ""
     },
     {
@@ -8433,16 +8398,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "domfisio",
-      "english": "for household use, to meet",
-      "pos": ""
-    },
-    {
-      "latin": "domūsiōnem",
-      "english": "one’s needs",
-      "pos": ""
-    },
-    {
       "latin": "domāre",
       "english": "tame, domesticate",
       "pos": ""
@@ -8568,9 +8523,9 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "ēlēctiō",
+      "latin": "ēlēctiō, -ōnis f",
       "english": "choice",
-      "pos": ""
+      "pos": "noun (f.)"
     },
     {
       "latin": "ēlēctus",
@@ -8820,11 +8775,6 @@ const chapter = {
     {
       "latin": "ex-ōrdīrī",
       "english": "begin",
-      "pos": ""
-    },
-    {
-      "latin": "ex-ōmare",
-      "english": "adorn, decorate",
       "pos": ""
     },
     {
@@ -9401,11 +9351,6 @@ const chapter = {
       "latin": "genius",
       "english": "tutelary deity of a person",
       "pos": "noun (m.)"
-    },
-    {
-      "latin": "genfi",
-      "english": "knee",
-      "pos": "noun (n.)"
     },
     {
       "latin": "genus",
@@ -10158,12 +10103,12 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "ipsima",
+      "latin": "ipsima, -ae f",
       "english": "the mistress",
       "pos": "noun (f.)"
     },
     {
-      "latin": "ipsimus",
+      "latin": "ipsimus, -ī m",
       "english": "the master",
       "pos": "noun (m.)"
     },
@@ -10898,8 +10843,8 @@ const chapter = {
       "pos": "noun (m.)"
     },
     {
-      "latin": "minerva",
-      "english": "nature, capacity",
+      "latin": "Minerva, -ae f",
+      "english": "Minerva, the goddess",
       "pos": "noun (f.)"
     },
     {
@@ -11036,11 +10981,6 @@ const chapter = {
       "latin": "mordicus",
       "english": "with the teeth",
       "pos": "adverb"
-    },
-    {
-      "latin": "mucr",
-      "english": "point (of sword/knife)",
-      "pos": "noun (m.)"
     },
     {
       "latin": "mūla",
@@ -11341,11 +11281,6 @@ const chapter = {
       "latin": "ob-iter",
       "english": "in passing, incidentally",
       "pos": "adverb"
-    },
-    {
-      "latin": "ob-ifirgare",
-      "english": "chastise, punish",
-      "pos": ""
     },
     {
       "latin": "ob-ligare",
@@ -12008,11 +11943,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "prngurs",
-      "english": "fat",
-      "pos": ""
-    },
-    {
       "latin": "prnna",
       "english": "feather, toothpick, wing",
       "pos": ""
@@ -12021,11 +11951,6 @@ const chapter = {
       "latin": "pinus",
       "english": "pme",
       "pos": ""
-    },
-    {
-      "latin": "prper",
-      "english": "Pepper",
-      "pos": "noun (n.)"
     },
     {
       "latin": "piperatus",
@@ -12363,9 +12288,9 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "praxis",
-      "english": "demonstrate",
-      "pos": "verb"
+      "latin": "praxis, -is f",
+      "english": "practice, exercise",
+      "pos": "noun (f.)"
     },
     {
       "latin": "precirium",
@@ -12608,9 +12533,9 @@ const chapter = {
       "pos": "adverb"
     },
     {
-      "latin": "quadrāgēsimus",
-      "english": "fortieth re-solvere",
-      "pos": ""
+      "latin": "quadrāgēsimus, -a, -um",
+      "english": "fortieth",
+      "pos": "adjective"
     },
     {
       "latin": "quadrāns",
@@ -12660,11 +12585,6 @@ const chapter = {
     {
       "latin": "querī",
       "english": "complain re-vocare",
-      "pos": ""
-    },
-    {
-      "latin": "quic-quam",
-      "english": "anything rhétor -oris m",
       "pos": ""
     },
     {
@@ -12866,11 +12786,6 @@ const chapter = {
       "latin": "re-quiēscere",
       "english": "rest, lie at rest",
       "pos": "verb"
-    },
-    {
-      "latin": "re-salfitare",
-      "english": "retum a greeting",
-      "pos": ""
     },
     {
       "latin": "sacculus",
@@ -13311,11 +13226,6 @@ const chapter = {
       "latin": "solium",
       "english": "throne, bath-tub",
       "pos": "noun (n.)"
-    },
-    {
-      "latin": "somniārel-rī",
-      "english": "dream (of)",
-      "pos": ""
     },
     {
       "latin": "sonāre",
@@ -13783,11 +13693,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "temptire",
-      "english": "try, attempt",
-      "pos": ""
-    },
-    {
       "latin": "tenebrae",
       "english": "darkness",
       "pos": "noun (f.)"
@@ -14243,11 +14148,6 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "fivae",
-      "english": "raisins",
-      "pos": ""
-    },
-    {
       "latin": "vacca",
       "english": "cow",
       "pos": "noun (f.)"
@@ -14468,8 +14368,8 @@ const chapter = {
       "pos": ""
     },
     {
-      "latin": "viātor",
-      "english": "traveler, messenger",
+      "latin": "Viātor, -ōris m",
+      "english": "Viātor, a name",
       "pos": "noun (m.)"
     },
     {
@@ -15131,6 +15031,11 @@ const chapter = {
       "latin": "Iūlus, -ī m",
       "english": "Iulus",
       "pos": "noun (m.)"
+    },
+    {
+      "latin": "sorbilis, -e",
+      "english": "able to be sucked, liquid",
+      "pos": "adjective"
     },
     {
       "latin": "mufrius, -ī m",

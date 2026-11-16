@@ -46,6 +46,7 @@ const norm = (s) =>
     .replace(/æ/g, 'ae')
     .replace(/œ/g, 'oe')
     .replace(/j/g, 'i')
+    .replace(/J/g, 'I')
     .replace(/-/g, '')
     .toLowerCase()
     .trim()
@@ -68,10 +69,17 @@ const lemmaOf = (form) => {
 }
 
 const headwordOf = (w) => {
-  for (const part of String(w.latin || '').split(',')) {
-    const cleaned = part
+  const raw = String(w.latin || '')
+  for (const part of raw.split(',')) {
+    const hadVariant = /[\/=…]|\.\.\./.test(part)
+    let cleaned = part
       .replace(/\(.*?\)/g, '')
       .replace(/\[.*?\]/g, '')
+      .replace(/[\/=…]/g, ' ').replace(/\.\.\./g, ' ')
+      .replace(/[!?;:]/g, ' ')
+      .trim()
+    if (hadVariant) cleaned = cleaned.split(/\s+/)[0] || ''
+    cleaned = cleaned
       .replace(new RegExp(`^[^${LETTER}]+`), '')
       .replace(new RegExp(`[^${LETTER}]+$`), '')
       .trim()
@@ -193,7 +201,183 @@ function sourceId(source) {
   return id
 }
 
+function inferInflection(head, pos, latin) {
+  const raw = String(head || '')
+  const h = raw.toLowerCase()
+  const p = String(pos || '').toLowerCase()
+  const entry = String(latin || '')
+  if (!h || !/[a-zāēīōūȳ]/.test(h)) return null
+  if (
+    p.includes('adverb') || p.includes('preposition') || p.includes('conjunction') ||
+    p.includes('interjection') || p.includes('pronoun') || p.includes('numeral')
+  ) return null
+
+  const genderOf = (value) =>
+    /\(m\.\)/.test(value) ? 'M' : /\(f\.\)/.test(value) ? 'F' :
+    /\(n\.\)/.test(value) ? 'N' : /\(c\.\)/.test(value) ? 'C' : ''
+
+  const comma = entry.indexOf(',')
+  let gen = ''
+  if (comma !== -1) {
+    const after = entry.slice(comma + 1).trim().replace(/^[-–—]\s*/, '')
+    const match = after.match(/^([a-zāēīōūȳ]+)/i)
+    if (match) gen = match[1].toLowerCase()
+  }
+
+  if (p.includes('verb') || /(āre|are|ēre|ere|īre)$/.test(h)) {
+    if (h.endsWith('āre') || h.endsWith('are')) {
+      const st = raw.replace(/-/g, '').slice(0, -3)
+      return { sig: 'V|1.1|X', stems: [st, st, st + 'av', st + 'at'] }
+    }
+    if (h.endsWith('ēre')) {
+      const st = raw.slice(0, -3)
+      return { sig: 'V|2.1|X', stems: [st, st, st + 'u', st + 'it'] }
+    }
+    if (h.endsWith('īre')) {
+      const inf = raw.slice(0, -3)
+      const pres = raw.slice(0, -2)
+      return { sig: 'V|3.4|X', stems: [pres, inf, inf + 'iv', inf + 'it'] }
+    }
+    if (h.endsWith('ere')) {
+      const st = raw.slice(0, -3)
+      return { sig: 'V|3.1|X', stems: [st, st, '', ''] }
+    }
+  }
+
+  if (p.includes('adjective')) {
+    if (h.endsWith('us') || h.endsWith('a') || h.endsWith('um') || h.endsWith('ā')) {
+      const st = h.endsWith('us') ? raw.slice(0, -2) : raw.slice(0, -1)
+      return { sig: 'ADJ|1.1|POS', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('is') || h.endsWith('e') || h.endsWith('ē')) {
+      const st = raw.replace(/[ieē]$/i, '')
+      return { sig: 'ADJ|3.2|POS', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('āx') || h.endsWith('ox')) {
+      const st = raw.slice(0, -1) + 'c'
+      return { sig: 'ADJ|3.1|POS', stems: [raw, st, '', ''] }
+    }
+  }
+
+  if (p.includes('noun') || p === '') {
+    // Use the printed genitive when the vocabulary gives one.
+    if (gen && gen.endsWith('ae')) {
+      if (h.endsWith('ās')) {
+        const st = raw.slice(0, -2)
+        return { sig: 'N|1.8|M|N', stems: [st, st, '', ''] }
+      }
+      const st = raw.replace(/[aā]$/i, '')
+      { const g = genderOf(p); return { sig: g === 'M' ? 'N|1.1|M|T' : g === 'N' ? 'N|1.1|N|T' : 'N|1.1|F|T', stems: [st, st, '', ''] } }
+    }
+    if (gen === 'ī' || gen.endsWith('ī')) {
+      if (h.endsWith('ius')) {
+        const st = raw.slice(0, -2)
+        return { sig: 'N|2.9|M|N', stems: [st, st, '', ''] }
+      }
+      if (h.endsWith('os')) {
+        const st = raw.slice(0, -2)
+        return { sig: 'N|2.6|M|T', stems: [st, st, '', ''] }
+      }
+      const st = raw.replace(/[uū]s$/i, '')
+      return { sig: 'N|2.1|M|P', stems: [st, st, '', ''] }
+    }
+    if (gen.endsWith('is')) {
+      const nomEnds = ['ius', 'ās', 'ēs', 'ōn', 'ō', 'or', 'ox', 'āx', 'is', 'x', 'os', 'us', 'um', 'ā', 'ē', 'a']
+      const nomEnd = nomEnds.find((ending) => h.endsWith(ending)) || ''
+      const genForm = raw.slice(0, -nomEnd.length) + gen
+      const st = genForm.slice(0, -2)
+      const g = genderOf(p) || 'M'
+      return { sig: `N|3.1|${g}|T`, stems: [raw, st, '', ''] }
+    }
+    if (gen.endsWith('ūs')) {
+      const st = raw.replace(/[uū]s$/i, '')
+      return { sig: 'N|4.1|M|T', stems: [st, st, '', ''] }
+    }
+    if (gen.endsWith('eī') || gen.endsWith('ēī')) {
+      const st = raw.replace(/[eē]s$/i, '')
+      return { sig: 'N|5.1|F|T', stems: [st, st, '', ''] }
+    }
+
+    // No genitive available: infer from the nominative ending.
+    if (h.endsWith('ās')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|1.8|M|N', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('ae')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|1.1|F|T', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('ir')) {
+      return { sig: 'N|2.3|M|N', stems: [raw, raw, '', ''] }
+    }
+    if (h.endsWith('ā')) {
+      const st = raw.slice(0, -1)
+      { const g = genderOf(p); return { sig: g === 'M' ? 'N|1.1|M|T' : g === 'N' ? 'N|1.1|N|T' : 'N|1.1|F|T', stems: [st, st, '', ''] } }
+    }
+    if (h.endsWith('a')) {
+      const st = raw.slice(0, -1)
+      { const g = genderOf(p); return { sig: g === 'M' ? 'N|1.1|M|T' : g === 'N' ? 'N|1.1|N|T' : 'N|1.1|F|T', stems: [st, st, '', ''] } }
+    }
+    if (h.endsWith('ē')) {
+      const st = raw.slice(0, -1)
+      return { sig: 'N|1.6|F|T', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('ius')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|2.9|M|N', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('os')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|2.6|M|T', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('us')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|2.1|M|P', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('um')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|2.2|N|T', stems: [st, st, '', ''] }
+    }
+    if (h.endsWith('ōn')) {
+      return { sig: 'N|3.1|M|T', stems: [raw, raw, '', ''] }
+    }
+    if (h.endsWith('ō')) {
+      return { sig: 'N|3.1|M|T', stems: [raw, raw + 'n', '', ''] }
+    }
+    if (h.endsWith('or')) {
+      return { sig: 'N|3.1|M|P', stems: [raw, raw.slice(0, -2) + 'ōr', '', ''] }
+    }
+    if (h.endsWith('is') || h.endsWith('īs')) {
+      return { sig: 'N|3.1|F|T', stems: [raw, raw.slice(0, -2), '', ''] }
+    }
+    if (h.endsWith('ēs')) {
+      return { sig: 'N|3.1|M|T', stems: [raw, raw.slice(0, -2), '', ''] }
+    }
+    if (h.endsWith('x')) {
+      return { sig: 'N|3.1|M|T', stems: [raw, raw.slice(0, -1) + 'c', '', ''] }
+    }
+    if (h.endsWith('ūs')) {
+      const st = raw.slice(0, -2)
+      return { sig: 'N|4.1|M|T', stems: [st, st, '', ''] }
+    }
+  }
+  return null
+}
+
 /* ---------- Curated vocabulary ---------- */
+const JUNK_HEADS = new Set([
+  'acc', 'abl', 'adv', 'dat', 'gen', 'nom', 'voc', 'prep', 'conj', 'pron',
+  'interj', 'num', 'm', 'f', 'n', 'pl', 'sing', 'indecl', 'comp', 'sup',
+  'pass', 'part', 'perf', 'imp', 'impers', 'ger', 'gerund', 'gerundive',
+  'inf', 'infinitive', 'imperative', 'indicative', 'subjunctive', 'active',
+  'passive', 'present', 'future', 'imperfect', 'pluperfect', 'cet', 'etc',
+])
+const curatedFormLemma = new Map()
+const CURATED_ALIASES = {
+  vult: 'volo', volt: 'volo', vultis: 'volo', volunt: 'volo',
+  es: 'sum', est: 'sum', sunt: 'sum', sumus: 'sum', estis: 'sum',
+  it: 'eo', eunt: 'eo', ibat: 'eo', iit: 'eo', itur: 'eo',
+}
 const curated = new Map()
 for (const { slug, book, chapters } of books) {
   for (const chapter of chapters) {
@@ -207,19 +391,60 @@ for (const { slug, book, chapters } of books) {
     }
     const sid = sourceId(source)
     for (const word of chapter.vocabulary || []) {
-      const head = headwordOf(word)
+      let head = headwordOf(word)
       if (!head) continue
-      const key = norm(head)
+      const originalHead = head
+      let latin = String(word.latin || '').replace(/^\s*[-–—]\s*,\s*/, '')
+      // Fold inflected or irregular headwords into their lexical lemma when
+      // possible, so the dictionary does not list amo/amat/amant separately.
+      if (!head.includes(' ') && !/^[A-ZĀĒĪŌŪȲ]/.test(head)) {
+        const alias = CURATED_ALIASES[norm(head)]
+        if (alias) {
+          head = alias
+          latin = alias
+        } else {
+          const analysis = bestAnalysis(head)
+          if (analysis) {
+            const lemma = lemmaOf(dictionaryForm(analysis.de))
+            if (lemma) {
+              head = lemma
+              latin = cleanForm(dictionaryForm(analysis.de))
+            }
+          }
+        }
+      }
+      const key = norm(head).replace(/\s+/g, '')
+      if (JUNK_HEADS.has(key)) continue
+      const allowConsonantal =
+        /numeral|preposition|conjunction/i.test(word.pos || '') ||
+        /^[IVXLCDM]+$/.test(originalHead) ||
+        /^[A-Z]+$/.test(originalHead)
+      if (!/[aeiouyāēīōūȳ]/.test(key) && !allowConsonantal) continue
+      if (!originalHead.includes(' ') && norm(originalHead) !== key) {
+        curatedFormLemma.set(norm(originalHead), key)
+      }
+      const inferred = inferInflection(head, word.pos, latin)
       let entry = curated.get(key)
       if (!entry) {
         entry = {
           head,
-          latin: String(word.latin || '').replace(/^\s*[-–—]\s*,\s*/, ''),
+          latin,
           meanings: new Set(),
           poses: new Set(),
           sourceIds: new Set(),
+          sig: inferred?.sig || '',
+          stems: inferred?.stems || [],
         }
         curated.set(key, entry)
+      } else if (/^[A-ZĀĒĪŌŪȲ]/.test(head) && !/^[A-ZĀĒĪŌŪȲ]/.test(entry.head)) {
+        // A proper name shares its spelling with a common noun (Pānsa/pansa);
+        // keep the capitalised form and its gender/paradigm.
+        entry.head = head
+        entry.latin = latin
+        if (inferred?.sig) {
+          entry.sig = inferred.sig
+          entry.stems = inferred.stems
+        }
       }
       if (word.english?.trim()) entry.meanings.add(word.english.trim())
       if (word.pos) entry.poses.add(word.pos)
@@ -254,12 +479,14 @@ function bestAnalysis(token) {
   const results = (parsed.results || []).filter((r) => r.de?.mean)
   if (!results.length) return null
 
+  const preferred = curatedFormLemma.get(norm(token))
   let best = null
   let bestScore = -Infinity
   for (const result of results) {
     const lemma = lemmaOf(dictionaryForm(result.de))
     let score = 0
     if (norm(lemma) === norm(token)) score += 100
+    if (preferred && norm(lemma) === preferred) score += 250
     if (curated.has(norm(lemma))) score += 40
     score += AGE_SCORE[result.ir?.age] ?? 0
     score += FREQ_SCORE[result.ir?.freq] ?? 0
@@ -444,12 +671,32 @@ for (const [key, curatedEntry] of curated) {
       formMap: new Map(),
       sourceIds: new Set(),
       e: null,
+      sig: curatedEntry.sig || '',
+      stems: curatedEntry.stems || [],
     }
     lemmaMap.set(key, entry)
   }
   entry.head = curatedEntry.head
   entry.latin = curatedEntry.latin
   if (!entry.de && analysis?.de) entry.de = analysis.de
+  if (curatedEntry.sig && /^[A-ZĀĒĪŌŪȲ]/.test(curatedEntry.head)) {
+    entry.sig = curatedEntry.sig
+    entry.stems = curatedEntry.stems
+  } else if (!entry.de && curatedEntry.sig && !entry.sig) {
+    entry.sig = curatedEntry.sig
+    entry.stems = curatedEntry.stems
+  }
+  if (!entry.poses.size && curatedEntry.sig) {
+    const parts = curatedEntry.sig.split('|')
+    if (parts[0] === 'N') {
+      const g = parts[2]
+      entry.poses.add(g === 'F' ? 'noun (f.)' : g === 'M' ? 'noun (m.)' : g === 'N' ? 'noun (n.)' : 'noun')
+    } else if (parts[0] === 'ADJ') {
+      entry.poses.add('adjective')
+    } else if (parts[0] === 'V') {
+      entry.poses.add('verb')
+    }
+  }
   if (analysis?.ir?.qual) noteSurface(curatedEntry.head, key, labelsFor(curatedEntry.head))
   if (curatedEntry.meanings.size) entry.meanings = new Set(curatedEntry.meanings)
   if (curatedEntry.poses.size) entry.poses = new Set(curatedEntry.poses)
@@ -469,6 +716,20 @@ for (const [key, curatedEntry] of curated) {
     if (sid != null) entry.e = addExample(citation, sid, true)
   }
   if (headWord && headWord.e == null) headWord.e = entry.e
+}
+
+/* The printed vocabulary sometimes gives the only reliable lemma for an
+   ambiguous form (vult -> volo rather than vultus).  Re-point those forms now
+   that every curated lemma exists. */
+for (const [form, lemmaKey] of curatedFormLemma) {
+  const word = wordMap.get(form)
+  const lemma = lemmaMap.get(lemmaKey)
+  if (!word || !lemma || word.l === lemmaKey) continue
+  const old = lemmaMap.get(word.l)
+  if (old) old.formMap.delete(norm(word.w))
+  word.l = lemmaKey
+  lemma.formMap.set(norm(word.w), word.w)
+  for (const sid of word.sourceIds) lemma.sourceIds.add(sid)
 }
 
 /* ---------- Resolve the rest of the reading vocabulary ----------
@@ -516,6 +777,9 @@ function resolveToken(token) {
   const t = norm(token)
   const aliases = {
     mavult: 'malo', mavolt: 'malo', mavoluit: 'malo',
+    vult: 'volo', volt: 'volo', vultis: 'volo', volunt: 'volo',
+    est: 'sum', es: 'sum', sunt: 'sum', sumus: 'sum', estis: 'sum',
+    it: 'eo', eunt: 'eo', ibat: 'eo', iit: 'eo',
     diibus: 'deus', deibus: 'deus', di: 'deus', dii: 'deus',
     nosse: 'novisse', coisse: 'coivisse', coiisse: 'coivisse',
     offla: 'offa', dupunduarius: 'dupondiarius',
@@ -566,7 +830,16 @@ for (const u of unknownTokens) {
     )
     word.e = addExample(marked, u.sid)
   }
-  if (entry.e == null && word?.e != null) entry.e = word.e
+  if (word?.e != null && (entry.e == null || exampleTable[entry.e]?.vocab)) {
+    entry.e = word.e
+  }
+}
+
+const LEMMA_OVERRIDES = {
+  volo: {
+    latin: 'volō, velle, voluī (want); volō, volāre, volāvī (fly)',
+    english: '1. want, be willing, wish; 2. fly',
+  },
 }
 
 /* ---------- Finalise ---------- */
@@ -576,21 +849,24 @@ const lemmas = [...lemmaMap.entries()]
     const english = mergeSenses(entry.meanings)
     const poses = [...new Set([...entry.poses].map(normalisePos).filter(Boolean))]
     const de = entry.de || null
-    const stems = de
-      ? de.stems.map((stem) => (stem && stem !== 'zzz' ? stem : ''))
-      : []
+    const stems = entry.stems?.length
+      ? entry.stems
+      : de
+        ? de.stems.map((stem) => (stem && stem !== 'zzz' ? stem : ''))
+        : []
+    const override = LEMMA_OVERRIDES[key]
     const lemma = {
       id: key,
       headword: entry.head,
-      latin: entry.latin,
+      latin: override?.latin || entry.latin,
       pos: poses.join('; '),
       posGroup: posGroup(poses[0] || ''),
-      english,
+      english: override?.english || english,
       stems,
-      sig: de ? partSignature(de.part) : '',
+      sig: entry.sig || (de ? partSignature(de.part) : ''),
       forms: [...entry.formMap.values()].sort((a, b) => a.localeCompare(b)),
       e: entry.e,
-      s: [...entry.sourceIds].slice(0, 12),
+      s: [...entry.sourceIds],
       sn: entry.sourceIds.size,
     }
     if (lemma.english) lemmaById.set(key, lemma)
@@ -606,7 +882,7 @@ const words = [...wordMap.values()]
   .map((word) => ({
     w: word.w,
     l: word.l,
-    s: [...word.sourceIds].slice(0, 12),
+    s: [...word.sourceIds],
     n: word.sourceIds.size,
     e: word.e ?? lemmaById.get(word.l)?.e ?? null,
   }))
@@ -642,6 +918,22 @@ for (const [sig, part] of partBySignature) {
     }
   }
   paradigmRules[sig] = [...bySlot.values()]
+}
+
+/* Whitaker's lists the i-stem accusative plural (-is) first for third
+   declension nouns.  The ordinary accusative plural is -es; prefer it for
+   every non-neuter third-declension signature. */
+for (const [sig, rules] of Object.entries(paradigmRules)) {
+  if (!sig.startsWith('N|3.')) continue
+  for (const rule of rules) {
+    if (
+      rule[2] === 'N|ACC|P|M' ||
+      rule[2] === 'N|ACC|P|F' ||
+      rule[2] === 'N|ACC|P|C'
+    ) {
+      rule[1] = 'es'
+    }
+  }
 }
 
 /* ---------- Compact index for the personal wordlist ----------

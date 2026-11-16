@@ -40,10 +40,11 @@ export default function ParadigmPage() {
     }
   }, [])
 
-  const lookupKeys = useMemo(
-    () => dictionaryKeys(word).map((key) => norm(key)),
-    [word],
-  )
+  const lookupKeys = useMemo(() => {
+    const keys = dictionaryKeys(word).map((key) => norm(key))
+    const compact = norm(word).replace(/\s+/g, '')
+    return [...new Set([...keys, compact])]
+  }, [word])
 
   const wordEntry = useMemo(() => {
     for (const key of lookupKeys) {
@@ -129,7 +130,9 @@ export default function ParadigmPage() {
 
         {entries.length === 0 ? (
           <p className="notice">
-            Whitaker’s Words has no inflection data for this lemma.
+            {/adverb|preposition|conjunction|interjection|pronoun|numeral|particle/i.test(lemma.pos || '')
+              ? 'This word is indeclinable; it has no inflection paradigm.'
+              : 'No inflection paradigm is recorded for this word.'}
           </p>
         ) : (
           <div className="paradigm-groups">
@@ -150,8 +153,9 @@ export default function ParadigmPage() {
         )}
 
         <p className="paradigm-note">
-          Forms are generated from Whitaker’s Words. The source does not record
-          macra for every generated form, so some appear without them.
+          Forms are generated from the dictionary’s inflection data. The source
+          does not record macra for every generated form, so some appear without
+          them.
         </p>
       </div>
     </section>

@@ -15,6 +15,7 @@ export const norm = (s) =>
     .replace(/æ/g, 'ae')
     .replace(/œ/g, 'oe')
     .replace(/j/g, 'i')
+    .replace(/J/g, 'I')
     .toLowerCase()
 
 // Every word carries a meaning, but the generator marks the forms it could

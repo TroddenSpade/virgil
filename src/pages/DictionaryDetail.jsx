@@ -31,10 +31,11 @@ export default function DictionaryDetail() {
     }
   }, [])
 
-  const lookupKeys = useMemo(
-    () => dictionaryKeys(word).map((key) => norm(key)),
-    [word],
-  )
+  const lookupKeys = useMemo(() => {
+    const keys = dictionaryKeys(word).map((key) => norm(key))
+    const compact = norm(word).replace(/\s+/g, '')
+    return [...new Set([...keys, compact])]
+  }, [word])
 
   const wordEntry = useMemo(() => {
     for (const key of lookupKeys) {
@@ -66,12 +67,19 @@ export default function DictionaryDetail() {
 
   const example = useMemo(() => {
     if (!data) return null
-    const id = wordEntry?.e ?? lemma?.e
+    const ids = [wordEntry?.e, lemma?.e].filter((id) => id != null)
+    const id = ids.find((candidate) => !data.examples?.[candidate]?.vocab) ?? ids[0]
     if (id == null) return null
     const item = data.examples?.[id]
     if (!item) return null
     return { ...item, source: data.sources[item.s] || null }
   }, [data, wordEntry, lemma])
+
+  const sources = useMemo(() => {
+    if (!data) return []
+    const ids = isForm ? (wordEntry?.s ?? []) : (lemma?.s ?? wordEntry?.s ?? [])
+    return ids.map((id) => data.sources[id]).filter(Boolean)
+  }, [data, wordEntry, lemma, isForm])
 
   const neighbours = useMemo(() => {
     if (!data || !wordEntry) return { prev: null, next: null }
@@ -240,6 +248,21 @@ export default function DictionaryDetail() {
                   )}
                 </li>
               </ol>
+              {sources.length > 1 && (
+                <div className="lexicon__source-list-wrap">
+                  <p className="lexicon__source-list-title">
+                    Every source with this word
+                    <span className="lexicon__section-count">{sources.length}</span>
+                  </p>
+                  <ul className="lexicon__source-list">
+                    {sources.map((source, index) => (
+                      <li key={`${source.bookSlug}-${source.slug}-${index}`}>
+                        <Link to={sourceHref(source)}>{sourceLabel(source)}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           )}
         </article>

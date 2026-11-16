@@ -22,7 +22,7 @@ const PAGE_SIZE = 120
 
 const DICTIONARY_LEAD =
   'Every word in the readings of the course — each inflected form, its headword, its ' +
-  'English sense, the chapter it was taken from, and an example from the readings or the ' +
+  'English sense, every chapter where it occurs, and an example from the readings or the ' +
   'chapter vocabulary. Headwords carry their macra, so the lexicon can be used when ' +
   'checking or proofreading a line of Latin.'
 
