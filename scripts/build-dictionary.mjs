@@ -397,6 +397,7 @@ for (const { slug, book, chapters } of books) {
       roman: chapter.roman,
       title: chapter.title,
       slug: chapter.slug,
+      ...(book?.sourceUnit ? { unit: book.sourceUnit } : {}),
     }
     const sid = sourceId(source)
     for (const word of chapter.vocabulary || []) {
@@ -441,8 +442,8 @@ for (const { slug, book, chapters } of books) {
           meanings: new Set(),
           poses: new Set(),
           sourceIds: new Set(),
-          sig: inferred?.sig || '',
-          stems: inferred?.stems || [],
+          sig: word.sig || inferred?.sig || '',
+          stems: word.stems || inferred?.stems || [],
         }
         curated.set(key, entry)
       } else if (/^[A-ZĀĒĪŌŪȲ]/.test(head) && !/^[A-ZĀĒĪŌŪȲ]/.test(entry.head)) {
@@ -455,6 +456,10 @@ for (const { slug, book, chapters } of books) {
           entry.stems = inferred.stems
         }
       }
+      if (word.sig && !entry.sig) {
+        entry.sig = word.sig
+        entry.stems = word.stems || []
+      }
       if (word.english?.trim()) entry.meanings.add(word.english.trim())
       if (word.pos) entry.poses.add(word.pos)
       entry.sourceIds.add(sid)
@@ -465,12 +470,16 @@ for (const { slug, book, chapters } of books) {
 /* ---------- The readings ---------- */
 function sentencesOf(chapter) {
   const out = []
+  // Short verse lines are still complete lines: do not drop them merely for
+  // being shorter than a prose sentence. Prose keeps the longer threshold so
+  // stray headings and page furniture do not enter the dictionary.
+  const minLength = chapter.verseCount ? 2 : 14
   for (const reading of chapter.readings || []) {
     for (const paragraph of reading.paragraphs || []) {
       const parts = String(paragraph).split(/(?<=[.!?])\s+(?=[A-ZĀĒĪŌŪȲ"“])/)
       for (const raw of parts) {
         const text = raw.trim()
-        if (text.length > 14) out.push({ text, note: false })
+        if (text.length >= minLength) out.push({ text, note: false })
       }
     }
     // Marginal notes are part of the book too: their words must be in the
@@ -606,6 +615,7 @@ for (const { slug, book, chapters } of books) {
       roman: chapter.roman,
       title: chapter.title,
       slug: chapter.slug,
+      ...(book?.sourceUnit ? { unit: book.sourceUnit } : {}),
     }
     const sid = sourceId(source)
     for (const sentence of sentencesOf(chapter)) {
@@ -821,6 +831,8 @@ function resolveToken(token) {
     offla: 'offa', dupunduarius: 'dupondiarius',
     eundem: 'idem', eandem: 'idem', eiusdem: 'idem', naenias: 'nenia', tisicus: 'phthisicus',
     exierat: 'exeo', abistis: 'abeo', fefellitus: 'fallo',
+    norat: 'novi', isset: 'eo', mauult: 'malo', afore: 'adsum',
+    tetuli: 'fero', tetulit: 'fero', tetulisset: 'fero',
   }
   if (aliases[t]) {
     const a = bestAnalysis(aliases[t])

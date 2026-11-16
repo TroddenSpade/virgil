@@ -32,6 +32,7 @@ const MODULES = [
   'petronius-cena-trimalchionis',
   'sallustius-cicero-catilina',
   'plautus-amphitryo',
+  'catullus-carmina',
   'companion-roma-aeterna',
   'companion',
   'learn-latin',
@@ -636,7 +637,7 @@ function textTypes(chapter, ctx) {
 
   const hasLatinText = hasReadings || bookId.startsWith('exercitia') || bookId === 'familia-romana' || bookId === 'roma-aeterna' || bookId === 'learn-latin' || bookId === 'latin-via-ovid'
   if (hasLatinText && !['companion', 'companion-roma-aeterna'].includes(bookId)) {
-    if (['caesar-de-bello-gallico-vii', 'vergil-aeneis-i-et-iv', 'ovidii-ars-amatoria', 'petronius-cena-trimalchionis', 'sallustius-cicero-catilina', 'plautus-amphitryo'].includes(bookId)) {
+    if (['caesar-de-bello-gallico-vii', 'vergil-aeneis-i-et-iv', 'ovidii-ars-amatoria', 'petronius-cena-trimalchionis', 'sallustius-cicero-catilina', 'plautus-amphitryo', 'catullus-carmina'].includes(bookId)) {
       out.add('original-latin')
     } else {
       out.add('adapted-latin')
@@ -660,7 +661,7 @@ function skillTags(chapter, ctx) {
   if (/translat/i.test(instructions)) out.add('translation')
   if (/translate into latin|into latin|in latinum/i.test(instructions)) out.add('composition')
 
-  if (chapter.verseCount || ctx.book.id === 'vergil-aeneis-i-et-iv' || ctx.book.id === 'ovidii-ars-amatoria') out.add('scansion')
+  if (chapter.verseCount || ctx.book.id === 'vergil-aeneis-i-et-iv' || ctx.book.id === 'ovidii-ars-amatoria' || ctx.book.id === 'catullus-carmina') out.add('scansion')
   if (ctx.book.kind === 'commentary') out.add('commentary')
   return [...out]
 }
@@ -690,7 +691,7 @@ function levelFor(chapter, ctx) {
     if (n <= 25) return 'elementary'
     return 'intermediate'
   }
-  if (['caesar-de-bello-gallico-vii', 'vergil-aeneis-i-et-iv', 'ovidii-ars-amatoria', 'petronius-cena-trimalchionis', 'sallustius-cicero-catilina', 'plautus-amphitryo'].includes(id)) {
+  if (['caesar-de-bello-gallico-vii', 'vergil-aeneis-i-et-iv', 'ovidii-ars-amatoria', 'petronius-cena-trimalchionis', 'sallustius-cicero-catilina', 'plautus-amphitryo', 'catullus-carmina'].includes(id)) {
     return 'advanced'
   }
   if (id === 'sermones-romani' || id === 'epitome-historiae-sacrae') return 'intermediate'

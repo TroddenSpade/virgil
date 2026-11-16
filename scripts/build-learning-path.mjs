@@ -188,6 +188,7 @@ const READING_ONLY_BOOKS = new Set([
 const AUTHOR_BOOKS = new Set([
   'caesar-de-bello-gallico-vii',
   'sallustius-cicero-catilina',
+  'catullus-carmina',
   'plautus-amphitryo',
   'vergil-aeneis-i-et-iv',
   'ovidii-ars-amatoria',
@@ -235,6 +236,7 @@ const BOOK_RANK = [
   'epitome-historiae-sacrae',
   'caesar-de-bello-gallico-vii',
   'sallustius-cicero-catilina',
+  'catullus-carmina',
   'plautus-amphitryo',
   'petronius-cena-trimalchionis',
   'vergil-aeneis-i-et-iv',

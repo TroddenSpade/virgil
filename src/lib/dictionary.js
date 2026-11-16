@@ -38,7 +38,8 @@ export function sourceHref(source) {
 
 export function sourceLabel(source) {
   if (!source) return ''
-  return [source.book, source.roman ? `Cap. ${source.roman}` : ''].filter(Boolean).join(' · ')
+  const unit = source.unit || 'Cap.'
+  return [source.book, source.roman ? `${unit} ${source.roman}` : ''].filter(Boolean).join(' · ')
 }
 
 /**

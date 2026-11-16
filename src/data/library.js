@@ -17,6 +17,7 @@ import { book as companionRA, chapters as companionRAChapters } from './companio
 import { book as aeneis, chapters as aeneisChapters } from './vergil-aeneis-i-et-iv/index.js'
 import { book as catilina, chapters as catilinaChapters } from './sallustius-cicero-catilina/index.js'
 import { book as amphitryo, chapters as amphitryoChapters } from './plautus-amphitryo/index.js'
+import { book as catullus, chapters as catullusChapters } from './catullus-carmina/index.js'
 import { chapterKeywords } from './chapter-keywords.generated.js'
 
 // Reference sources are the full texts extracted from the source editions.
@@ -82,6 +83,11 @@ export const fabulaeBook = {
 export const amphitryoBook = {
   ...amphitryo,
   chapters: amphitryoChapters,
+}
+
+export const catullusBook = {
+  ...catullus,
+  chapters: catullusChapters,
 }
 
 
@@ -181,6 +187,7 @@ export const books = [
   petroniusBook,
   catilinaBook,
   amphitryoBook,
+  catullusBook,
   companionRABook,
   companionBook,
   learnLatinBook,
@@ -208,6 +215,7 @@ const BOOK_ORDER = [
   'petronius-cena-trimalchionis',
   'vergil-aeneis-i-et-iv',
   'ovidii-ars-amatoria',
+  'catullus-carmina',
 ]
 const BOOK_RANK = new Map(BOOK_ORDER.map((slug, index) => [slug, index]))
 books.sort((a, b) => (BOOK_RANK.get(a.slug) ?? 99) - (BOOK_RANK.get(b.slug) ?? 99))
@@ -280,7 +288,7 @@ export const authorShelf = {
   emptyNote:
     'The first original texts will appear here as they are added. The existing author editions remain ' +
     'on the Advanced shelf.',
-  slugs: [],
+  slugs: ['catullus-carmina'],
 }
 
 // The order in which shelves are rendered on /library.
@@ -309,6 +317,7 @@ const HERO_MARKS = {
   'petronius-cena-trimalchionis': 'CENA',
   'sallustius-cicero-catilina': 'CATILINA',
   'plautus-amphitryo': 'AMPHITRYO',
+  'catullus-carmina': 'CATVLLVS',
   'companion-roma-aeterna': 'COMES II',
   companion: 'COMES I',
   'learn-latin': 'DISC. LAT.',
