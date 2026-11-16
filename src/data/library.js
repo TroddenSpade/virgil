@@ -187,6 +187,31 @@ export const books = [
   latinViaOvidBook,
 ]
 
+// The shelf runs from the first beginner book to the most advanced author.
+// Companion and exercise volumes sit beside the course they support.
+const BOOK_ORDER = [
+  'familia-romana',
+  'exercitia-latina',
+  'colloquia-personarum',
+  'companion-to-familia-romana',
+  'learn-latin-from-the-romans',
+  'latin-via-ovid',
+  'fabulae-syrae',
+  'roma-aeterna',
+  'exercitia-latina-ii',
+  'companion-to-roma-aeterna',
+  'sermones-romani',
+  'epitome-historiae-sacrae',
+  'caesar-de-bello-gallico-vii',
+  'sallustius-cicero-catilina',
+  'plautus-amphitryo',
+  'petronius-cena-trimalchionis',
+  'vergil-aeneis-i-et-iv',
+  'ovidii-ars-amatoria',
+]
+const BOOK_RANK = new Map(BOOK_ORDER.map((slug, index) => [slug, index]))
+books.sort((a, b) => (BOOK_RANK.get(a.slug) ?? 99) - (BOOK_RANK.get(b.slug) ?? 99))
+
 const HERO_MARKS = {
   'familia-romana': 'FAM. ROM.',
   'roma-aeterna': 'ROMA AET.',
