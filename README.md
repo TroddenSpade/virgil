@@ -24,7 +24,6 @@ The site is organised as a **library of books**. The course books are open, toge
 | A Companion to Familia Romana (Neumann) | **Open** — full text reference | Grammar, translation help and cultural notes. |
 | Learn Latin from the Romans (Dickey) | **Open** — full text reference | A grammar-based, second track. |
 | **Latin via Ovid: A First Course** (Goldman & Nyenhuis) | **Open** — 40 of 40 lessons written up | A reading course built on Ovid's _Metamorphoses_, with Verba, Structure, exercises and etymology. |
-| **The Works of Virgil** | Planned — **the goal** | The _Aeneid_, _Eclogues_ and _Georgics_ in the original. |
 
 ### Every chapter is a self-contained lesson
 

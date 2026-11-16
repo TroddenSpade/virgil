@@ -1255,7 +1255,7 @@
   font-size: clamp(2.1rem, 5vw, 3.25rem);
 }
 .book-page--framed .book-hero .lead {
-  max-width: 62ch;
+  max-width: none;
 }
 .book-page--framed .book-hero__stats {
   gap: 0;

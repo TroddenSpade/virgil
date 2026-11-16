@@ -185,26 +185,6 @@ export const books = [
   companionBook,
   learnLatinBook,
   latinViaOvidBook,
-  {
-    id: 'virgils-works',
-    slug: 'virgils-works',
-    title: 'The Works of Virgil',
-    latinTitle: 'OPERA VERGILII',
-    shortTitle: 'Virgil',
-    author: 'P. Vergilius Maro',
-    edition: 'Aeneid, Eclogues, Georgics',
-    year: -19,
-    publisher: 'Rome',
-    isbn: null,
-    level: 'The goal',
-    language: 'Latin',
-    summary:
-      'The destination of the whole project: reading the Aeneid, the Eclogues and the Georgics ' +
-      'in the original — with vocabulary, scansion and commentary laid over the text.',
-    status: 'planned',
-    accent: 'wine',
-    isGoal: true,
-  },
 ]
 
 const HERO_MARKS = {
@@ -226,7 +206,6 @@ const HERO_MARKS = {
   companion: 'COMES I',
   'learn-latin': 'DISC. LAT.',
   'latin-via-ovid': 'LAT. OVID.',
-  'virgils-works': 'VERGILIVS',
 }
 
 for (const book of books) {
