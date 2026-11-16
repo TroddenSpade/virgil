@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Loading from '../components/Loading.jsx'
 import { norm, hasDefinition, wordHref, sourceLabel } from '../lib/dictionary.js'
 
@@ -63,14 +63,34 @@ function DictionaryHero({ stats, loading = false }) {
 export default function Dictionary() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
-  const [query, setQuery] = useState('')
-  const [letter, setLetter] = useState('all')
-  const [pos, setPos] = useState('all')
   const [visible, setVisible] = useState(PAGE_SIZE)
+
+  /* The URL is the source of truth for the filters, so a link such as
+     /dictionary?q=volo or /dictionary?letter=v&pos=verb opens on the same
+     view and the address bar always shows what is being filtered. */
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = searchParams.get('q') || ''
+  const letter = (searchParams.get('letter') || 'all').toLowerCase()
+  const pos = searchParams.get('pos') || 'all'
+
+  const updateFilters = (changes) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      for (const [key, value] of Object.entries(changes)) {
+        if (!value || value === 'all') next.delete(key)
+        else next.set(key, value)
+      }
+      return next
+    }, { replace: true })
+  }
+  const setQuery = (value) => updateFilters({ q: value })
+  const setLetter = (value) => updateFilters({ letter: value })
+  const setPos = (value) => updateFilters({ pos: value })
+  const clearFilters = () => setSearchParams(new URLSearchParams(), { replace: true })
 
   useEffect(() => {
     let cancelled = false
-    import('../data/dictionary.generated.js')
+    import('../data/dictionary-index.generated.js')
       .then((module) => {
         if (!cancelled) setData(module)
       })
@@ -258,7 +278,16 @@ export default function Dictionary() {
               </div>
             )}
 
-            {filtered.length === 0 && <p className="dictionary-empty muted">No words match that search.</p>}
+            {filtered.length === 0 && (
+              <div className="dictionary-empty muted">
+                <p>No words match that search.</p>
+                {(query || letter !== 'all' || pos !== 'all') && (
+                  <button type="button" className="btn btn--ghost" onClick={clearFilters}>
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>

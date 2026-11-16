@@ -120,6 +120,76 @@
 
 /* ---------- Library ---------- */
 
+.library-levels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
+  margin: 2rem 0 0.5rem;
+}
+.library-levels__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.14s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.library-levels__link:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--gold-soft);
+}
+.library-levels__latin {
+  color: var(--gold);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+.library-levels__title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+.library-levels__count {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+.library-level {
+  margin-top: 2.8rem;
+  scroll-margin-top: 5rem;
+}
+.library-level__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--line);
+}
+.library-level__title {
+  font-size: 1.8rem;
+}
+.library-level__count {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.library-level__desc {
+  max-width: 70ch;
+  margin-top: 0.85rem;
+  font-size: 0.98rem;
+}
+.library-level .book-grid {
+  margin-top: 1.3rem;
+}
+
 .book-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
@@ -2802,6 +2872,9 @@ button.lesson__keywords-label:focus-visible {
   padding: 2.4rem 0;
   font-family: var(--font-ui);
   font-size: 0.8rem;
+}
+.dictionary-empty p {
+  margin-bottom: 0.9rem;
 }
 
 @media (max-width: 1080px) {

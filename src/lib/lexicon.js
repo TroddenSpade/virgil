@@ -124,6 +124,26 @@ export function lookupLexicon(index, token) {
   const key = norm(token)
   if (!key) return null
 
+  // Irregular pronoun/adverb combinations and archaic forms that the
+  // dictionary stores under a different lemma.
+  const aliases = {
+    mecum: 'ego',
+    tecum: 'tu',
+    nobiscum: 'n',
+    vobiscum: 'v',
+    quicum: 'qui',
+    eique: 'is',
+    siet: 'sum',
+    sient: 'sum',
+    mavis: 'malo',
+    quicumque: 'quisquis',
+  }
+  const alias = aliases[key]
+  if (alias) {
+    const lemma = index.lemmas.get(alias)
+    if (lemma) return { form: token, lemma, parse: '', fromLemma: true, exact: false }
+  }
+
   const exact = index.surface?.get(exactKey)
   if (exact) return { ...exact, fromLemma: false, exact: true }
 
@@ -143,6 +163,18 @@ export function lookupLexicon(index, token) {
     if (altLemma) return { form: altLemma.headword, lemma: altLemma, parse: '', fromLemma: true, exact: false }
   }
 
+  // Enclitics and emphatic particles: eīque, idque, iīsdem, huiusce, suamet.
+  for (const suffix of ['que', 'dem', 'met', 'pte', 've', 'ne', 'ce', 'st']) {
+    if (key.length < suffix.length + 2 || !key.endsWith(suffix)) continue
+    const base = key.slice(0, -suffix.length)
+    const baseForm = index.forms.get(base)
+    if (baseForm) return { ...baseForm, parse: '', fromLemma: false, exact: false }
+    const baseLemma = index.lemmas.get(base)
+    if (baseLemma) {
+      return { form: baseLemma.headword, lemma: baseLemma, parse: '', fromLemma: true, exact: false }
+    }
+  }
+
   return null
 }
 
@@ -155,7 +187,7 @@ export function cachedLexicon() {
 export function loadLexicon() {
   if (cachedIndex) return Promise.resolve(cachedIndex)
   if (!pendingIndex) {
-    pendingIndex = import('../data/dictionary.generated.js')
+    pendingIndex = import('../data/dictionary-index.generated.js')
       .then((data) => {
         cachedIndex = buildLexiconIndex(data)
         return cachedIndex

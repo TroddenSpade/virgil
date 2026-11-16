@@ -12398,9 +12398,9 @@ const chapter = {
       "pos": "noun (n.)"
     },
     {
-      "latin": "propīn",
+      "latin": "propīn, indēcl.",
       "english": "welcoming glass, apéritif",
-      "pos": "noun (n.)"
+      "pos": "noun (n.), indeclinable"
     },
     {
       "latin": "propitius",
@@ -15036,6 +15036,11 @@ const chapter = {
       "latin": "sorbilis, -e",
       "english": "able to be sucked, liquid",
       "pos": "adjective"
+    },
+    {
+      "latin": "perbāsiāre, -āre",
+      "english": "kiss repeatedly",
+      "pos": "verb"
     },
     {
       "latin": "mufrius, -ī m",

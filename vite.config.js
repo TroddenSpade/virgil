@@ -55,11 +55,24 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The authored course bundle and the generated dictionary chunk now
-        // exceed Workbox's 2 MB default; keep them in the offline precache.
+        // The authored course bundle and the dictionary index now exceed
+        // Workbox's 2 MB default; keep them in the offline precache.
         maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // The full 17 MB dictionary is only needed on word-detail and paradigm
+        // pages. Keep it out of the install-time precache so the app starts
+        // small; the runtime rule below caches it after the first such page.
+        globIgnores: ['**/dictionary.generated-*.js'],
         runtimeCaching: [
+          {
+            urlPattern: /\/assets\/dictionary\.generated-[^/]+\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'dictionary-full',
+              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',

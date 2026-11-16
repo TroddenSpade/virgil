@@ -1,6 +1,6 @@
 // Shared helpers for the /dictionary lexicon.
 //
-// The lexicon is loaded lazily from src/data/dictionary.generated.js. Its
+// The lexicon is loaded lazily from src/data/dictionary-index.generated.js. Its
 // entries are shaped:
 //   { id, latin, headword, letter, pos, posGroup, english,
 //     sources: [{ book, bookSlug }],

@@ -212,6 +212,65 @@ const BOOK_ORDER = [
 const BOOK_RANK = new Map(BOOK_ORDER.map((slug, index) => [slug, index]))
 books.sort((a, b) => (BOOK_RANK.get(a.slug) ?? 99) - (BOOK_RANK.get(b.slug) ?? 99))
 
+// Three broad stages for the shelf. The course volumes and their companions
+// sit with the stage they support, so the progression from first sentences to
+// the classical authors is visible without reading the descriptions.
+export const levelGroups = [
+  {
+    id: 'beginner',
+    title: 'Beginner',
+    latin: 'Initium',
+    description:
+      'Start here: first sentences, grammar, exercises and easy reading, with the companions that explain them.',
+    slugs: [
+      'familia-romana',
+      'exercitia-latina',
+      'colloquia-personarum',
+      'companion-to-familia-romana',
+      'learn-latin-from-the-romans',
+      'latin-via-ovid',
+      'fabulae-syrae',
+    ],
+  },
+  {
+    id: 'intermediate',
+    title: 'Intermediate',
+    latin: 'Prōgressus',
+    description:
+      'Roma Aeterna and the readers that carry you from graded Latin into longer, unadapted prose.',
+    slugs: [
+      'roma-aeterna',
+      'exercitia-latina-ii',
+      'companion-to-roma-aeterna',
+      'sermones-romani',
+      'epitome-historiae-sacrae',
+    ],
+  },
+  {
+    id: 'advanced',
+    title: 'Advanced',
+    latin: 'Auctōrēs',
+    description:
+      'The classical authors read in the original: history, oratory, comedy, the novel and epic.',
+    slugs: [
+      'caesar-de-bello-gallico-vii',
+      'sallustius-cicero-catilina',
+      'plautus-amphitryo',
+      'petronius-cena-trimalchionis',
+      'vergil-aeneis-i-et-iv',
+      'ovidii-ars-amatoria',
+    ],
+  },
+]
+
+const LEVEL_BY_SLUG = new Map()
+for (const group of levelGroups) {
+  for (const slug of group.slugs) LEVEL_BY_SLUG.set(slug, group.id)
+}
+for (const book of books) {
+  book.levelGroup = LEVEL_BY_SLUG.get(book.slug) || 'advanced'
+}
+
 const HERO_MARKS = {
   'familia-romana': 'FAM. ROM.',
   'roma-aeterna': 'ROMA AET.',

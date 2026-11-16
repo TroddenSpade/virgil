@@ -408,6 +408,37 @@
 
 /* ---------- Library shelf ---------- */
 
+.library-levels {
+  gap: 0.6rem;
+  margin: 2.2rem 0 0.5rem;
+}
+.library-levels__link {
+  border-radius: 2px;
+  box-shadow: var(--shadow-sm);
+}
+.library-levels__link:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--line-strong);
+}
+.library-levels__latin {
+  color: var(--bronze);
+  letter-spacing: 0.1em;
+}
+.library-levels__title {
+  font-size: 1.18rem;
+}
+.library-level__head {
+  border-bottom-color: var(--line-strong);
+}
+.library-level__title {
+  font-size: 1.9rem;
+}
+.library-levels__count,
+.library-level__count {
+  letter-spacing: 0.14em;
+}
+
 .book-grid {
   gap: 1.1rem;
 }

@@ -25,6 +25,10 @@ const OUT_PARADIGM = new URL(
   '../src/data/paradigm-rules.generated.js',
   import.meta.url,
 )
+const OUT_INDEX = new URL(
+  '../src/data/dictionary-index.generated.js',
+  import.meta.url,
+)
 
 const engine = createEngine()
 const inflects = parseInflectsFile(
@@ -365,6 +369,11 @@ function inferInflection(head, pos, latin) {
 }
 
 /* ---------- Curated vocabulary ---------- */
+const FORCE_KEEP = new Set([
+  'russeus', 'nivatus', 'sucosus', 'praxis', 'odarium', 'phthisicus',
+  'gastra', 'perbasiare',
+])
+
 const JUNK_HEADS = new Set([
   'acc', 'abl', 'adv', 'dat', 'gen', 'nom', 'voc', 'prep', 'conj', 'pron',
   'interj', 'num', 'm', 'f', 'n', 'pl', 'sing', 'indecl', 'comp', 'sup',
@@ -657,10 +666,32 @@ for (const { slug, book, chapters } of books) {
   }
 }
 
+/* Prefixes of forms actually found in the readings.  Glossary entries with
+   no such anchor and no valid analysis are OCR debris, not words. */
+const readingPrefixes = new Set()
+const readingKeys = [...wordMap.keys(), ...unknownTokens.map((u) => norm(u.token))]
+for (const key of readingKeys) {
+  for (let i = 3; i <= Math.min(6, key.length); i += 1) readingPrefixes.add(key.slice(0, i))
+}
+
 /* Merge the printed vocabulary into the reading lemmas. */
 for (const [key, curatedEntry] of curated) {
-  let entry = lemmaMap.get(key)
+  const headKey = norm(curatedEntry.head).replace(/\s+/g, '')
   const analysis = bestAnalysis(curatedEntry.head)
+  const allowedPos = /numeral|preposition|conjunction|interjection|adverb|pronoun/i.test(
+    [...curatedEntry.poses].join(' '),
+  )
+  const anchored =
+    analysis ||
+    wordMap.has(headKey) ||
+    lemmaMap.has(headKey) ||
+    readingPrefixes.has(headKey.slice(0, 6)) ||
+    FORCE_KEEP.has(headKey) ||
+    /^[A-ZĀĒĪŌŪȲ]/.test(curatedEntry.head) ||
+    allowedPos ||
+    headKey.length <= 3
+  if (!anchored) continue
+  let entry = lemmaMap.get(key)
   if (!entry) {
     entry = {
       head: curatedEntry.head,
@@ -773,6 +804,11 @@ function ensureLemma(analysis) {
   }
   return key
 }
+function commonPrefix(a, b) {
+  let i = 0
+  while (i < a.length && i < b.length && a[i] === b[i]) i += 1
+  return i
+}
 function resolveToken(token) {
   const t = norm(token)
   const aliases = {
@@ -816,7 +852,30 @@ function resolveToken(token) {
   return bestCuratedPrefix(t)
 }
 for (const u of unknownTokens) {
-  const key = resolveToken(u.token)
+  let key = resolveToken(u.token)
+  if (key && !lemmaMap.has(key)) key = null
+  if (key && /^[A-ZĀĒĪŌŪȲ]/.test(u.token)) {
+    const entry = lemmaMap.get(key)
+    if (commonPrefix(norm(u.token), norm(entry?.head || key)) < 6) key = null
+  }
+  if (!key && /^[A-ZĀĒĪŌŪȲ]/.test(u.token) && u.token.length >= 3) {
+    key = norm(u.token)
+    if (!lemmaMap.has(key)) {
+      const inferred = inferInflection(u.token, 'noun', u.token)
+      lemmaMap.set(key, {
+        head: u.token,
+        latin: u.token,
+        de: null,
+        meanings: new Set(['proper name']),
+        poses: new Set(['noun']),
+        formMap: new Map(),
+        sourceIds: new Set(),
+        e: null,
+        sig: inferred?.sig || '',
+        stems: inferred?.stems || [],
+      })
+    }
+  }
   if (!key) continue
   const entry = lemmaMap.get(key)
   if (!entry) continue
@@ -835,6 +894,13 @@ for (const u of unknownTokens) {
   }
 }
 
+/* Every surface form's sources also belong to its lemma. */
+for (const word of wordMap.values()) {
+  const lemma = lemmaMap.get(word.l)
+  if (!lemma) continue
+  for (const sid of word.sourceIds) lemma.sourceIds.add(sid)
+}
+
 const LEMMA_OVERRIDES = {
   volo: {
     latin: 'volō, velle, voluī (want); volō, volāre, volāvī (fly)',
@@ -849,11 +915,19 @@ const lemmas = [...lemmaMap.entries()]
     const english = mergeSenses(entry.meanings)
     const poses = [...new Set([...entry.poses].map(normalisePos).filter(Boolean))]
     const de = entry.de || null
-    const stems = entry.stems?.length
+    let stems = entry.stems?.length
       ? entry.stems
       : de
         ? de.stems.map((stem) => (stem && stem !== 'zzz' ? stem : ''))
         : []
+    let sig = entry.sig || (de ? partSignature(de.part) : '')
+    if (!sig) {
+      const inferred = inferInflection(entry.head, poses.join(' '), entry.latin)
+      if (inferred) {
+        sig = inferred.sig
+        stems = inferred.stems
+      }
+    }
     const override = LEMMA_OVERRIDES[key]
     const lemma = {
       id: key,
@@ -863,7 +937,7 @@ const lemmas = [...lemmaMap.entries()]
       posGroup: posGroup(poses[0] || ''),
       english: override?.english || english,
       stems,
-      sig: entry.sig || (de ? partSignature(de.part) : ''),
+      sig,
       forms: [...entry.formMap.values()].sort((a, b) => a.localeCompare(b)),
       e: entry.e,
       s: [...entry.sourceIds],
@@ -999,6 +1073,30 @@ const js =
 
 writeFileSync(OUT, js, 'utf8')
 
+/* A lighter module for the dictionary list and the reading lexicon: it keeps
+   the lookup and display fields, but not the per-entry examples, paradigm
+   stems or full surface-form table. Entry and paradigm pages load the full
+   dictionary only when opened. */
+const indexLemmas = lemmas.map(({ id, headword, latin, pos, posGroup, english, s, sn }) => ({
+  id,
+  headword,
+  latin,
+  pos,
+  posGroup,
+  english,
+  s,
+  sn,
+}))
+const indexWords = words.map(({ w, l, s, n }) => ({ w, l, s, n }))
+const indexJs =
+  banner +
+  'export const sources = ' + JSON.stringify(sources) + '\n\n' +
+  'export const lemmas = ' + JSON.stringify(indexLemmas) + '\n\n' +
+  'export const words = ' + JSON.stringify(indexWords) + '\n\n' +
+  'export const letters = ' + JSON.stringify(letters) + '\n\n' +
+  'export const stats = ' + JSON.stringify(stats) + '\n'
+writeFileSync(OUT_INDEX, indexJs, 'utf8')
+
 const paradigmBanner =
   '// AUTO-GENERATED by scripts/build-dictionary.mjs — do not edit by hand.\n' +
   '// Shared stem/suffix recipes for the full paradigm view, keyed by the\n' +
@@ -1039,6 +1137,7 @@ console.log({
   readingLemmas: readingLemmas.length,
   readingChapters: Object.keys(readingChapters).length,
   bytes: js.length,
+  indexBytes: indexJs.length,
   paradigmBytes: paradigmJs.length,
   readingBytes: readingJs.length,
 })
