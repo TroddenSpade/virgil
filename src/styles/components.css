@@ -162,6 +162,11 @@
   margin-top: 2.8rem;
   scroll-margin-top: 5rem;
 }
+.library-level--authors {
+  margin-top: 3.8rem;
+  padding-top: 2.4rem;
+  border-top: 1px solid var(--line-strong);
+}
 .library-level__head {
   display: flex;
   justify-content: space-between;
@@ -185,6 +190,16 @@
   max-width: 70ch;
   margin-top: 0.85rem;
   font-size: 0.98rem;
+}
+.library-empty {
+  margin-top: 1.3rem;
+  padding: 2rem 1.4rem;
+  border: 1px dashed var(--line-strong);
+  background: var(--surface);
+  border-radius: 2px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  text-align: center;
 }
 .library-level .book-grid {
   margin-top: 1.3rem;

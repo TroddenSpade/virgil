@@ -249,7 +249,7 @@ export const levelGroups = [
   {
     id: 'advanced',
     title: 'Advanced',
-    latin: 'Auctōrēs',
+    latin: 'Prōvectī',
     description:
       'The classical authors read in the original: history, oratory, comedy, the novel and epic.',
     slugs: [
@@ -262,6 +262,28 @@ export const levelGroups = [
     ],
   },
 ]
+
+// A dedicated shelf for the original works. It starts empty: new original
+// editions are added here by slug as they arrive, while the existing author
+// editions remain in the Advanced stage. Horace and further authors can join
+// this shelf in the same way.
+export const authorShelf = {
+  id: 'auctores-latini',
+  title: 'Auctōrēs Latīnī',
+  latin: 'Opera orīginālia',
+  description:
+    'A home for the original works of Latin literature, read in the original: Caesar and Sallust in ' +
+    'history, Cicero in oratory, Plautus and Petronius for the stage and the novel, Vergil and Ovid in ' +
+    'verse, and the authors still to come, such as Horace.',
+  emptyLabel: 'new shelf',
+  emptyNote:
+    'The first original texts will appear here as they are added. The existing author editions remain ' +
+    'on the Advanced shelf.',
+  slugs: [],
+}
+
+// The order in which shelves are rendered on /library.
+export const libraryShelves = [...levelGroups, authorShelf]
 
 const LEVEL_BY_SLUG = new Map()
 for (const group of levelGroups) {

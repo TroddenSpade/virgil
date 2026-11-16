@@ -434,6 +434,10 @@
 .library-level__title {
   font-size: 1.9rem;
 }
+.library-level--authors {
+  margin-top: 4rem;
+  padding-top: 2.4rem;
+}
 .library-levels__count,
 .library-level__count {
   letter-spacing: 0.14em;

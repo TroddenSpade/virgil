@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { books, levelGroups } from '../data/library.js'
+import { books, libraryShelves } from '../data/library.js'
 
 function BookCard({ book }) {
   const isActive = book.status === 'active'
@@ -48,12 +48,12 @@ function BookCard({ book }) {
 }
 
 export default function Library() {
-  const levels = levelGroups
-    .map((group) => ({
-      ...group,
-      books: books.filter((book) => book.levelGroup === group.id),
-    }))
-    .filter((group) => group.books.length)
+  const levels = libraryShelves.map((group) => ({
+    ...group,
+    books: group.slugs
+      .map((slug) => books.find((book) => book.slug === slug))
+      .filter(Boolean),
+  }))
 
   return (
     <section className="section">
@@ -66,23 +66,30 @@ export default function Library() {
           the Fabulae Syrae, the Sermones Romani and the Epitome Historiae Sacrae beside them. The companions offer
           chapter-by-chapter commentary on Familia Romana and Roma Aeterna, while Learn Latin from the Romans, Latin
           via Ovid, Exercitia Latina II and the Latin texts of Caesar, Vergil, Ovid, Petronius, Sallust, Cicero and
-          Plautus are here in full. Together they lead from your first Latin sentence to the poetry of Virgil.
+          Plautus are here in full, and the Auctōrēs Latīnī shelf is set aside for the original works. Together
+          they lead from your first Latin sentence to the poetry of Virgil.
         </p>
 
-        <nav className="library-levels" aria-label="Learning stages">
+        <nav className="library-levels" aria-label="Library shelves">
           {levels.map((group) => (
             <a key={group.id} href={`#level-${group.id}`} className="library-levels__link">
               <span className="library-levels__latin latin">{group.latin}</span>
               <span className="library-levels__title">{group.title}</span>
               <span className="library-levels__count">
-                {group.books.length} {group.books.length === 1 ? 'book' : 'books'}
+                {group.books.length
+                  ? `${group.books.length} ${group.books.length === 1 ? 'book' : 'books'}`
+                  : group.emptyLabel || '0 books'}
               </span>
             </a>
           ))}
         </nav>
 
         {levels.map((group) => (
-          <section key={group.id} className="library-level" aria-labelledby={`level-${group.id}`}>
+          <section
+            key={group.id}
+            className={`library-level${group.id === 'auctores-latini' ? ' library-level--authors' : ''}`}
+            aria-labelledby={`level-${group.id}`}
+          >
             <header className="library-level__head">
               <div>
                 <p className="eyebrow">{group.latin}</p>
@@ -91,16 +98,22 @@ export default function Library() {
                 </h2>
               </div>
               <p className="library-level__count">
-                {group.books.length} {group.books.length === 1 ? 'book' : 'books'}
+                {group.books.length
+                  ? `${group.books.length} ${group.books.length === 1 ? 'book' : 'books'}`
+                  : group.emptyLabel || '0 books'}
               </p>
             </header>
             <p className="library-level__desc muted">{group.description}</p>
 
-            <div className="book-grid">
-              {group.books.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
+            {group.books.length ? (
+              <div className="book-grid">
+                {group.books.map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+            ) : (
+              <p className="library-empty muted">{group.emptyNote || 'No books on this shelf yet.'}</p>
+            )}
           </section>
         ))}
       </div>
