@@ -3801,8 +3801,23 @@ button.lesson__keywords-label:focus-visible {
   align-items: start;
 }
 .dickey__main {
+  position: relative;
   min-width: 0;
-  max-width: 46rem;
+  max-width: 48rem;
+  padding: clamp(1.6rem, 3.4vw, 2.6rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.dickey__main::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--wine), var(--gold) 70%, transparent);
+  opacity: 0.55;
 }
 
 /* ---- Sections ---- */
