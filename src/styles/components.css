@@ -6241,8 +6241,31 @@ button.lesson__keywords-label:focus-visible {
   gap: 1rem;
   margin-top: 1.6rem;
 }
+.approach-shelf__column {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
 .approach-shelf__group {
   padding: 1.3rem 1.25rem;
+}
+.approach-shelf__group--authors {
+  display: flex;
+  flex-direction: column;
+}
+.approach-shelf__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.28rem 0;
+  border-bottom: 1px dotted var(--line-soft);
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.approach-shelf__more {
+  margin-top: auto;
+  padding-top: 1.2rem;
+  align-self: flex-start;
 }
 .approach-shelf__group h3 {
   font-size: 1rem;
@@ -6279,9 +6302,6 @@ button.lesson__keywords-label:focus-visible {
   margin-top: 1.3rem;
   font-size: 1rem;
   color: var(--ink-soft);
-}
-.approach-goal--wide {
-  max-width: none;
 }
 .approach-tools {
   display: grid;

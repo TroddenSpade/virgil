@@ -58,12 +58,15 @@ const originalAuthors = [
 ].sort(
   (a, b) => authorRank(a.label) - authorRank(b.label) || a.label.localeCompare(b.label),
 )
-const originalAuthorText =
-  originalAuthors.length > 1
-    ? `${originalAuthors.slice(0, -1).map((author) => author.label).join(', ')} and ${
-        originalAuthors[originalAuthors.length - 1].label
-      }`
-    : originalAuthors[0]?.label || ''
+const originalAuthorCounts = originalBooks.reduce((counts, book) => {
+  const key = authorIdentity(book).key
+  counts.set(key, (counts.get(key) || 0) + 1)
+  return counts
+}, new Map())
+const originalAuthorRows = originalAuthors.map((author) => ({
+  ...author,
+  count: originalAuthorCounts.get(author.key) || 0,
+}))
 
 const groups = [
   {
@@ -82,6 +85,27 @@ const groups = [
     items: shelf.filter((book) => book.kind === 'reader' && !originalSlugs.has(book.slug)),
   },
 ]
+
+function ShelfGroup({ group }) {
+  return (
+    <article className="approach-shelf__group card">
+      <p className="eyebrow">{group.label}</p>
+      <h3>{group.note}</h3>
+      <ul>
+        {group.items.map((book) => (
+          <li key={book.slug}>
+            <Link to={`/library/${book.slug}`}>
+              <span>{book.shortTitle}</span>
+              <span className="approach-shelf__count">
+                {book.chapterCount || book.chapters.length}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </article>
+  )
+}
 
 const principles = [
   {
@@ -472,32 +496,36 @@ export default function Home() {
               </Link>
             </div>
             <div className="approach-shelf">
-              {groups.map((group) => (
-                <article className="approach-shelf__group card" key={group.label}>
-                  <p className="eyebrow">{group.label}</p>
-                  <h3>{group.note}</h3>
+              <div className="approach-shelf__column">
+                {groups.slice(0, 2).map((group) => (
+                  <ShelfGroup key={group.label} group={group} />
+                ))}
+              </div>
+              {groups.slice(2).map((group) => (
+                <ShelfGroup key={group.label} group={group} />
+              ))}
+              {originalAuthorRows.length > 0 && (
+                <article className="approach-shelf__group approach-shelf__group--authors card">
+                  <p className="eyebrow">Latīnistae</p>
+                  <h3>The complete originals</h3>
                   <ul>
-                    {group.items.map((book) => (
-                      <li key={book.slug}>
-                        <Link to={`/library/${book.slug}`}>
-                          <span>{book.shortTitle}</span>
+                    {originalAuthorRows.map((author) => (
+                      <li key={author.key}>
+                        <span className="approach-shelf__row">
+                          <span>{author.label}</span>
                           <span className="approach-shelf__count">
-                            {book.chapterCount || book.chapters.length}
+                            {author.count} {author.count === 1 ? 'work' : 'works'}
                           </span>
-                        </Link>
+                        </span>
                       </li>
                     ))}
                   </ul>
+                  <Link className="back-link approach-shelf__more" to="/library#level-latinae-periti">
+                    Open the shelf →
+                  </Link>
                 </article>
-              ))}
+              )}
             </div>
-            {originalBooks.length > 0 && (
-              <p className="approach-goal approach-goal--wide">
-                The <span className="latin">Latīnistae</span> shelf gathers the complete originals —{' '}
-                {originalAuthorText} — with a filter by author.{' '}
-                <Link to="/library#level-latinae-periti">Open the Latīnistae shelf →</Link>
-              </p>
-            )}
             {goalBook && (
               <p className="approach-goal">
                 And at the end of the road: <span className="latin">{goalBook.latinTitle}</span> — the{' '}
