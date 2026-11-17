@@ -21,7 +21,14 @@ const firstRomaAeternaChapter = romaAeternaBook.chapters[0]
 // The shelf as the project really stands: every book that carries text.
 const shelf = books.filter((book) => book.chapters?.length)
 const bookCount = shelf.length
-const textCount = shelf.reduce((total, book) => total + (book.chapterCount || 0), 0)
+const originalSlugs = new Set(authorShelf.slugs)
+// Every chapter, plus the sections of the complete originals: the Latīnistae
+// shelf is a reading collection of its own, outside the Iter.
+const textCount =
+  shelf.reduce((total, book) => total + (book.chapterCount || 0), 0) +
+  shelf
+    .filter((book) => originalSlugs.has(book.slug))
+    .reduce((total, book) => total + (book.readingCount || 0), 0)
 const stageCount = iterStages.length
 const goalBook = books.find((book) => book.isGoal)
 
@@ -40,7 +47,6 @@ const PRACTICE_SLUGS = [
 
 const bySlug = (slug) => shelf.find((book) => book.slug === slug)
 
-const originalSlugs = new Set(authorShelf.slugs)
 const originalBooks = authorShelf.slugs.map(bySlug).filter(Boolean)
 const originalAuthors = [
   ...new Map(
