@@ -12,8 +12,9 @@
  *
  * The alternative courses (Learn Latin from the Romans, Latin via Ovid) are
  * placed in the band their grammar belongs to, after the Lingua Latina family,
- * so they never break the main sequence. Reference matter (answer keys,
- * glossaries, appendices) is left off the road.
+ * so they never break the main sequence. The complete originals on the
+ * Latīnistae shelf are a separate collection and are left off the road, as is
+ * reference matter (answer keys, glossaries, appendices).
  *
  * Output: src/data/learning-path.generated.js
  *
@@ -23,7 +24,7 @@
 import { writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { books } from '../src/data/library.js'
+import { books, authorShelf } from '../src/data/library.js'
 import { describeKeyword } from '../src/data/keywords.js'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -220,6 +221,11 @@ const AUTHOR_BOOKS = new Set([
 ])
 const ALTERNATIVE_BOOKS = new Set(['learn-latin', 'latin-via-ovid'])
 
+// The complete originals on the Latīnistae shelf are a separate reading
+// collection. They are not stops on the Lingua Latina road, so they stay out
+// of the Iter; the school editions on the Advanced shelf remain stage IX.
+const LATINISTAE_BOOKS = new Set(authorShelf.slugs)
+
 // Look-up matter, not lessons: answer keys, glossaries and appendices.
 const EXCLUDED = new Set([
   'learn-latin:capitulum-62', // How to Use the Appendices
@@ -400,6 +406,11 @@ for (const book of books) {
 }
 
 for (const book of books) {
+  if (LATINISTAE_BOOKS.has(book.slug)) {
+    // Count the complete originals as deliberately left off the road.
+    excluded += (book.chapters || []).filter((chapter) => chapter.complete).length
+    continue
+  }
   for (const chapter of book.chapters || []) {
     if (!chapter.complete) continue
     const key = `${book.slug}/${chapter.slug}`
@@ -517,6 +528,7 @@ for (const stage of STAGES) {
   }
   let expected = 0
   for (const book of books) {
+    if (LATINISTAE_BOOKS.has(book.slug)) continue
     for (const chapter of book.chapters || []) {
       if (!chapter.complete) continue
       if (EXCLUDED.has(`${book.id}:${chapter.slug}`)) continue

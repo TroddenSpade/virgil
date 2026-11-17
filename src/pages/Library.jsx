@@ -12,7 +12,9 @@ function BookCard({ book }) {
   return (
     <Card {...cardProps}>
       <div className="book-card__top">
-        <span className="book-card__level">{book.level}</span>
+        <span className="book-card__level">
+          {book.isAuthorShelf ? 'Latīnistae' : book.level}
+        </span>
         {isActive ? (
           <span className="tag tag--laurel">open</span>
         ) : (

@@ -441,14 +441,15 @@ export const levelGroups = [
   },
 ]
 
-// The dedicated shelf for the complete original works. The existing school
-// editions remain in the Advanced stage; complete editions are added here by
-// slug and filtered by author on the page.
+// The dedicated shelf for the complete original works. These editions are a
+// reading collection of their own and are deliberately left off the Iter; the
+// existing school editions remain in the Advanced stage and on the road.
+// Complete editions are added here by slug and filtered by author on the page.
 export const authorShelf = {
   id: 'latinae-periti',
   modifier: 'library-level--collection',
   title: 'Latīnistae',
-  latin: 'Linguae Latīnae perītī',
+  latin: 'Opera orīginālia',
   description:
     'A shelf for Latinists — readers at home in the original language: Caesar in history and letters, ' +
     'Cicero in oratory and letters, Catullus, Vergil, Horace and Ovid in verse, and further authors as ' +
