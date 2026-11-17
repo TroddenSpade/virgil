@@ -18,6 +18,30 @@ import { book as aeneis, chapters as aeneisChapters } from './vergil-aeneis-i-et
 import { book as catilina, chapters as catilinaChapters } from './sallustius-cicero-catilina/index.js'
 import { book as amphitryo, chapters as amphitryoChapters } from './plautus-amphitryo/index.js'
 import { book as catullus, chapters as catullusChapters } from './catullus-carmina/index.js'
+import { book as ciceroFamiliares, chapters as ciceroFamiliaresChapters } from './cicero-epistulae-ad-familiares/index.js'
+import { book as caesarGallico, chapters as caesarGallicoChapters } from './caesar-de-bello-gallico/index.js'
+import { book as caesarCivili, chapters as caesarCiviliChapters } from './caesar-de-bello-civili/index.js'
+import { book as caesarAlexandrinum, chapters as caesarAlexandrinumChapters } from './caesar-bellum-alexandrinum/index.js'
+import { book as caesarAfricum, chapters as caesarAfricumChapters } from './caesar-bellum-africum/index.js'
+import { book as caesarHispaniense, chapters as caesarHispanienseChapters } from './caesar-bellum-hispaniense/index.js'
+import { book as ovidMetamorphoses, chapters as ovidMetamorphosesChapters } from './ovidius-metamorphoses/index.js'
+import { book as ovidAmores, chapters as ovidAmoresChapters } from './ovidius-amores/index.js'
+import { book as ovidHeroides, chapters as ovidHeroidesChapters } from './ovidius-heroides/index.js'
+import { book as ovidArsAmatoria, chapters as ovidArsAmatoriaChapters } from './ovidius-ars-amatoria/index.js'
+import { book as ovidTristia, chapters as ovidTristiaChapters } from './ovidius-tristia/index.js'
+import { book as ovidExPonto, chapters as ovidExPontoChapters } from './ovidius-ex-ponto/index.js'
+import { book as ovidFasti, chapters as ovidFastiChapters } from './ovidius-fasti/index.js'
+import { book as ovidRemedia, chapters as ovidRemediaChapters } from './ovidius-remedia-amoris/index.js'
+import { book as ovidIbis, chapters as ovidIbisChapters } from './ovidius-ibis/index.js'
+import { book as vergilAeneis, chapters as vergilAeneisChapters } from './vergil-aeneis/index.js'
+import { book as vergilEclogae, chapters as vergilEclogaeChapters } from './vergil-eclogae/index.js'
+import { book as vergilGeorgica, chapters as vergilGeorgicaChapters } from './vergil-georgica/index.js'
+import { book as horaceSermones, chapters as horaceSermonesChapters } from './horatius-sermones/index.js'
+import { book as horaceCarmina, chapters as horaceCarminaChapters } from './horatius-carmina/index.js'
+import { book as horaceEpistulae, chapters as horaceEpistulaeChapters } from './horatius-epistulae/index.js'
+import { book as horaceArsPoetica, chapters as horaceArsPoeticaChapters } from './horatius-ars-poetica/index.js'
+import { book as horaceCarmenSaeculare, chapters as horaceCarmenSaeculareChapters } from './horatius-carmen-saeculare/index.js'
+import { book as horaceEpodi, chapters as horaceEpodiChapters } from './horatius-epodi/index.js'
 import { chapterKeywords } from './chapter-keywords.generated.js'
 
 // Reference sources are the full texts extracted from the source editions.
@@ -88,6 +112,104 @@ export const amphitryoBook = {
 export const catullusBook = {
   ...catullus,
   chapters: catullusChapters,
+}
+
+export const ciceroFamiliaresBook = {
+  ...ciceroFamiliares,
+  chapters: ciceroFamiliaresChapters,
+}
+
+export const caesarGallicoBook = {
+  ...caesarGallico,
+  chapters: caesarGallicoChapters,
+}
+export const caesarCiviliBook = {
+  ...caesarCivili,
+  chapters: caesarCiviliChapters,
+}
+export const caesarAlexandrinumBook = {
+  ...caesarAlexandrinum,
+  chapters: caesarAlexandrinumChapters,
+}
+export const caesarAfricumBook = {
+  ...caesarAfricum,
+  chapters: caesarAfricumChapters,
+}
+export const caesarHispanienseBook = {
+  ...caesarHispaniense,
+  chapters: caesarHispanienseChapters,
+}
+export const ovidMetamorphosesBook = {
+  ...ovidMetamorphoses,
+  chapters: ovidMetamorphosesChapters,
+}
+export const ovidAmoresBook = {
+  ...ovidAmores,
+  chapters: ovidAmoresChapters,
+}
+export const ovidHeroidesBook = {
+  ...ovidHeroides,
+  chapters: ovidHeroidesChapters,
+}
+export const ovidArsAmatoriaBook = {
+  ...ovidArsAmatoria,
+  chapters: ovidArsAmatoriaChapters,
+}
+export const ovidTristiaBook = {
+  ...ovidTristia,
+  chapters: ovidTristiaChapters,
+}
+export const ovidExPontoBook = {
+  ...ovidExPonto,
+  chapters: ovidExPontoChapters,
+}
+export const ovidFastiBook = {
+  ...ovidFasti,
+  chapters: ovidFastiChapters,
+}
+export const ovidRemediaBook = {
+  ...ovidRemedia,
+  chapters: ovidRemediaChapters,
+}
+export const ovidIbisBook = {
+  ...ovidIbis,
+  chapters: ovidIbisChapters,
+}
+export const vergilAeneisBook = {
+  ...vergilAeneis,
+  chapters: vergilAeneisChapters,
+}
+export const vergilEclogaeBook = {
+  ...vergilEclogae,
+  chapters: vergilEclogaeChapters,
+}
+export const vergilGeorgicaBook = {
+  ...vergilGeorgica,
+  chapters: vergilGeorgicaChapters,
+}
+export const horaceSermonesBook = {
+  ...horaceSermones,
+  chapters: horaceSermonesChapters,
+}
+export const horaceCarminaBook = {
+  ...horaceCarmina,
+  chapters: horaceCarminaChapters,
+}
+export const horaceEpistulaeBook = {
+  ...horaceEpistulae,
+  chapters: horaceEpistulaeChapters,
+}
+export const horaceArsPoeticaBook = {
+  ...horaceArsPoetica,
+  chapters: horaceArsPoeticaChapters,
+}
+export const horaceCarmenSaeculareBook = {
+  ...horaceCarmenSaeculare,
+  chapters: horaceCarmenSaeculareChapters,
+}
+export const horaceEpodiBook = {
+  ...horaceEpodi,
+  chapters: horaceEpodiChapters,
 }
 
 
@@ -188,6 +310,30 @@ export const books = [
   catilinaBook,
   amphitryoBook,
   catullusBook,
+  ciceroFamiliaresBook,
+  caesarGallicoBook,
+  caesarCiviliBook,
+  caesarAlexandrinumBook,
+  caesarAfricumBook,
+  caesarHispanienseBook,
+  ovidMetamorphosesBook,
+  ovidAmoresBook,
+  ovidHeroidesBook,
+  ovidArsAmatoriaBook,
+  ovidTristiaBook,
+  ovidExPontoBook,
+  ovidFastiBook,
+  ovidRemediaBook,
+  ovidIbisBook,
+  vergilAeneisBook,
+  vergilEclogaeBook,
+  vergilGeorgicaBook,
+  horaceSermonesBook,
+  horaceCarminaBook,
+  horaceEpistulaeBook,
+  horaceArsPoeticaBook,
+  horaceCarmenSaeculareBook,
+  horaceEpodiBook,
   companionRABook,
   companionBook,
   learnLatinBook,
@@ -215,7 +361,31 @@ const BOOK_ORDER = [
   'petronius-cena-trimalchionis',
   'vergil-aeneis-i-et-iv',
   'ovidii-ars-amatoria',
+  'caesar-de-bello-gallico',
+  'caesar-de-bello-civili',
+  'caesar-bellum-alexandrinum',
+  'caesar-bellum-africum',
+  'caesar-bellum-hispaniense',
+  'cicero-epistulae-ad-familiares',
   'catullus-carmina',
+  'vergil-aeneis',
+  'vergil-eclogae',
+  'vergil-georgica',
+  'horatius-sermones',
+  'horatius-carmina',
+  'horatius-epistulae',
+  'horatius-ars-poetica',
+  'horatius-carmen-saeculare',
+  'horatius-epodi',
+  'ovidius-metamorphoses',
+  'ovidius-amores',
+  'ovidius-heroides',
+  'ovidius-ars-amatoria',
+  'ovidius-fasti',
+  'ovidius-tristia',
+  'ovidius-ex-ponto',
+  'ovidius-remedia-amoris',
+  'ovidius-ibis',
 ]
 const BOOK_RANK = new Map(BOOK_ORDER.map((slug, index) => [slug, index]))
 books.sort((a, b) => (BOOK_RANK.get(a.slug) ?? 99) - (BOOK_RANK.get(b.slug) ?? 99))
@@ -271,24 +441,49 @@ export const levelGroups = [
   },
 ]
 
-// A dedicated shelf for the original works. It starts empty: new original
-// editions are added here by slug as they arrive, while the existing author
-// editions remain in the Advanced stage. Horace and further authors can join
-// this shelf in the same way.
+// The dedicated shelf for the complete original works. The existing school
+// editions remain in the Advanced stage; complete editions are added here by
+// slug and filtered by author on the page.
 export const authorShelf = {
   id: 'latinae-periti',
   modifier: 'library-level--collection',
   title: 'Latīnistae',
   latin: 'Linguae Latīnae perītī',
   description:
-    'A shelf for Latinists — readers at home in the original language: Caesar and Sallust in history, ' +
-    'Cicero in oratory, Plautus and Petronius for the stage and the novel, Vergil and Ovid in verse, ' +
-    'and the authors still to come, such as Horace.',
+    'A shelf for Latinists — readers at home in the original language: Caesar in history and letters, ' +
+    'Cicero in oratory and letters, Catullus, Vergil, Horace and Ovid in verse, and further authors as ' +
+    'their texts are added.',
   emptyLabel: 'new shelf',
   emptyNote:
     'The first original texts will appear here as they are added. The existing author editions remain ' +
     'on the Advanced shelf.',
-  slugs: ['catullus-carmina'],
+  slugs: [
+    'caesar-de-bello-gallico',
+    'caesar-de-bello-civili',
+    'caesar-bellum-alexandrinum',
+    'caesar-bellum-africum',
+    'caesar-bellum-hispaniense',
+    'cicero-epistulae-ad-familiares',
+    'catullus-carmina',
+    'vergil-aeneis',
+    'vergil-eclogae',
+    'vergil-georgica',
+    'horatius-sermones',
+    'horatius-carmina',
+    'horatius-epistulae',
+    'horatius-ars-poetica',
+    'horatius-carmen-saeculare',
+    'horatius-epodi',
+    'ovidius-metamorphoses',
+    'ovidius-amores',
+    'ovidius-heroides',
+    'ovidius-ars-amatoria',
+    'ovidius-fasti',
+    'ovidius-tristia',
+    'ovidius-ex-ponto',
+    'ovidius-remedia-amoris',
+    'ovidius-ibis',
+  ],
 }
 
 // The order in which shelves are rendered on /library.
@@ -297,6 +492,7 @@ export const libraryShelves = [...levelGroups, authorShelf]
 // Original-language editions get the diacritics menu in their reading
 // toolbar. This includes the new authors shelf and the existing Advanced
 // author editions, whose texts carry printed macra.
+const AUTHOR_SHELF_SLUGS = new Set(authorShelf.slugs)
 const ORIGINAL_EDITIONS = new Set([
   ...authorShelf.slugs,
   ...(levelGroups.find((group) => group.id === 'advanced')?.slugs || []),
@@ -326,6 +522,30 @@ const HERO_MARKS = {
   'sallustius-cicero-catilina': 'CATILINA',
   'plautus-amphitryo': 'AMPHITRYO',
   'catullus-carmina': 'CATVLLVS',
+  'cicero-epistulae-ad-familiares': 'CICERO',
+  'caesar-de-bello-gallico': 'BELL. GALL.',
+  'caesar-de-bello-civili': 'BELL. CIV.',
+  'caesar-bellum-alexandrinum': 'ALEX.',
+  'caesar-bellum-africum': 'AFR.',
+  'caesar-bellum-hispaniense': 'HISP.',
+  'vergil-aeneis': 'AENEIS',
+  'vergil-eclogae': 'ECLOGAE',
+  'vergil-georgica': 'GEORG.',
+  'horatius-sermones': 'SERM.',
+  'horatius-carmina': 'CARM.',
+  'horatius-epistulae': 'EPIST.',
+  'horatius-ars-poetica': 'ARS POET.',
+  'horatius-carmen-saeculare': 'CARM. SAEC.',
+  'horatius-epodi': 'EPODI',
+  'ovidius-metamorphoses': 'METAM.',
+  'ovidius-amores': 'AMORES',
+  'ovidius-heroides': 'HEROIDES',
+  'ovidius-ars-amatoria': 'ARS AM.',
+  'ovidius-fasti': 'FASTI',
+  'ovidius-tristia': 'TRISTIA',
+  'ovidius-ex-ponto': 'EX PONTO',
+  'ovidius-remedia-amoris': 'REMEDIA',
+  'ovidius-ibis': 'IBIS',
   'companion-roma-aeterna': 'COMES II',
   companion: 'COMES I',
   'learn-latin': 'DISC. LAT.',
@@ -334,6 +554,7 @@ const HERO_MARKS = {
 
 for (const book of books) {
   book.heroMark = HERO_MARKS[book.id] || book.shortTitle?.toUpperCase() || 'LIBER'
+  book.isAuthorShelf = AUTHOR_SHELF_SLUGS.has(book.slug)
   book.isOriginalEdition = ORIGINAL_EDITIONS.has(book.slug)
   for (const chapter of book.chapters || []) {
     chapter.keywords = chapterKeywords[`${book.slug}/${chapter.slug}`] || []

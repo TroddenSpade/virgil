@@ -204,6 +204,62 @@
 .library-level .book-grid {
   margin-top: 1.3rem;
 }
+.library-author-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.35rem;
+}
+.library-author-filter__label {
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.library-author-filter__control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.library-author-filter select {
+  appearance: none;
+  min-width: 14rem;
+  padding: 0.62rem 2.35rem 0.62rem 0.95rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.library-author-filter select:hover,
+.library-author-filter select:focus-visible {
+  border-color: var(--bronze);
+  outline: none;
+  box-shadow: var(--shadow-sm), 0 0 0 1px var(--bronze);
+}
+.library-author-filter__arrow {
+  position: absolute;
+  right: 0.85rem;
+  pointer-events: none;
+  color: var(--bronze);
+  font-size: 0.72rem;
+}
+.book-grid.book-grid--authors {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 760px) {
+  .book-grid.book-grid--authors {
+    grid-template-columns: 1fr;
+  }
+}
 
 .book-grid {
   display: grid;

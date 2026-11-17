@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { books, libraryShelves } from '../data/library.js'
+import { authorIdentity, authorRank, displayTitle } from '../lib/authors.js'
 
 function BookCard({ book }) {
   const isActive = book.status === 'active'
@@ -17,7 +19,7 @@ function BookCard({ book }) {
           <span className="tag tag--gold">soon</span>
         )}
       </div>
-      <h2 className="book-card__title">{book.title}</h2>
+      <h2 className="book-card__title">{displayTitle(book)}</h2>
       {book.latinTitle && <p className="book-card__latin latin">{book.latinTitle}</p>}
       <p className="book-card__meta muted">
         {book.author}
@@ -48,6 +50,7 @@ function BookCard({ book }) {
 }
 
 export default function Library() {
+  const [authorFilter, setAuthorFilter] = useState('all')
   const levels = libraryShelves.map((group) => ({
     ...group,
     books: group.slugs
@@ -84,38 +87,96 @@ export default function Library() {
           ))}
         </nav>
 
-        {levels.map((group) => (
-          <section
-            key={group.id}
-            className={`library-level${group.modifier ? ` ${group.modifier}` : ''}`}
-            aria-labelledby={`level-${group.id}`}
-          >
-            <header className="library-level__head">
-              <div>
-                <p className="eyebrow">{group.latin}</p>
-                <h2 className="library-level__title" id={`level-${group.id}`}>
-                  {group.title}
-                </h2>
-              </div>
-              <p className="library-level__count">
-                {group.books.length
-                  ? `${group.books.length} ${group.books.length === 1 ? 'book' : 'books'}`
-                  : group.emptyLabel || '0 books'}
-              </p>
-            </header>
-            <p className="library-level__desc muted">{group.description}</p>
+        {levels.map((group) => {
+          const isAuthors = group.id === 'latinae-periti'
+          const authorOptions = isAuthors
+            ? [
+                ...group.books
+                  .reduce((map, book) => {
+                    const identity = authorIdentity(book)
+                    const existing = map.get(identity.key)
+                    if (existing) existing.count += 1
+                    else map.set(identity.key, { ...identity, count: 1 })
+                    return map
+                  }, new Map())
+                  .values(),
+              ].sort(
+                (a, b) =>
+                  authorRank(a.label) - authorRank(b.label) ||
+                  a.label.localeCompare(b.label),
+              )
+            : []
+          const activeAuthor = authorOptions.some((option) => option.key === authorFilter)
+            ? authorFilter
+            : 'all'
+          const visibleBooks =
+            isAuthors && activeAuthor !== 'all'
+              ? group.books.filter((book) => authorIdentity(book).key === activeAuthor)
+              : group.books
+          const countLabel = isAuthors
+            ? activeAuthor === 'all'
+              ? `${group.books.length} ${group.books.length === 1 ? 'work' : 'works'}`
+              : `${visibleBooks.length} of ${group.books.length} works`
+            : group.books.length
+              ? `${group.books.length} ${group.books.length === 1 ? 'book' : 'books'}`
+              : group.emptyLabel || '0 books'
 
-            {group.books.length ? (
-              <div className="book-grid">
-                {group.books.map((book) => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
-            ) : (
-              <p className="library-empty muted">{group.emptyNote || 'No books on this shelf yet.'}</p>
-            )}
-          </section>
-        ))}
+          return (
+            <section
+              key={group.id}
+              className={`library-level${group.modifier ? ` ${group.modifier}` : ''}`}
+              aria-labelledby={`level-${group.id}`}
+            >
+              <header className="library-level__head">
+                <div>
+                  <p className="eyebrow">{group.latin}</p>
+                  <h2 className="library-level__title" id={`level-${group.id}`}>
+                    {group.title}
+                  </h2>
+                </div>
+                <p className="library-level__count">{countLabel}</p>
+              </header>
+              <p className="library-level__desc muted">{group.description}</p>
+
+              {isAuthors && authorOptions.length > 1 && (
+                <div className="library-author-filter">
+                  <label className="library-author-filter__label" htmlFor="latinae-author-filter">
+                    Author
+                  </label>
+                  <div className="library-author-filter__control">
+                    <select
+                      id="latinae-author-filter"
+                      value={activeAuthor}
+                      onChange={(event) => setAuthorFilter(event.target.value)}
+                    >
+                      <option value="all">All authors</option>
+                      {authorOptions.map((option) => (
+                        <option key={option.key} value={option.key}>
+                          {option.label} ({option.count})
+                        </option>
+                      ))}
+                    </select>
+                    <span className="library-author-filter__arrow" aria-hidden="true">
+                      ▾
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {visibleBooks.length ? (
+                <div className={`book-grid${isAuthors ? ' book-grid--authors' : ''}`}>
+                  {visibleBooks.map((book) => (
+                    <BookCard key={book.id} book={book} />
+                  ))}
+                </div>
+              ) : (
+                <p className="library-empty muted">
+                  {group.emptyNote || 'No books on this shelf yet.'}
+                </p>
+              )}
+            </section>
+          )
+        })}
       </div>
     </section>
   )

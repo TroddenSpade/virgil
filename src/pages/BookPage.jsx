@@ -1,5 +1,6 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { books, getBook } from '../data/library.js'
+import { displayTitle } from '../lib/authors.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import KeywordChips from '../components/KeywordChips.jsx'
 
@@ -33,7 +34,7 @@ function ReferenceBook({ book }) {
             </span>
           )}
           <p className="eyebrow">{book.latinTitle}</p>
-          <h1 className="book-hero__title">{book.title}</h1>
+          <h1 className="book-hero__title">{displayTitle(book)}</h1>
           <p className="book-hero__meta muted">
             {book.author} · {book.edition} · {book.publisher}, {book.year}
             {book.isbn ? ` · ISBN ${book.isbn}` : ''}
@@ -123,7 +124,7 @@ function ActiveBook({ book }) {
             </span>
           )}
           <p className="eyebrow">{book.latinTitle}</p>
-          <h1 className="book-hero__title">{book.title}</h1>
+          <h1 className="book-hero__title">{displayTitle(book)}</h1>
           <p className="book-hero__meta muted">
             {book.author} · {book.edition} · {book.publisher}, {book.year}
             {book.isbn ? ` · ISBN ${book.isbn}` : ''}

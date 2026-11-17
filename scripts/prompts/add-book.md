@@ -32,6 +32,8 @@ BOOK METADATA
 - Accent: wine | laurel | gold | ivory
 - Source / rights note:
 - Diacritics in the source: printed | none | editorial/uncertain
+  (If the book goes on Advanced or Latīnistae and the source prints none, editorial
+  macra are required; see rule 2.)
 
 TEXT TO ADD
 -----------
@@ -49,12 +51,17 @@ lost or duplicated.
    labels, section order, and verse line breaks. Do not translate, summarize, modernize,
    or "improve" the Latin. Do not add sentences that are not in the source.
 2. **Preserve every printed diacritic.** Keep macra (ā), breves (ă), diaereses (ë),
-   acute accents (á) and apices (´) exactly as the edition prints them. If the source
-   prints none, do not invent a whole scheme; if you add editorial marks, say so in the
-   book description, `extras`, and your report.
-3. **Diacritics are display-only.** The reading toolbar can hide diacritic classes, but
-   the underlying data always keeps them. The menu belongs to original editions on the
-   Advanced and Latīnistae shelves only; do not add it to Beginner or Intermediate books.
+   acute accents (á) and apices (´) exactly as the edition prints them.
+   **If the book is on Advanced or Latīnistae and the source prints none, editorial
+   macra are mandatory.** Use a documented, reliable method (for example the Alatius
+   Latin Macronizer), keep the source's words otherwise unchanged, and say in the book
+   description, `extras`, and your report that the marks are editorial. Do not ship an
+   Advanced/Latīnistae book with an inert Diacritics menu.
+3. **Diacritics must be functional where they are offered.** The reading toolbar can
+   hide diacritic classes, but the underlying data always keeps them. The menu belongs
+   to original editions on the Advanced and Latīnistae shelves only; do not add it to
+   Beginner or Intermediate books. On Advanced/Latīnistae, at least one reading class
+   must visibly change when a box is unchecked.
 4. **One dictionary entry per word, regardless of diacritics.** Fold macra, breves,
    diaereses, acute accents, apices and their combining marks before comparing keys.
    `Rōma`, `Roma`, `Rŏma` and `Roma´` are the same word, not four entries. Keep the
@@ -460,6 +467,9 @@ Requirements:
 - No lemma without a usable English definition.
 - No word without a lemma or with an invalid source.
 - No new paradigm gaps.
+- For an Advanced or Latīnistae book, the Diacritics menu must actually change the
+  reading text. If the source is unmarked, add editorial macra and rebuild before
+  declaring the book done.
 - `validate:keywords` must exit 0.
 - All tests pass.
 - The production build succeeds. The build script already sets the required heap size.
@@ -489,9 +499,10 @@ Check:
 3. `/library/<slug>/<first-chapter-slug>` — reading renders with macra, breves,
    diaereses, acute accents, italics, notes, vocabulary, grammar, and exercises.
 4. For an **Advanced** or **Latīnistae** book, confirm the **Diacritics** button appears
-   at the top of each reading section. Open it, hide one class, confirm the text changes,
-   use **Show All** / **Hide All**, and confirm clicking outside or pressing Escape
-   closes the dropdown.
+   at the top of each reading section. Open it, hide **Macrons**, and confirm the text
+   visibly changes (e.g. `Rōma` → `Roma`). If it does not, add editorial macra, rebuild,
+   and test again. Use **Show All** / **Hide All**, and confirm clicking outside or
+   pressing Escape closes the dropdown.
 5. Confirm the Diacritics button does **not** appear on Beginner or Intermediate books.
 6. Toggle **Lexicon mode**; click several words (including a proper name and a rare
    word); confirm the popover shows a sensible gloss and the paradigm/full-entry links
@@ -539,7 +550,8 @@ DIACRITICS
 - Menu absent from Beginner/Intermediate:
 - Types tested (macra/breves/diaereses/acutes/apices):
 - Show All / Hide All / outside click:
-- Editorial marks or source notes:
+- Editorial marks or source notes (required if source has none):
+- Text visibly changes when a class is unchecked: yes/no
 - Dictionary diacritic duplicates: none / details
 
 QA

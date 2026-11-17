@@ -6,7 +6,9 @@ import {
   companionBook,
   colloquiaBook,
   fabulaeBook,
+  authorShelf,
 } from '../data/library.js'
+import { authorIdentity, authorRank } from '../lib/authors.js'
 import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import VirgilLines from '../components/VirgilLines.jsx'
@@ -38,6 +40,25 @@ const PRACTICE_SLUGS = [
 
 const bySlug = (slug) => shelf.find((book) => book.slug === slug)
 
+const originalSlugs = new Set(authorShelf.slugs)
+const originalBooks = authorShelf.slugs.map(bySlug).filter(Boolean)
+const originalAuthors = [
+  ...new Map(
+    originalBooks.map((book) => {
+      const identity = authorIdentity(book)
+      return [identity.key, identity]
+    }),
+  ).values(),
+].sort(
+  (a, b) => authorRank(a.label) - authorRank(b.label) || a.label.localeCompare(b.label),
+)
+const originalAuthorText =
+  originalAuthors.length > 1
+    ? `${originalAuthors.slice(0, -1).map((author) => author.label).join(', ')} and ${
+        originalAuthors[originalAuthors.length - 1].label
+      }`
+    : originalAuthors[0]?.label || ''
+
 const groups = [
   {
     label: 'The course',
@@ -52,7 +73,7 @@ const groups = [
   {
     label: 'Readers',
     note: 'More Latin, from dialogue to history',
-    items: shelf.filter((book) => book.kind === 'reader'),
+    items: shelf.filter((book) => book.kind === 'reader' && !originalSlugs.has(book.slug)),
   },
 ]
 
@@ -127,7 +148,7 @@ const tools = [
   {
     mark: 'LIB',
     title: 'The Library',
-    body: 'The course, the exercise books, the companions, the readers and the authors — shelved together and labelled by grammar, theme and text.',
+    body: 'The course, the exercise books, the companions, the readers and the complete originals on the Latīnistae shelf — shelved together and labelled by grammar, theme and text.',
     to: '/library',
     link: 'Browse the library →',
   },
@@ -464,6 +485,13 @@ export default function Home() {
                 </article>
               ))}
             </div>
+            {originalBooks.length > 0 && (
+              <p className="approach-goal">
+                The <span className="latin">Latīnistae</span> shelf gathers the complete originals —{' '}
+                {originalAuthorText} — with a filter by author.{' '}
+                <Link to="/library#level-latinae-periti">Open the Latīnistae shelf →</Link>
+              </p>
+            )}
             {goalBook && (
               <p className="approach-goal">
                 And at the end of the road: <span className="latin">{goalBook.latinTitle}</span> — the{' '}

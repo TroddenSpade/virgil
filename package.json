@@ -6,8 +6,8 @@
   "description": "Virgil — a Latin learning project. From Ørberg's Familia Romana to the works of Virgil.",
   "scripts": {
     "dev": "vite",
-    "build": "NODE_OPTIONS=--max-old-space-size=4096 vite build && node scripts/postbuild.mjs",
-    "build:pages": "NODE_OPTIONS=--max-old-space-size=4096 VITE_BASE=/ vite build && node scripts/postbuild.mjs",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 vite build && node scripts/postbuild.mjs",
+    "build:pages": "NODE_OPTIONS=--max-old-space-size=8192 VITE_BASE=/ vite build && node scripts/postbuild.mjs",
     "preview": "vite preview --host",
     "icons": "python3 scripts/generate-icons.py",
     "keywords": "node scripts/build-chapter-keywords.mjs",

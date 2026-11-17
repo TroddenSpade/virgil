@@ -17,6 +17,40 @@ import { dirname, join } from 'node:path'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 
+const ORIGINAL_BOOK_IDS = [
+  'caesar-de-bello-gallico-vii',
+  'vergil-aeneis-i-et-iv',
+  'ovidii-ars-amatoria',
+  'petronius-cena-trimalchionis',
+  'sallustius-cicero-catilina',
+  'plautus-amphitryo',
+  'catullus-carmina',
+  'cicero-epistulae-ad-familiares',
+  'caesar-de-bello-gallico',
+  'caesar-de-bello-civili',
+  'caesar-bellum-alexandrinum',
+  'caesar-bellum-africum',
+  'caesar-bellum-hispaniense',
+  'ovidius-metamorphoses',
+  'ovidius-amores',
+  'ovidius-heroides',
+  'ovidius-ars-amatoria',
+  'ovidius-tristia',
+  'ovidius-ex-ponto',
+  'ovidius-fasti',
+  'ovidius-remedia-amoris',
+  'ovidius-ibis',
+  'vergil-aeneis',
+  'vergil-eclogae',
+  'vergil-georgica',
+  'horatius-sermones',
+  'horatius-carmina',
+  'horatius-epistulae',
+  'horatius-ars-poetica',
+  'horatius-carmen-saeculare',
+  'horatius-epodi',
+]
+
 const MODULES = [
   'familia-romana',
   'roma-aeterna',
@@ -33,6 +67,30 @@ const MODULES = [
   'sallustius-cicero-catilina',
   'plautus-amphitryo',
   'catullus-carmina',
+  'cicero-epistulae-ad-familiares',
+  'caesar-de-bello-gallico',
+  'caesar-de-bello-civili',
+  'caesar-bellum-alexandrinum',
+  'caesar-bellum-africum',
+  'caesar-bellum-hispaniense',
+  'ovidius-metamorphoses',
+  'ovidius-amores',
+  'ovidius-heroides',
+  'ovidius-ars-amatoria',
+  'ovidius-tristia',
+  'ovidius-ex-ponto',
+  'ovidius-fasti',
+  'ovidius-remedia-amoris',
+  'ovidius-ibis',
+  'vergil-aeneis',
+  'vergil-eclogae',
+  'vergil-georgica',
+  'horatius-sermones',
+  'horatius-carmina',
+  'horatius-epistulae',
+  'horatius-ars-poetica',
+  'horatius-carmen-saeculare',
+  'horatius-epodi',
   'companion-roma-aeterna',
   'companion',
   'learn-latin',
@@ -637,7 +695,7 @@ function textTypes(chapter, ctx) {
 
   const hasLatinText = hasReadings || bookId.startsWith('exercitia') || bookId === 'familia-romana' || bookId === 'roma-aeterna' || bookId === 'learn-latin' || bookId === 'latin-via-ovid'
   if (hasLatinText && !['companion', 'companion-roma-aeterna'].includes(bookId)) {
-    if (['caesar-de-bello-gallico-vii', 'vergil-aeneis-i-et-iv', 'ovidii-ars-amatoria', 'petronius-cena-trimalchionis', 'sallustius-cicero-catilina', 'plautus-amphitryo', 'catullus-carmina'].includes(bookId)) {
+    if (ORIGINAL_BOOK_IDS.includes(bookId)) {
       out.add('original-latin')
     } else {
       out.add('adapted-latin')
@@ -691,7 +749,7 @@ function levelFor(chapter, ctx) {
     if (n <= 25) return 'elementary'
     return 'intermediate'
   }
-  if (['caesar-de-bello-gallico-vii', 'vergil-aeneis-i-et-iv', 'ovidii-ars-amatoria', 'petronius-cena-trimalchionis', 'sallustius-cicero-catilina', 'plautus-amphitryo', 'catullus-carmina'].includes(id)) {
+  if (ORIGINAL_BOOK_IDS.includes(id)) {
     return 'advanced'
   }
   if (id === 'sermones-romani' || id === 'epitome-historiae-sacrae') return 'intermediate'
