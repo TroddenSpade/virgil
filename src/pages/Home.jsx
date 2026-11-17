@@ -492,7 +492,7 @@ export default function Home() {
               ))}
             </div>
             {originalBooks.length > 0 && (
-              <p className="approach-goal">
+              <p className="approach-goal approach-goal--wide">
                 The <span className="latin">Latīnistae</span> shelf gathers the complete originals —{' '}
                 {originalAuthorText} — with a filter by author.{' '}
                 <Link to="/library#level-latinae-periti">Open the Latīnistae shelf →</Link>

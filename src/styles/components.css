@@ -6280,6 +6280,9 @@ button.lesson__keywords-label:focus-visible {
   font-size: 1rem;
   color: var(--ink-soft);
 }
+.approach-goal--wide {
+  max-width: none;
+}
 .approach-tools {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
