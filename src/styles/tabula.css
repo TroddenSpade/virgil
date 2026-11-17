@@ -1031,6 +1031,25 @@
   letter-spacing: 0.16em;
   color: var(--ink-faint);
 }
+.motto-slider__toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.motto-slider__toggle:hover {
+  color: var(--bronze);
+}
+.motto-slider__toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 55%, transparent);
+  outline-offset: 3px;
+}
 .motto-slider__dots {
   display: flex;
   flex-wrap: wrap;
