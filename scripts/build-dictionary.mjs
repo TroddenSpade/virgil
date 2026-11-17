@@ -30,6 +30,16 @@ const OUT_INDEX = new URL(
   import.meta.url,
 )
 
+const MACRA = (() => {
+  try {
+    return JSON.parse(
+      readFileSync(new URL('../scripts/dictionary-macra.json', import.meta.url), 'utf8'),
+    )
+  } catch {
+    return {}
+  }
+})()
+
 const engine = createEngine()
 const inflects = parseInflectsFile(
   readFileSync(
@@ -923,6 +933,13 @@ const LEMMA_OVERRIDES = {
 
 /* ---------- Finalise ---------- */
 const lemmaById = new Map()
+/* The dictionary macra cache supplies editorial quantities for headwords,
+   forms and the few examples whose source text was unmarked. */
+for (const example of exampleTable) {
+  const marked = MACRA.examples?.[example.latin]
+  if (marked) example.latin = marked
+}
+
 const lemmas = [...lemmaMap.entries()]
   .map(([key, entry]) => {
     const english = mergeSenses(entry.meanings)
@@ -942,16 +959,19 @@ const lemmas = [...lemmaMap.entries()]
       }
     }
     const override = LEMMA_OVERRIDES[key]
+    const macra = MACRA.lemmas?.[key]
     const lemma = {
       id: key,
-      headword: entry.head,
-      latin: override?.latin || entry.latin,
+      headword: macra?.headword || entry.head,
+      latin: override?.latin || macra?.latin || entry.latin,
       pos: poses.join('; '),
       posGroup: posGroup(poses[0] || ''),
       english: override?.english || english,
       stems,
       sig,
-      forms: [...entry.formMap.values()].sort((a, b) => a.localeCompare(b)),
+      forms: [...entry.formMap.values()]
+        .map((form) => MACRA.words?.[norm(form)] || form)
+        .sort((a, b) => a.localeCompare(b)),
       e: entry.e,
       s: [...entry.sourceIds],
       sn: entry.sourceIds.size,
@@ -967,7 +987,7 @@ const lemmas = [...lemmaMap.entries()]
 const words = [...wordMap.values()]
   .filter((word) => lemmaById.has(word.l))
   .map((word) => ({
-    w: word.w,
+    w: MACRA.words?.[norm(word.w)] || word.w,
     l: word.l,
     s: [...word.sourceIds],
     n: word.sourceIds.size,
@@ -977,6 +997,7 @@ const words = [...wordMap.values()]
 
 const surfaceForms = [...surfaceMap.values()]
   .filter((form) => form.l && form.g)
+  .map((form) => ({ ...form, w: MACRA.words?.[norm(form.w)] || form.w }))
   .sort((a, b) => a.w.localeCompare(b.w))
 
 /* ---------- Paradigm recipes ----------

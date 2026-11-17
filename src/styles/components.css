@@ -1290,6 +1290,11 @@ button.lesson__keywords-label:focus-visible {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+.paradigm-head__tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
 .paradigm-actions {
   margin-top: 1rem;
 }
@@ -2855,6 +2860,12 @@ button.lesson__keywords-label:focus-visible {
   flex-direction: column;
   gap: 0.4rem;
 }
+.dictionary-diacritics {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.15rem;
+}
 .dictionary-field__label {
   font-family: var(--font-ui);
   font-size: 0.62rem;
@@ -3104,6 +3115,11 @@ button.lesson__keywords-label:focus-visible {
   line-height: 1.05;
   color: var(--ink);
   overflow-wrap: anywhere;
+}
+.lexicon__head-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.6rem;
 }
 .lexicon__meta {
   display: flex;

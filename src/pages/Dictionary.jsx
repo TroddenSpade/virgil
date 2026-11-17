@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Loading from '../components/Loading.jsx'
+import DiacriticsControl from '../components/DiacriticsControl.jsx'
+import { useDiacritics } from '../hooks/useDiacritics.js'
+import { containsDiacritics, stripDiacritics } from '../lib/diacritics.js'
 import { norm, hasDefinition, wordHref, sourceLabel } from '../lib/dictionary.js'
 
 const POS_ORDER = [
@@ -64,6 +67,7 @@ export default function Dictionary() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [visible, setVisible] = useState(PAGE_SIZE)
+  const diacritics = useDiacritics()
 
   /* The URL is the source of truth for the filters, so a link such as
      /dictionary?q=volo or /dictionary?letter=v&pos=verb opens on the same
@@ -119,13 +123,13 @@ export default function Dictionary() {
       if (!id) continue
       const entry = {
         id,
-        latin: word.w,
-        headword: word.w,
+        latin: stripDiacritics(word.w, diacritics.options),
+        headword: stripDiacritics(word.w, diacritics.options),
         letter: id.replace(/^[^a-z]+/, '')[0] || '',
         pos: lemma.pos,
         posGroup: lemma.posGroup,
         english: lemma.english,
-        lemma: lemma.headword,
+        lemma: stripDiacritics(lemma.headword, diacritics.options),
         lemmaId: lemma.id,
         sources: (word.s || []).map((index) => data.sources[index]).filter(Boolean),
         sourceCount: word.n || (word.s || []).length,
@@ -136,7 +140,12 @@ export default function Dictionary() {
       }
     }
     return [...byForm.values()]
-  }, [data])
+  }, [data, diacritics.options])
+
+  const hasMarks = useMemo(
+    () => Boolean(data?.words?.some((word) => containsDiacritics(word.w))),
+    [data],
+  )
 
   const letters = data?.letters || []
   const stats = data?.stats || { words: 0, lemmas: 0, sources: 0, withExamples: 0 }
@@ -214,6 +223,10 @@ export default function Dictionary() {
                   ))}
                 </select>
               </label>
+
+              <div className="dictionary-diacritics">
+                <DiacriticsControl mode={diacritics} hasMarks={hasMarks} />
+              </div>
             </div>
 
             <nav className="dictionary-letters" aria-label="Filter by first letter">

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Loading from '../components/Loading.jsx'
+import DiacriticsControl from '../components/DiacriticsControl.jsx'
+import { useDiacritics } from '../hooks/useDiacritics.js'
+import { containsDiacritics, stripDiacritics } from '../lib/diacritics.js'
 import {
   norm,
   dictionaryKeys,
@@ -16,6 +19,8 @@ export default function DictionaryDetail() {
   const { word } = useParams()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
+  const diacritics = useDiacritics()
+  const d = (value) => stripDiacritics(value, diacritics.options)
 
   useEffect(() => {
     let cancelled = false
@@ -93,8 +98,8 @@ export default function DictionaryDetail() {
   const entry = lemma
     ? {
         ...lemma,
-        headword: wordEntry ? wordEntry.w : lemma.headword,
-        latin: wordEntry && isForm ? wordEntry.w : lemma.latin,
+        headword: d(wordEntry ? wordEntry.w : lemma.headword),
+        latin: d(wordEntry && isForm ? wordEntry.w : lemma.latin),
       }
     : null
 
@@ -180,13 +185,19 @@ export default function DictionaryDetail() {
             <div className="lexicon__meta">
               {entry.pos && entry.pos !== 'other' && <span className="lexicon__pos">{entry.pos}</span>}
             </div>
+            <div className="lexicon__head-tools">
+              <DiacriticsControl
+                mode={diacritics}
+                hasMarks={containsDiacritics(wordEntry?.w || lemma?.headword || '')}
+              />
+            </div>
           </header>
 
           {isForm && (
             <p className="lexicon__form-note">
-              <span className="latin">{wordEntry.w}</span> is a form of{' '}
+              <span className="latin">{d(wordEntry.w)}</span> is a form of{' '}
               <Link className="latin" to={wordHref(lemma.headword)}>
-                {lemma.headword}
+                {d(lemma.headword)}
               </Link>
               .
             </p>
@@ -216,7 +227,7 @@ export default function DictionaryDetail() {
               <ul className="lexicon__form-list">
                 {entry.forms.map((form) => (
                   <li key={form} className={norm(form) === normWord ? 'is-current' : ''}>
-                    <span className="latin">{form}</span>
+                    <span className="latin">{d(form)}</span>
                   </li>
                 ))}
               </ul>
@@ -234,10 +245,10 @@ export default function DictionaryDetail() {
                     {exampleSegments(example.latin).map((segment, j) =>
                       segment.mark ? (
                         <mark className="dict-mark" key={j}>
-                          {segment.t}
+                          {d(segment.t)}
                         </mark>
                       ) : (
-                        <span key={j}>{segment.t}</span>
+                        <span key={j}>{d(segment.t)}</span>
                       ),
                     )}
                   </p>
@@ -272,14 +283,14 @@ export default function DictionaryDetail() {
             {neighbours.prev ? (
               <Link className="dict-neighbours__link" to={wordHref(neighbours.prev.w)}>
                 <span aria-hidden="true">←</span>
-                <span className="latin">{neighbours.prev.w}</span>
+                <span className="latin">{d(neighbours.prev.w)}</span>
               </Link>
             ) : (
               <span />
             )}
             {neighbours.next ? (
               <Link className="dict-neighbours__link" to={wordHref(neighbours.next.w)}>
-                <span className="latin">{neighbours.next.w}</span>
+                <span className="latin">{d(neighbours.next.w)}</span>
                 <span aria-hidden="true">→</span>
               </Link>
             ) : (

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Loading from '../components/Loading.jsx'
+import DiacriticsControl from '../components/DiacriticsControl.jsx'
+import { useDiacritics } from '../hooks/useDiacritics.js'
+import { containsDiacritics, stripDiacritics } from '../lib/diacritics.js'
 import {
   dictionaryKeys,
   hasDefinition,
@@ -20,6 +23,8 @@ export default function ParadigmPage() {
   const [data, setData] = useState(null)
   const [rules, setRules] = useState(null)
   const [error, setError] = useState(null)
+  const diacritics = useDiacritics()
+  const d = (value) => stripDiacritics(value, diacritics.options)
 
   useEffect(() => {
     let cancelled = false
@@ -68,7 +73,11 @@ export default function ParadigmPage() {
     () => (lemma && rules ? buildParadigm(lemma, rules, data?.surfaceForms) : []),
     [lemma, rules, data],
   )
-  const groups = useMemo(() => groupParadigm(entries), [entries])
+  const displayEntries = useMemo(
+    () => entries.map((entry) => ({ ...entry, form: d(entry.form) })),
+    [entries, diacritics.options],
+  )
+  const groups = useMemo(() => groupParadigm(displayEntries), [displayEntries])
   const principal = lemma ? principalParts(lemma.latin) : []
 
   if (error) {
@@ -110,14 +119,20 @@ export default function ParadigmPage() {
 
         <header className="paradigm-head">
           <p className="eyebrow">Paradigma</p>
-          <h1 className="lexicon__latin latin">{lemma.headword}</h1>
+          <h1 className="lexicon__latin latin">{d(lemma.headword)}</h1>
           {principal.length > 1 && (
-            <p className="paradigm-head__principal latin">{principal.join(', ')}</p>
+            <p className="paradigm-head__principal latin">{principal.map((part) => d(part)).join(', ')}</p>
           )}
           <p className="paradigm-head__meta">
             {lemma.pos && lemma.pos !== 'other' ? lemma.pos : 'lexicon'}
             {hasDefinition(lemma.english) ? ` · ${lemma.english}` : ''}
           </p>
+          <div className="paradigm-head__tools">
+            <DiacriticsControl
+              mode={diacritics}
+              hasMarks={containsDiacritics(lemma.headword) || entries.some((entry) => containsDiacritics(entry.form))}
+            />
+          </div>
           <div className="paradigm-actions">
             <Link
               className="btn btn--primary btn--sm"
