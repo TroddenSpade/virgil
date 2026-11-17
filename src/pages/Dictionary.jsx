@@ -103,29 +103,39 @@ export default function Dictionary() {
   }, [])
 
   /* One row per inflected form, carrying its lemma's sense and the
-     chapters where the form occurs. */
+     chapters where the form occurs. Normalised ids collapse forms that differ
+     only in diacritics (Rōma / Roma); keep the marked spelling for display. */
   const entries = useMemo(() => {
     if (!data) return []
     const byId = new Map(data.lemmas.map((lemma) => [lemma.id, lemma]))
-    return data.words
-      .map((word) => {
-        const lemma = byId.get(word.l)
-        if (!lemma) return null
-        return {
-          id: norm(word.w),
-          latin: word.w,
-          headword: word.w,
-          letter: norm(word.w).replace(/^[^a-z]+/, '')[0] || '',
-          pos: lemma.pos,
-          posGroup: lemma.posGroup,
-          english: lemma.english,
-          lemma: lemma.headword,
-          lemmaId: lemma.id,
-          sources: (word.s || []).map((index) => data.sources[index]).filter(Boolean),
-          sourceCount: word.n || (word.s || []).length,
-        }
-      })
-      .filter(Boolean)
+    const byForm = new Map()
+    const markCount = (value) =>
+      (String(value).match(/[āēīōūȳăĕĭŏŭëïÿáéíóúý]/gi) || []).length
+
+    for (const word of data.words) {
+      const lemma = byId.get(word.l)
+      if (!lemma) continue
+      const id = norm(word.w)
+      if (!id) continue
+      const entry = {
+        id,
+        latin: word.w,
+        headword: word.w,
+        letter: id.replace(/^[^a-z]+/, '')[0] || '',
+        pos: lemma.pos,
+        posGroup: lemma.posGroup,
+        english: lemma.english,
+        lemma: lemma.headword,
+        lemmaId: lemma.id,
+        sources: (word.s || []).map((index) => data.sources[index]).filter(Boolean),
+        sourceCount: word.n || (word.s || []).length,
+      }
+      const existing = byForm.get(id)
+      if (!existing || markCount(entry.latin) > markCount(existing.latin)) {
+        byForm.set(id, entry)
+      }
+    }
+    return [...byForm.values()]
   }, [data])
 
   const letters = data?.letters || []

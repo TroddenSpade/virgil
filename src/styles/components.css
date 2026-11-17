@@ -852,6 +852,105 @@ button.lesson__keywords-label:focus-visible {
   gap: 0.55rem 0.8rem;
   margin-bottom: 0.9rem;
 }
+.diacritics {
+  position: relative;
+}
+.diacritics__trigger {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.diacritics__trigger::-webkit-details-marker {
+  display: none;
+}
+.diacritics__trigger::after {
+  content: '▾';
+  font-size: 0.7em;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.diacritics[open] .diacritics__trigger::after {
+  transform: rotate(180deg);
+}
+.diacritics__count {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.diacritics__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.45rem);
+  z-index: 30;
+  min-width: 15.5rem;
+  padding: 0.8rem 0.95rem 0.7rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.diacritics__title {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.diacritics__option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.22rem 0;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.diacritics__option input {
+  margin: 0;
+  accent-color: var(--oxblood);
+}
+.diacritics__example {
+  width: 1.35rem;
+  color: var(--ink);
+  font-size: 0.98rem;
+  text-align: center;
+}
+.diacritics__actions {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--line);
+}
+.diacritics__action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--oxblood);
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.diacritics__action:hover {
+  text-decoration: underline;
+}
+.diacritics__note {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--ink-faint);
+}
 .lexicon-controls {
   display: flex;
   flex-wrap: wrap;

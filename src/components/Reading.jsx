@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Inline } from './Commentary.jsx'
 import { LexiconControls, LexiconText, useLexiconMode } from './Lexicon.jsx'
+import DiacriticsControl from './DiacriticsControl.jsx'
 import { useWordlist } from '../hooks/useWordlist.js'
 import { useSavedWords } from '../hooks/useSavedWords.js'
+import { applyDiacriticsToReadings, readingHasDiacritics } from '../lib/diacritics.js'
 
 function ReadingText({ text, lexicon, wordKeys, savedWords, source }) {
   if (!lexicon.enabled || !lexicon.index) return <Inline text={text} />
@@ -17,7 +19,7 @@ function ReadingText({ text, lexicon, wordKeys, savedWords, source }) {
   )
 }
 
-export default function Reading({ readings, source }) {
+export default function Reading({ readings, source, diacritics = null }) {
   const [showNotes, setShowNotes] = useState(true)
   const lexicon = useLexiconMode()
   const wordlist = useWordlist({ active: lexicon.enabled })
@@ -27,9 +29,21 @@ export default function Reading({ readings, source }) {
     [wordlist.words],
   )
 
-  if (!readings?.length) return null
+  const displayReadings = useMemo(
+    () =>
+      diacritics
+        ? applyDiacriticsToReadings(readings, diacritics.options)
+        : readings,
+    [readings, diacritics?.options],
+  )
+  const hasMarks = useMemo(
+    () => (readings || []).some(readingHasDiacritics),
+    [readings],
+  )
 
-  const hasNotes = readings.some((r) => r.notes?.length)
+  if (!displayReadings?.length) return null
+
+  const hasNotes = displayReadings.some((r) => r.notes?.length)
 
   return (
     <div className="readings">
@@ -39,10 +53,11 @@ export default function Reading({ readings, source }) {
             {showNotes ? 'Hide marginal notes' : 'Show marginal notes'}
           </button>
         )}
+        <DiacriticsControl mode={diacritics} hasMarks={hasMarks} />
         <LexiconControls mode={lexicon} />
       </div>
 
-      {readings.map((reading, index) => (
+      {displayReadings.map((reading, index) => (
         <section key={reading.id || index} className="reading rise" id={reading.id}>
           {!reading.hideHead && (reading.latinTitle || reading.title) && (
             <header className="reading__head">

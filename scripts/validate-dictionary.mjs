@@ -23,6 +23,7 @@ const norm = (value) =>
   String(value ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u00b4\u02ca\u02b9]/g, '')
     .replace(/æ/g, 'ae')
     .replace(/œ/g, 'oe')
     .replace(/j/g, 'i')

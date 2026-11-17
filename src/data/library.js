@@ -294,6 +294,14 @@ export const authorShelf = {
 // The order in which shelves are rendered on /library.
 export const libraryShelves = [...levelGroups, authorShelf]
 
+// Original-language editions get the diacritics menu in their reading
+// toolbar. This includes the new authors shelf and the existing Advanced
+// author editions, whose texts carry printed macra.
+const ORIGINAL_EDITIONS = new Set([
+  ...authorShelf.slugs,
+  ...(levelGroups.find((group) => group.id === 'advanced')?.slugs || []),
+])
+
 const LEVEL_BY_SLUG = new Map()
 for (const group of levelGroups) {
   for (const slug of group.slugs) LEVEL_BY_SLUG.set(slug, group.id)
@@ -326,6 +334,7 @@ const HERO_MARKS = {
 
 for (const book of books) {
   book.heroMark = HERO_MARKS[book.id] || book.shortTitle?.toUpperCase() || 'LIBER'
+  book.isOriginalEdition = ORIGINAL_EDITIONS.has(book.slug)
   for (const chapter of book.chapters || []) {
     chapter.keywords = chapterKeywords[`${book.slug}/${chapter.slug}`] || []
   }

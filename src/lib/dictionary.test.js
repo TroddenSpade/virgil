@@ -97,4 +97,9 @@ describe('norm', () => {
     expect(norm('æquus')).toBe('aequus')
     expect(norm('Iūlius')).toBe('iulius')
   })
+
+  it('folds breves, diaereses, acute accents and apices', () => {
+    expect(norm('ăëá')).toBe('aea')
+    expect(norm('a´')).toBe('a')
+  })
 })

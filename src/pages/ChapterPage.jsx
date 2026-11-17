@@ -1,6 +1,7 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { getBook } from '../data/library.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
+import { useDiacritics } from '../hooks/useDiacritics.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
 import Reading from '../components/Reading.jsx'
 import GrammarSection from '../components/GrammarSection.jsx'
@@ -75,6 +76,8 @@ function SectionHead({ num, latin, english }) {
 
 function Lesson({ book, chapter }) {
   const { isDone, toggle } = useProgress(book.id, book.chapterCount)
+  const diacritics = useDiacritics()
+  const showDiacritics = Boolean(book.isOriginalEdition)
   const done = isDone(chapter.number)
 
   const ready = book.chapters.filter((c) => c.complete)
@@ -182,7 +185,11 @@ function Lesson({ book, chapter }) {
                       latin={sections.find((section) => section.id === 'lectio')?.label || 'Lēctiō'}
                       english="reading"
                     />
-                    <Reading readings={chapter.readings} source={readingSource} />
+                    <Reading
+                      readings={chapter.readings}
+                      source={readingSource}
+                      diacritics={showDiacritics ? diacritics : null}
+                    />
                   </section>
                 )}
 
@@ -235,7 +242,11 @@ function Lesson({ book, chapter }) {
                       latin={sections.find((section) => section.id === 'lectio')?.label || 'Lēctiō'}
                       english="reading"
                     />
-                    <Reading readings={chapter.readings} source={readingSource} />
+                    <Reading
+                      readings={chapter.readings}
+                      source={readingSource}
+                      diacritics={showDiacritics ? diacritics : null}
+                    />
                   </section>
                 )}
 

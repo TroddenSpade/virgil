@@ -31,6 +31,7 @@ BOOK METADATA
 - Unit names (e.g. Capitulum/Capitula, Colloquium/Colloquia, Pars/Partes):
 - Accent: wine | laurel | gold | ivory
 - Source / rights note:
+- Diacritics in the source: printed | none | editorial/uncertain
 
 TEXT TO ADD
 -----------
@@ -47,23 +48,32 @@ lost or duplicated.
 1. **Fidelity first.** Preserve the source's wording, spelling, punctuation, speaker
    labels, section order, and verse line breaks. Do not translate, summarize, modernize,
    or "improve" the Latin. Do not add sentences that are not in the source.
-2. **Preserve macra.** If the edition prints long-vowel marks (ā ē ī ō ū ȳ), keep every
-   one. If it does not, add macra only where a reliable reference makes them certain;
-   list uncertain forms in your report.
-3. **Only Latin in `paragraphs`.** English belongs in `title`, `gloss`, `english`,
+2. **Preserve every printed diacritic.** Keep macra (ā), breves (ă), diaereses (ë),
+   acute accents (á) and apices (´) exactly as the edition prints them. If the source
+   prints none, do not invent a whole scheme; if you add editorial marks, say so in the
+   book description, `extras`, and your report.
+3. **Diacritics are display-only.** The reading toolbar can hide diacritic classes, but
+   the underlying data always keeps them. The menu belongs to original editions on the
+   Advanced and Latīnistae shelves only; do not add it to Beginner or Intermediate books.
+4. **One dictionary entry per word, regardless of diacritics.** Fold macra, breves,
+   diaereses, acute accents, apices and their combining marks before comparing keys.
+   `Rōma`, `Roma`, `Rŏma` and `Roma´` are the same word, not four entries. Keep the
+   marked spelling for display and never create a duplicate lemma or word row for a
+   spelling difference that is only diacritics.
+5. **Only Latin in `paragraphs`.** English belongs in `title`, `gloss`, `english`,
    `overview`, descriptions, and `extras`, never in the running Latin text.
-4. **Clean OCR, do not rewrite.** Fix obvious character-level OCR errors (u/v, i/j,
+6. **Clean OCR, do not rewrite.** Fix obvious character-level OCR errors (u/v, i/j,
    f/ſ, broken ligatures, stray symbols) and report genuinely uncertain readings.
    Never silently replace a doubtful word with a plausible one.
-5. **Do not hand-edit generated files.** Never edit `*.generated.js` directly. Regenerate
+7. **Do not hand-edit generated files.** Never edit `*.generated.js` directly. Regenerate
    them with the scripts below.
-6. **Do not change existing books** unless the new book genuinely requires a shared
+8. **Do not change existing books** unless the new book genuinely requires a shared
    helper change. Do not reorder existing books on the shelf.
-7. **Do not lower validation thresholds** or add bulk exceptions to make a check pass.
+9. **Do not lower validation thresholds** or add bulk exceptions to make a check pass.
    Fix the data instead.
-8. **Respect performance.** Keep the new book as plain JS data. The full dictionary is
-   large and must remain lazily loaded; do not import it into the main app shell.
-9. **Do not commit** unless I explicitly ask. Leave the working tree ready for review.
+10. **Respect performance.** Keep the new book as plain JS data. The full dictionary is
+    large and must remain lazily loaded; do not import it into the main app shell.
+11. **Do not commit** unless I explicitly ask. Leave the working tree ready for review.
 
 ---
 
@@ -77,6 +87,9 @@ src/data/<slug>/index.js                exports `book` and `chapters`
 src/data/<slug>/outline.js              table of contents
 src/data/<slug>/<chapter>.js            one file per chapter
 src/data/<slug>/extras.js               optional front/back matter
+src/lib/diacritics.js                   diacritic classes and display helpers
+src/hooks/useDiacritics.js              persisted diacritics preference
+src/components/DiacriticsControl.jsx    dropdown in original-edition reading bars
 scripts/build-chapter-keywords.mjs      keyword generation; contains a hard-coded MODULES list
 scripts/build-dictionary.mjs            generates dictionary, index, reading lexicon, paradigms
 scripts/validate-dictionary.mjs         hard dictionary/lexicon quality gate
@@ -123,7 +136,9 @@ Derive:
   (`beginner`, `intermediate`, or `advanced`). New original Latin editions go in
   `authorShelf`, the Latin-named **Latīnistae** shelf, which starts empty
   and is reserved for original works. A book may appear in both if it belongs
-  on the learning path too.
+  on the learning path too. The diacritics menu is computed from
+  `authorShelf` plus the `advanced` group; Beginner and Intermediate books must
+  not receive it.
 
 Write a 2–3 sentence `summary` and a longer `description` in the voice of the existing
 books. Write chapter `tagline`/`overview` text only from what the source supports.
@@ -237,6 +252,8 @@ Field notes:
   anchors. Do not use Markdown, HTML, or backticks in Latin text.
 - `{{answer}}` blanks are for `pensa` fill items only, not for running readings.
 - For verse, keep one verse per paragraph and set `verseCount` in the outline.
+- Keep every printed diacritic in `paragraphs`, `notes`, `latinTitle` and vocabulary
+  headwords. The Diacritics menu only hides them at render time.
 - Vocabulary `pos` should use the labels the existing data uses: `noun (m.)`,
   `noun (f.)`, `noun (n.)`, `adjective`, `verb`, `adverb`, `preposition`,
   `conjunction`, `pronoun`, `numeral`, `particle`, `interjection`.
@@ -393,6 +410,20 @@ Therefore:
    to that chapter's `vocabulary` rather than adding a special case to the build script.
 6. Never add OCR debris, abbreviation fragments, or bare endings as vocabulary.
 
+### Diacritics and dictionary identity
+
+The dictionary is diacritic-insensitive. Before keys are compared, the build and
+the client fold NFD combining marks (macra, breves, diaereses, acute accents) and
+standalone apices (`´`). Therefore:
+
+- `Rōma`, `Roma`, `Rŏma` and `Roma´` are the same dictionary word.
+- Never create a separate lemma, headword or word row for a difference that is
+  only diacritics. Keep one entry and display the marked spelling.
+- A source that prints no marks must still merge with a marked source; do not
+  add an unmarked duplicate just because the spelling differs.
+- The Diacritics menu changes rendering only. It must never change dictionary
+  keys, search results, or word identity.
+
 Run the generators only after the data is in place:
 
 ```bash
@@ -424,6 +455,8 @@ Requirements:
 - Latin reading coverage must stay at or above the project threshold (99.5%). Do not
   lower it.
 - No duplicate lemma ids, headwords, or word keys.
+- No diacritic-only duplicates: forms that differ only by macra, breves,
+  diaereses, acute accents or apices are one entry.
 - No lemma without a usable English definition.
 - No word without a lemma or with an invalid source.
 - No new paradigm gaps.
@@ -453,14 +486,20 @@ Check:
 1. `/library` — the book appears under the correct shelf (Beginner, Intermediate,
    Advanced and/or the Latīnistae shelf), in the intended order, with accurate counts.
 2. `/library/<slug>` — book page opens; chapter cards and first-chapter link work.
-3. `/library/<slug>/<first-chapter-slug>` — reading renders with macra, italics, notes,
-   vocabulary, grammar, and exercises.
-4. Toggle **Lexicon mode**; click several words (including a proper name and a rare
+3. `/library/<slug>/<first-chapter-slug>` — reading renders with macra, breves,
+   diaereses, acute accents, italics, notes, vocabulary, grammar, and exercises.
+4. For an **Advanced** or **Latīnistae** book, confirm the **Diacritics** button appears
+   at the top of each reading section. Open it, hide one class, confirm the text changes,
+   use **Show All** / **Hide All**, and confirm clicking outside or pressing Escape
+   closes the dropdown.
+5. Confirm the Diacritics button does **not** appear on Beginner or Intermediate books.
+6. Toggle **Lexicon mode**; click several words (including a proper name and a rare
    word); confirm the popover shows a sensible gloss and the paradigm/full-entry links
    open.
-5. `/dictionary?q=<a word from the book>` — search finds the new forms; a detail page
-   lists the new chapter among its sources; the paradigm page renders.
-6. Check the browser console for errors.
+7. `/dictionary?q=<a word from the book>` — search finds the new forms; a detail page
+   lists the new chapter among its sources; the paradigm page renders. Search both the
+   marked and unmarked spelling and confirm they resolve to one entry.
+8. Check the browser console for errors.
 
 Report the URLs you checked.
 
@@ -494,6 +533,14 @@ VALIDATION
 - validate:keywords: <summary / exit code>
 - npm test: <passed count>
 - npm run build: <result and precache size>
+
+DIACRITICS
+- Menu present on Advanced/Latīnistae:
+- Menu absent from Beginner/Intermediate:
+- Types tested (macra/breves/diaereses/acutes/apices):
+- Show All / Hide All / outside click:
+- Editorial marks or source notes:
+- Dictionary diacritic duplicates: none / details
 
 QA
 - URLs checked:

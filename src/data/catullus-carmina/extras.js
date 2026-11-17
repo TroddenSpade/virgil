@@ -24,9 +24,10 @@ export const extras = [
           {
             t: 'p',
             text:
-              'The source does not mark vowel quantity, so the running text is printed without macra. ' +
-              'Obvious electronic-text slips have been corrected where the Oxford text settles the reading; ' +
-              'the surviving fragments are printed after Carmen CXVI.',
+              'The source does not mark vowel quantity. Macra in the running text are supplied editorially ' +
+              'with the Alatius Latin Macronizer and can be hidden with the Diacritics menu. Obvious ' +
+              'electronic-text slips have been corrected where the Oxford text settles the reading; the ' +
+              'surviving fragments are printed after Carmen CXVI.',
           },
           {
             t: 'table',

@@ -32,7 +32,8 @@ export const book = {
     'the abusive iambics, the marriage songs and the long mythological pieces are all here in the original ' +
     'Latin. The text follows the Latin Library electronic text and has been checked against the Oxford ' +
     'Classical Texts edition of R. A. B. Mynors (Oxford, 1958). The source does not mark vowel quantity, ' +
-    'so the running text is given without macra; the surviving fragments are printed after Carmen CXVI.',
+    'so macra are supplied editorially with the Alatius Latin Macronizer and can be hidden with the ' +
+    'Diacritics menu; the surviving fragments are printed after Carmen CXVI.',
   accent: 'wine',
   status: 'active',
   kind: 'reader',
