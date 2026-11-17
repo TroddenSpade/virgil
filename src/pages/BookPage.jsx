@@ -85,15 +85,34 @@ function ReferenceBook({ book }) {
   )
 }
 
+const SHELF_LABEL = {
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+  latinistae: 'Latīnistae',
+}
+
+function shelfOf(book) {
+  return book.isAuthorShelf ? 'latinistae' : book.levelGroup
+}
+
 function BookSwitcher({ current }) {
+  const shelf = shelfOf(current)
   const others = books.filter(
-    (book) => book.status === 'active' && book.kind !== 'reference' && book.id !== current.id,
+    (book) =>
+      book.status === 'active' &&
+      book.kind !== 'reference' &&
+      book.id !== current.id &&
+      shelfOf(book) === shelf,
   )
   if (!others.length) return null
 
+  const label = SHELF_LABEL[shelf]
+  const heading = label ? `Other ${label} books` : 'Other books'
+
   return (
-    <nav className="book-switcher" aria-label="Other books">
-      <span className="book-switcher__label">Other books</span>
+    <nav className="book-switcher" aria-label={heading}>
+      <span className="book-switcher__label">{heading}</span>
       <div className="book-switcher__links">
         {others.map((book) => (
           <Link key={book.id} to={`/library/${book.slug}`} className="book-switcher__link">
