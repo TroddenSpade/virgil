@@ -51,6 +51,36 @@ const ORIGINAL_BOOK_IDS = [
   'horatius-epodi',
 ]
 
+// The complete originals on the Latīnistae shelf sit above the Advanced
+// school editions: they are for readers already at home in the language.
+const LATINISTAE_BOOK_IDS = [
+  'caesar-de-bello-gallico',
+  'caesar-de-bello-civili',
+  'caesar-bellum-alexandrinum',
+  'caesar-bellum-africum',
+  'caesar-bellum-hispaniense',
+  'cicero-epistulae-ad-familiares',
+  'catullus-carmina',
+  'vergil-aeneis',
+  'vergil-eclogae',
+  'vergil-georgica',
+  'horatius-sermones',
+  'horatius-carmina',
+  'horatius-epistulae',
+  'horatius-ars-poetica',
+  'horatius-carmen-saeculare',
+  'horatius-epodi',
+  'ovidius-metamorphoses',
+  'ovidius-amores',
+  'ovidius-heroides',
+  'ovidius-ars-amatoria',
+  'ovidius-fasti',
+  'ovidius-tristia',
+  'ovidius-ex-ponto',
+  'ovidius-remedia-amoris',
+  'ovidius-ibis',
+]
+
 const MODULES = [
   'familia-romana',
   'roma-aeterna',
@@ -347,6 +377,7 @@ const LEVEL_LABELS = {
   elementary: 'Elementary',
   intermediate: 'Intermediate',
   advanced: 'Advanced',
+  expert: 'Expert',
 }
 
 /* ------------------------------------------------------------------ */
@@ -748,6 +779,9 @@ function levelFor(chapter, ctx) {
     if (n <= 12) return 'beginner'
     if (n <= 25) return 'elementary'
     return 'intermediate'
+  }
+  if (LATINISTAE_BOOK_IDS.includes(id)) {
+    return 'expert'
   }
   if (ORIGINAL_BOOK_IDS.includes(id)) {
     return 'advanced'
