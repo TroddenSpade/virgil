@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { applyMacraOverrides, overrideBooks } from './scripts/macra-overrides.mjs'
+import { buildInfo } from './scripts/build-info.mjs'
 
 // The site is served from the root of a GitHub Pages custom domain
 // (https://virgil.parsasam.ir/), so the production build uses a base of "/".
@@ -43,6 +44,21 @@ function chunkFileNames(chunkInfo) {
   return 'assets/[name]-[hash].js'
 }
 
+// Emit the same build description the bundle carries. A deployed site can be
+// checked at /version.json without trusting the app shell that answers.
+function buildVersion() {
+  return {
+    name: 'virgil-build-version',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: `${JSON.stringify(buildInfo, null, 2)}\n`,
+      })
+    },
+  }
+}
+
 // Apply the reviewed macra corrections while the book modules are loaded.
 // The source files stay exactly as the macronizer produced them; the build
 // (and the dev server) sees the reviewed text, and the same manifest is used
@@ -68,6 +84,11 @@ function macraOverrides() {
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  // The footer reads this to show the commit the running bundle was built
+  // from; it is also what /version.json reports.
+  define: {
+    __BUILD_INFO__: JSON.stringify(buildInfo),
+  },
   build: {
     rollupOptions: {
       output: {
@@ -78,6 +99,7 @@ export default defineConfig({
   },
   plugins: [
     macraOverrides(),
+    buildVersion(),
     react(),
     VitePWA({
       // Updates are applied without asking. The new worker activates as soon

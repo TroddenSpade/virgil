@@ -167,6 +167,7 @@ npm run check:bundle  # fail if the initial JS grows past 1 MB
 npm run validate:all  # per-book coverage/structure, dictionary and keyword checks
 npm run macra:review  # list suspicious editorial macra and write a JSON report
 npm test         # run the wordlist, review, and lexicon tests (Vitest)
+npm run test:e2e # browser smoke tests against a production build (Playwright)
 npm run preview  # serve the production build (needed to test the PWA)
 npm run data     # regenerate books meta, keywords, itinerary and vocabulary
 ```
@@ -206,6 +207,28 @@ Updates are **forced**: a newly deployed service worker activates immediately, t
 reloads into the new build, and a short “Updated” notice confirms it afterwards. There is
 no “refresh to update” prompt and no way for an open tab to keep serving an old shell. When
 testing a deploy, clear the site data once if a browser still holds a pre-fix worker.
+
+The footer shows the **Build** stamp of the bundle that is actually running: the short
+commit and build date. The same values are written to `/version.json` during the build, so
+a deployed site can be checked directly without trusting the app shell. When a reader
+reports a bug, that stamp identifies the exact build and service worker they were on.
+
+### Browser smoke tests
+
+`npm run test:e2e` runs Playwright against `vite preview`. It expects a production build
+first:
+
+```bash
+npm run build
+npm run test:e2e
+```
+
+The suite covers the home-page counts and build stamp, the reading flow (library → book →
+chapter → mark learned → wordlist review), dictionary search → word → paradigm, and an
+offline reload of the app shell. CI installs Chromium and runs the same suite after the
+build; failed runs upload `playwright-report/` and `test-results/` as artifacts. If a
+matching Chromium is already on the machine and downloads are unavailable, set
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome`.
 
 ### Deployment (GitHub Pages)
 

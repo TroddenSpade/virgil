@@ -1,5 +1,32 @@
 import { Link } from 'react-router-dom'
 import Logo from './Logo.jsx'
+import { build, buildCommitUrl } from '../lib/build.js'
+
+const BUILD_DATE = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+}).format(new Date(build.builtAt))
+
+function BuildStamp() {
+  return (
+    <p
+      className="site-footer__build"
+      title={`Commit ${build.commit || 'unknown'} · built ${build.builtAt}`}
+    >
+      Build{' '}
+      {buildCommitUrl ? (
+        <a href={buildCommitUrl} target="_blank" rel="noreferrer">
+          {build.shortCommit}
+        </a>
+      ) : (
+        build.shortCommit
+      )}
+      {' · '}
+      <time dateTime={build.builtAt}>{BUILD_DATE}</time>
+    </p>
+  )
+}
 
 export default function Footer() {
   return (
@@ -34,6 +61,7 @@ export default function Footer() {
 
       <div className="container site-footer__fine">
         <p>Text and exercises after H. H. Ørberg, Lingua Latina per se Illustrata.</p>
+        <BuildStamp />
         <p className="latin">Arma virumque canō…</p>
       </div>
     </footer>

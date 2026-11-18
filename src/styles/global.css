@@ -483,6 +483,13 @@ main {
   font-style: italic;
   color: var(--bronze-soft);
 }
+.site-footer__build {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.site-footer__build a {
+  text-decoration: none;
+}
 
 /* ---------- Buttons: stamped bronze labels ---------- */
 
