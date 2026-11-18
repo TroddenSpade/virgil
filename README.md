@@ -164,10 +164,17 @@ npm install      # install dependencies
 npm run dev      # start the dev server at http://localhost:5173
 npm run build    # production build into dist/
 npm run check:bundle  # fail if the initial JS grows past 1 MB
+npm run validate:all  # per-book coverage/structure, dictionary and keyword checks
 npm test         # run the wordlist, review, and lexicon tests (Vitest)
 npm run preview  # serve the production build (needed to test the PWA)
 npm run data     # regenerate books meta, keywords, itinerary and vocabulary
 ```
+
+`validate:books` enforces a 99.5% Latin-coverage floor per book, rejects empty
+chapters/readings and duplicate numbers or headings, and flags suspicious OCR
+tokens. It writes every unresolved token, grouped by book, to
+`reports/book-validation.json` — CI uploads that file as the `book-validation`
+artifact.
 
 To see the **install prompt**, run `npm run build && npm run preview` and open the site —
 a browser (Chrome/Edge) will offer to install Virgil as an app. It also works offline once

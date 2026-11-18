@@ -11,6 +11,9 @@ public/sw.js
 public/workbox-*.js
 public/registerSW.js
 
+# Validation reports
+reports/
+
 # Logs
 *.log
 npm-debug.log*
