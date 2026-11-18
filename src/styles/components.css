@@ -3116,6 +3116,24 @@ button.lesson__keywords-label:focus-visible {
   color: var(--ink);
   overflow-wrap: anywhere;
 }
+.lexicon__principal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.55rem;
+  margin: -0.35rem 0 0.9rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.lexicon__principal-label {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
 .lexicon__head-tools {
   display: flex;
   align-items: center;
@@ -3225,17 +3243,34 @@ button.lesson__keywords-label:focus-visible {
   padding: 0;
 }
 .lexicon__form-list li {
-  padding: 0.22rem 0.5rem;
+  padding: 0;
   border: 1px solid var(--line-soft);
   border-radius: 2px;
   background: var(--surface-2);
   font-size: 0.92rem;
   color: var(--ink-soft);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lexicon__form-list li:hover {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--line));
+  background: color-mix(in srgb, var(--gold) 9%, var(--surface-2));
+}
+.lexicon__form-list a {
+  display: block;
+  padding: 0.22rem 0.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+.lexicon__form-list a:hover {
+  color: var(--bronze-deep);
 }
 .lexicon__form-list li.is-current {
   color: var(--oxblood);
   border-color: color-mix(in srgb, var(--oxblood) 40%, var(--line));
   background: color-mix(in srgb, var(--oxblood) 8%, transparent);
+}
+.lexicon__form-list li.is-current a:hover {
+  color: var(--oxblood);
 }
 
 .lexicon__passages {

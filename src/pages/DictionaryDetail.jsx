@@ -5,6 +5,7 @@ import DiacriticsControl from '../components/DiacriticsControl.jsx'
 import ReportMacraLink from '../components/ReportMacraLink.jsx'
 import { useDiacritics } from '../hooks/useDiacritics.js'
 import { hasParadigm } from '../lib/paradigm.js'
+import { principalParts } from '../lib/grammar.js'
 import { containsDiacritics, stripDiacritics } from '../lib/diacritics.js'
 import {
   norm,
@@ -106,6 +107,17 @@ export default function DictionaryDetail() {
     : null
 
   const showParadigm = hasParadigm(lemma)
+  const principal = lemma ? principalParts(lemma.latin) : []
+  const displayHead = principal[0] || entry?.latin || ''
+  const otherParts = principal.slice(1)
+  const partLabel =
+    lemma?.sig?.startsWith('ADV|')
+      ? 'Comparison'
+      : lemma?.sig?.startsWith('N|')
+        ? 'Genitive'
+        : lemma?.sig?.startsWith('V|')
+          ? 'Principal parts'
+          : 'Other forms'
 
   const crumb = (
     <nav className="dict-crumb">
@@ -185,7 +197,13 @@ export default function DictionaryDetail() {
         <article className="lexicon">
           <header className="lexicon__head">
             <p className="eyebrow">{isForm ? 'Form' : 'Lexicon'}</p>
-            <h1 className="lexicon__latin latin">{entry.latin}</h1>
+            <h1 className="lexicon__latin latin">{d(displayHead)}</h1>
+            {otherParts.length > 0 && (
+              <p className="lexicon__principal">
+                <span className="lexicon__principal-label">{partLabel}</span>
+                <span className="latin">{otherParts.map((part) => d(part)).join(', ')}</span>
+              </p>
+            )}
             <div className="lexicon__meta">
               {entry.pos && entry.pos !== 'other' && <span className="lexicon__pos">{entry.pos}</span>}
             </div>
@@ -244,7 +262,9 @@ export default function DictionaryDetail() {
               <ul className="lexicon__form-list">
                 {entry.forms.map((form) => (
                   <li key={form} className={norm(form) === normWord ? 'is-current' : ''}>
-                    <span className="latin">{d(form)}</span>
+                    <Link className="latin" to={wordHref(form)}>
+                      {d(form)}
+                    </Link>
                   </li>
                 ))}
               </ul>
