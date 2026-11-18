@@ -11,8 +11,12 @@
     "preview": "vite preview --host",
     "icons": "python3 scripts/generate-icons.py",
     "keywords": "node scripts/build-chapter-keywords.mjs",
+    "meta": "node scripts/build-books-meta.mjs",
+    "vocab": "node scripts/build-printed-vocabulary.mjs",
+    "data": "npm run meta && npm run keywords && npm run path && npm run vocab",
     "validate:keywords": "node scripts/validate-keywords.mjs",
     "path": "node scripts/build-learning-path.mjs",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

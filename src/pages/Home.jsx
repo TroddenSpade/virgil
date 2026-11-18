@@ -9,7 +9,11 @@ import {
   authorShelf,
 } from '../data/library.js'
 import { authorIdentity, authorRank } from '../lib/authors.js'
-import { iterStages, iterLessonCount } from '../data/learning-path.generated.js'
+import {
+  iterStageCount,
+  iterLessonCount,
+  iterStageSummary,
+} from '../data/iter-meta.generated.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import VirgilLines from '../components/VirgilLines.jsx'
 
@@ -29,7 +33,7 @@ const textCount =
   shelf
     .filter((book) => originalSlugs.has(book.slug))
     .reduce((total, book) => total + (book.readingCount || 0), 0)
-const stageCount = iterStages.length
+const stageCount = iterStageCount
 const goalBook = books.find((book) => book.isGoal)
 
 const COURSE_SLUGS = [
@@ -546,7 +550,7 @@ export default function Home() {
           </p>
 
           <ol className="home-road">
-            {iterStages.map((stage, index) => (
+            {iterStageSummary.map((stage, index) => (
               <li key={stage.id} className="home-road__stop">
                 <span className="home-road__node" aria-hidden="true">
                   {ROMAN[index] || index + 1}

@@ -1,8 +1,10 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
-import { getBook } from '../data/library.js'
+import { keywordsFor } from '../data/keywords.js'
+import { useBookData } from '../hooks/useBookData.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import { useDiacritics } from '../hooks/useDiacritics.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
+import Loading from '../components/Loading.jsx'
 import Reading from '../components/Reading.jsx'
 import GrammarSection from '../components/GrammarSection.jsx'
 import Vocabulary from '../components/Vocabulary.jsx'
@@ -16,10 +18,13 @@ const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'
 
 export default function ChapterPage() {
   const { bookSlug, chapterSlug } = useParams()
-  const book = getBook(bookSlug)
-  const chapter = book?.chapters.find((c) => c.slug === chapterSlug && c.complete)
+  const { book, status } = useBookData(bookSlug)
 
-  if (!book || !chapter) return <Navigate to={`/library/${bookSlug || ''}`} replace />
+  if (status === 'loading') return <Loading title="Opening the chapter" />
+  if (!book) return <Navigate to={`/library/${bookSlug || ''}`} replace />
+
+  const chapter = book.chapters.find((c) => c.slug === chapterSlug && c.complete)
+  if (!chapter) return <Navigate to={`/library/${bookSlug}`} replace />
 
   // Learn Latin from the Romans is re-typeset page-faithfully from the book.
   if (book.slug === 'learn-latin-from-the-romans') {
@@ -131,7 +136,7 @@ function Lesson({ book, chapter }) {
               <li>{chapter.pensa?.length || 0} practices</li>
             </ul>
           )}
-          <KeywordChips ids={chapter.keywords} />
+          <KeywordChips ids={keywordsFor(book.slug, chapter.slug)} />
         </header>
 
         <div className="lesson__layout">

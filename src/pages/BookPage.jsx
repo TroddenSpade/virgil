@@ -1,8 +1,10 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { books, getBook } from '../data/library.js'
+import { keywordsFor } from '../data/keywords.js'
 import { displayTitle } from '../lib/authors.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import KeywordChips from '../components/KeywordChips.jsx'
+import OfflineBadge from '../components/OfflineBadge.jsx'
 
 const EXTRA_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 
@@ -199,6 +201,7 @@ function ActiveBook({ book }) {
                 Browse the commentary
               </a>
             )}
+            <OfflineBadge slug={book.slug} />
           </div>
 
           <BookSwitcher current={book} />
@@ -240,7 +243,7 @@ function ActiveBook({ book }) {
                 <span className="chapter-card__body">
                   <span className="chapter-card__latin latin">{chapter.latinTitle}</span>
                   <span className="chapter-card__title">{chapter.title}</span>
-                  <KeywordChips ids={chapter.keywords} variant="card" />
+                  <KeywordChips ids={keywordsFor(book.slug, chapter.slug)} variant="card" />
                 </span>
               </>
             )

@@ -1,48 +1,11 @@
-import { book as familiaRomana, chapters as familiaRomanaChapters } from './familia-romana/index.js'
-import { book as romaAeterna, chapters as romaAeternaChapters } from './roma-aeterna/index.js'
-import { book as exercitiaLatina, chapters as exercitiaLatinaChapters } from './exercitia-latina/index.js'
-import { book as latinViaOvid, chapters as latinViaOvidChapters } from './latin-via-ovid/index.js'
-import { book as companion, chapters as companionChapters } from './companion/index.js'
-import { book as colloquia, chapters as colloquiaChapters } from './colloquia-personarum/index.js'
-import { book as fabulae, chapters as fabulaeChapters } from './fabulae-syrae/index.js'
-import { book as learnLatin, chapters as learnLatinChapters } from './learn-latin/index.js'
-import { book as epitome, chapters as epitomeChapters } from './epitome-historiae-sacrae/index.js'
-import { book as caesar, chapters as caesarChapters } from './caesar-de-bello-gallico-vii/index.js'
-import { book as exercitiaII, chapters as exercitiaIIChapters } from './exercitia-latina-ii/index.js'
-import { book as sermones, chapters as sermonesChapters } from './sermones-romani/index.js'
+// The library registry.
+//
+// This module is deliberately light: it reads the generated book metadata and
+// never imports a book's full text. Pages that need chapter content load one
+// book on demand through src/data/book-loader.js, so Home, Library and Iter
+// stay small.
+import { booksMeta } from './books-meta.generated.js'
 import { sources } from './sources.generated.js'
-import { book as petronius, chapters as petroniusChapters } from './petronius-cena-trimalchionis/index.js'
-import { book as ars, chapters as arsChapters } from './ovidii-ars-amatoria/index.js'
-import { book as companionRA, chapters as companionRAChapters } from './companion-roma-aeterna/index.js'
-import { book as aeneis, chapters as aeneisChapters } from './vergil-aeneis-i-et-iv/index.js'
-import { book as catilina, chapters as catilinaChapters } from './sallustius-cicero-catilina/index.js'
-import { book as amphitryo, chapters as amphitryoChapters } from './plautus-amphitryo/index.js'
-import { book as catullus, chapters as catullusChapters } from './catullus-carmina/index.js'
-import { book as ciceroFamiliares, chapters as ciceroFamiliaresChapters } from './cicero-epistulae-ad-familiares/index.js'
-import { book as caesarGallico, chapters as caesarGallicoChapters } from './caesar-de-bello-gallico/index.js'
-import { book as caesarCivili, chapters as caesarCiviliChapters } from './caesar-de-bello-civili/index.js'
-import { book as caesarAlexandrinum, chapters as caesarAlexandrinumChapters } from './caesar-bellum-alexandrinum/index.js'
-import { book as caesarAfricum, chapters as caesarAfricumChapters } from './caesar-bellum-africum/index.js'
-import { book as caesarHispaniense, chapters as caesarHispanienseChapters } from './caesar-bellum-hispaniense/index.js'
-import { book as ovidMetamorphoses, chapters as ovidMetamorphosesChapters } from './ovidius-metamorphoses/index.js'
-import { book as ovidAmores, chapters as ovidAmoresChapters } from './ovidius-amores/index.js'
-import { book as ovidHeroides, chapters as ovidHeroidesChapters } from './ovidius-heroides/index.js'
-import { book as ovidArsAmatoria, chapters as ovidArsAmatoriaChapters } from './ovidius-ars-amatoria/index.js'
-import { book as ovidTristia, chapters as ovidTristiaChapters } from './ovidius-tristia/index.js'
-import { book as ovidExPonto, chapters as ovidExPontoChapters } from './ovidius-ex-ponto/index.js'
-import { book as ovidFasti, chapters as ovidFastiChapters } from './ovidius-fasti/index.js'
-import { book as ovidRemedia, chapters as ovidRemediaChapters } from './ovidius-remedia-amoris/index.js'
-import { book as ovidIbis, chapters as ovidIbisChapters } from './ovidius-ibis/index.js'
-import { book as vergilAeneis, chapters as vergilAeneisChapters } from './vergil-aeneis/index.js'
-import { book as vergilEclogae, chapters as vergilEclogaeChapters } from './vergil-eclogae/index.js'
-import { book as vergilGeorgica, chapters as vergilGeorgicaChapters } from './vergil-georgica/index.js'
-import { book as horaceSermones, chapters as horaceSermonesChapters } from './horatius-sermones/index.js'
-import { book as horaceCarmina, chapters as horaceCarminaChapters } from './horatius-carmina/index.js'
-import { book as horaceEpistulae, chapters as horaceEpistulaeChapters } from './horatius-epistulae/index.js'
-import { book as horaceArsPoetica, chapters as horaceArsPoeticaChapters } from './horatius-ars-poetica/index.js'
-import { book as horaceCarmenSaeculare, chapters as horaceCarmenSaeculareChapters } from './horatius-carmen-saeculare/index.js'
-import { book as horaceEpodi, chapters as horaceEpodiChapters } from './horatius-epodi/index.js'
-import { chapterKeywords } from './chapter-keywords.generated.js'
 
 // Reference sources are the full texts extracted from the source editions.
 // Their chapter JSON lives in public/sources/<sourceSlug>/ and is fetched on
@@ -64,281 +27,12 @@ function referenceChapters(sourceSlug) {
   }))
 }
 
-// Attach the matching full-text id to each Familia Romana chapter so that
-// chapters without a written lesson can still be read in the original.
-const familiaReference = sourceBySlug['familia-romana']
-export const familiaRomanaBook = {
-  ...familiaRomana,
-  sourceSlug: 'familia-romana',
-  referenceChapters: referenceChapters('familia-romana'),
-  chapters: familiaRomanaChapters.map((chapter) => ({
-    ...chapter,
-    referenceId:
-      familiaReference?.chapters.find((c) => c.number === chapter.number)?.id || null,
-  })),
-}
-
-export const romaAeternaBook = {
-  ...romaAeterna,
-  chapters: romaAeternaChapters,
-}
-
-const companionSource = sourceBySlug['companion']
-const latinViaOvidSource = sourceBySlug['latin-via-ovid']
-const exercitiaSource = sourceBySlug['exercitia']
-
-export const companionBook = {
-  ...companion,
-  sourceSlug: 'companion',
-  referenceChapters: referenceChapters('companion'),
-  chapters: companionChapters,
-}
-
-export const colloquiaBook = {
-  ...colloquia,
-  chapters: colloquiaChapters,
-}
-
-export const fabulaeBook = {
-  ...fabulae,
-  chapters: fabulaeChapters,
-}
-
-export const amphitryoBook = {
-  ...amphitryo,
-  chapters: amphitryoChapters,
-}
-
-export const catullusBook = {
-  ...catullus,
-  chapters: catullusChapters,
-}
-
-export const ciceroFamiliaresBook = {
-  ...ciceroFamiliares,
-  chapters: ciceroFamiliaresChapters,
-}
-
-export const caesarGallicoBook = {
-  ...caesarGallico,
-  chapters: caesarGallicoChapters,
-}
-export const caesarCiviliBook = {
-  ...caesarCivili,
-  chapters: caesarCiviliChapters,
-}
-export const caesarAlexandrinumBook = {
-  ...caesarAlexandrinum,
-  chapters: caesarAlexandrinumChapters,
-}
-export const caesarAfricumBook = {
-  ...caesarAfricum,
-  chapters: caesarAfricumChapters,
-}
-export const caesarHispanienseBook = {
-  ...caesarHispaniense,
-  chapters: caesarHispanienseChapters,
-}
-export const ovidMetamorphosesBook = {
-  ...ovidMetamorphoses,
-  chapters: ovidMetamorphosesChapters,
-}
-export const ovidAmoresBook = {
-  ...ovidAmores,
-  chapters: ovidAmoresChapters,
-}
-export const ovidHeroidesBook = {
-  ...ovidHeroides,
-  chapters: ovidHeroidesChapters,
-}
-export const ovidArsAmatoriaBook = {
-  ...ovidArsAmatoria,
-  chapters: ovidArsAmatoriaChapters,
-}
-export const ovidTristiaBook = {
-  ...ovidTristia,
-  chapters: ovidTristiaChapters,
-}
-export const ovidExPontoBook = {
-  ...ovidExPonto,
-  chapters: ovidExPontoChapters,
-}
-export const ovidFastiBook = {
-  ...ovidFasti,
-  chapters: ovidFastiChapters,
-}
-export const ovidRemediaBook = {
-  ...ovidRemedia,
-  chapters: ovidRemediaChapters,
-}
-export const ovidIbisBook = {
-  ...ovidIbis,
-  chapters: ovidIbisChapters,
-}
-export const vergilAeneisBook = {
-  ...vergilAeneis,
-  chapters: vergilAeneisChapters,
-}
-export const vergilEclogaeBook = {
-  ...vergilEclogae,
-  chapters: vergilEclogaeChapters,
-}
-export const vergilGeorgicaBook = {
-  ...vergilGeorgica,
-  chapters: vergilGeorgicaChapters,
-}
-export const horaceSermonesBook = {
-  ...horaceSermones,
-  chapters: horaceSermonesChapters,
-}
-export const horaceCarminaBook = {
-  ...horaceCarmina,
-  chapters: horaceCarminaChapters,
-}
-export const horaceEpistulaeBook = {
-  ...horaceEpistulae,
-  chapters: horaceEpistulaeChapters,
-}
-export const horaceArsPoeticaBook = {
-  ...horaceArsPoetica,
-  chapters: horaceArsPoeticaChapters,
-}
-export const horaceCarmenSaeculareBook = {
-  ...horaceCarmenSaeculare,
-  chapters: horaceCarmenSaeculareChapters,
-}
-export const horaceEpodiBook = {
-  ...horaceEpodi,
-  chapters: horaceEpodiChapters,
-}
-
-
-export const catilinaBook = {
-  ...catilina,
-  chapters: catilinaChapters,
-}
-
-
-export const aeneisBook = {
-  ...aeneis,
-  chapters: aeneisChapters,
-}
-
-
-export const companionRABook = {
-  ...companionRA,
-  chapters: companionRAChapters,
-}
-
-
-export const arsBook = {
-  ...ars,
-  chapters: arsChapters,
-}
-
-
-export const petroniusBook = {
-  ...petronius,
-  chapters: petroniusChapters,
-}
-
-
-export const epitomeBook = {
-  ...epitome,
-  chapters: epitomeChapters,
-}
-
-
-export const caesarBook = {
-  ...caesar,
-  chapters: caesarChapters,
-}
-
-
-export const exercitiaIIBook = {
-  ...exercitiaII,
-  chapters: exercitiaIIChapters,
-}
-
-
-export const sermonesBook = {
-  ...sermones,
-  chapters: sermonesChapters,
-}
-
-
-export const learnLatinBook = {
-  ...learnLatin,
-  chapters: learnLatinChapters,
-}
-
-export const latinViaOvidBook = {
-  ...latinViaOvid,
-  sourceSlug: 'latin-via-ovid',
-  referenceChapters: referenceChapters('latin-via-ovid'),
-  chapters: latinViaOvidChapters.map((chapter) => ({
-    ...chapter,
-    referenceId:
-      latinViaOvidSource?.chapters.find((c) => c.number === chapter.number)?.id || null,
-  })),
-}
-
-export const exercitiaBook = {
-  ...exercitiaLatina,
-  sourceSlug: 'exercitia',
-  referenceChapters: referenceChapters('exercitia'),
-  chapters: exercitiaLatinaChapters.map((chapter) => ({
-    ...chapter,
-    referenceId:
-      exercitiaSource?.chapters.find((c) => c.number === chapter.number)?.id || null,
-  })),
-}
-
-export const books = [
-  familiaRomanaBook,
-  romaAeternaBook,
-  exercitiaBook,
-  colloquiaBook,
-  fabulaeBook,
-  sermonesBook,
-  epitomeBook,
-  exercitiaIIBook,
-  caesarBook,
-  aeneisBook,
-  arsBook,
-  petroniusBook,
-  catilinaBook,
-  amphitryoBook,
-  catullusBook,
-  ciceroFamiliaresBook,
-  caesarGallicoBook,
-  caesarCiviliBook,
-  caesarAlexandrinumBook,
-  caesarAfricumBook,
-  caesarHispanienseBook,
-  ovidMetamorphosesBook,
-  ovidAmoresBook,
-  ovidHeroidesBook,
-  ovidArsAmatoriaBook,
-  ovidTristiaBook,
-  ovidExPontoBook,
-  ovidFastiBook,
-  ovidRemediaBook,
-  ovidIbisBook,
-  vergilAeneisBook,
-  vergilEclogaeBook,
-  vergilGeorgicaBook,
-  horaceSermonesBook,
-  horaceCarminaBook,
-  horaceEpistulaeBook,
-  horaceArsPoeticaBook,
-  horaceCarmenSaeculareBook,
-  horaceEpodiBook,
-  companionRABook,
-  companionBook,
-  learnLatinBook,
-  latinViaOvidBook,
-]
+export const books = booksMeta.map((book) => ({
+  ...book,
+  ...(book.sourceSlug
+    ? { referenceChapters: referenceChapters(book.sourceSlug) }
+    : {}),
+}))
 
 // The shelf runs from the first beginner book to the most advanced author.
 // Companion and exercise volumes sit beside the course they support.
@@ -389,6 +83,53 @@ const BOOK_ORDER = [
 ]
 const BOOK_RANK = new Map(BOOK_ORDER.map((slug, index) => [slug, index]))
 books.sort((a, b) => (BOOK_RANK.get(a.slug) ?? 99) - (BOOK_RANK.get(b.slug) ?? 99))
+
+const bySlug = new Map(books.map((book) => [book.slug, book]))
+
+// Named accessors kept for the pages and helpers that use a familiar book.
+export const familiaRomanaBook = bySlug.get('familia-romana')
+export const romaAeternaBook = bySlug.get('roma-aeterna')
+export const exercitiaBook = bySlug.get('exercitia-latina')
+export const latinViaOvidBook = bySlug.get('latin-via-ovid')
+export const companionBook = bySlug.get('companion-to-familia-romana')
+export const colloquiaBook = bySlug.get('colloquia-personarum')
+export const fabulaeBook = bySlug.get('fabulae-syrae')
+export const learnLatinBook = bySlug.get('learn-latin-from-the-romans')
+export const epitomeBook = bySlug.get('epitome-historiae-sacrae')
+export const caesarBook = bySlug.get('caesar-de-bello-gallico-vii')
+export const exercitiaIIBook = bySlug.get('exercitia-latina-ii')
+export const sermonesBook = bySlug.get('sermones-romani')
+export const petroniusBook = bySlug.get('petronius-cena-trimalchionis')
+export const arsBook = bySlug.get('ovidii-ars-amatoria')
+export const companionRABook = bySlug.get('companion-to-roma-aeterna')
+export const aeneisBook = bySlug.get('vergil-aeneis-i-et-iv')
+export const catilinaBook = bySlug.get('sallustius-cicero-catilina')
+export const amphitryoBook = bySlug.get('plautus-amphitryo')
+export const catullusBook = bySlug.get('catullus-carmina')
+export const ciceroFamiliaresBook = bySlug.get('cicero-epistulae-ad-familiares')
+export const caesarGallicoBook = bySlug.get('caesar-de-bello-gallico')
+export const caesarCiviliBook = bySlug.get('caesar-de-bello-civili')
+export const caesarAlexandrinumBook = bySlug.get('caesar-bellum-alexandrinum')
+export const caesarAfricumBook = bySlug.get('caesar-bellum-africum')
+export const caesarHispanienseBook = bySlug.get('caesar-bellum-hispaniense')
+export const ovidMetamorphosesBook = bySlug.get('ovidius-metamorphoses')
+export const ovidAmoresBook = bySlug.get('ovidius-amores')
+export const ovidHeroidesBook = bySlug.get('ovidius-heroides')
+export const ovidArsAmatoriaBook = bySlug.get('ovidius-ars-amatoria')
+export const ovidTristiaBook = bySlug.get('ovidius-tristia')
+export const ovidExPontoBook = bySlug.get('ovidius-ex-ponto')
+export const ovidFastiBook = bySlug.get('ovidius-fasti')
+export const ovidRemediaBook = bySlug.get('ovidius-remedia-amoris')
+export const ovidIbisBook = bySlug.get('ovidius-ibis')
+export const vergilAeneisBook = bySlug.get('vergil-aeneis')
+export const vergilEclogaeBook = bySlug.get('vergil-eclogae')
+export const vergilGeorgicaBook = bySlug.get('vergil-georgica')
+export const horaceSermonesBook = bySlug.get('horatius-sermones')
+export const horaceCarminaBook = bySlug.get('horatius-carmina')
+export const horaceEpistulaeBook = bySlug.get('horatius-epistulae')
+export const horaceArsPoeticaBook = bySlug.get('horatius-ars-poetica')
+export const horaceCarmenSaeculareBook = bySlug.get('horatius-carmen-saeculare')
+export const horaceEpodiBook = bySlug.get('horatius-epodi')
 
 // Three broad stages for the shelf. The course volumes and their companions
 // sit with the stage they support, so the progression from first sentences to
@@ -557,17 +298,7 @@ for (const book of books) {
   book.heroMark = HERO_MARKS[book.id] || book.shortTitle?.toUpperCase() || 'LIBER'
   book.isAuthorShelf = AUTHOR_SHELF_SLUGS.has(book.slug)
   book.isOriginalEdition = ORIGINAL_EDITIONS.has(book.slug)
-  for (const chapter of book.chapters || []) {
-    chapter.keywords = chapterKeywords[`${book.slug}/${chapter.slug}`] || []
-  }
 }
-
-export {
-  chapterKeywords,
-  keywordDefinitions,
-  keywordGroups,
-  keywordIndex,
-} from './chapter-keywords.generated.js'
 
 export function getBook(slug) {
   return books.find((b) => b.slug === slug)
@@ -576,5 +307,3 @@ export function getBook(slug) {
 export function getSource(slug) {
   return sourceBySlug[slug]
 }
-
-export default books

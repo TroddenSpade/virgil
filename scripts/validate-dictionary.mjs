@@ -14,7 +14,7 @@
  * Soft warnings:
  *   - noun/verb/adjective lemmas without a paradigm signature/stems
  */
-import { books } from '../src/data/library.js'
+import { books } from './book-data.mjs'
 import * as data from '../src/data/dictionary.generated.js'
 import { hasDefinition } from '../src/lib/dictionary.js'
 import { buildLexiconIndex, latinTokens, lookupLexicon } from '../src/lib/lexicon.js'

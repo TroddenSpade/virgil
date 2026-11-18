@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import Header from './Header.jsx'
 import Footer from './Footer.jsx'
+import Loading from './Loading.jsx'
 import PwaUpdatePrompt from './PwaUpdatePrompt.jsx'
 import InstallPrompt from './InstallPrompt.jsx'
 
@@ -19,7 +20,9 @@ export default function Layout() {
       </a>
       <Header />
       <main id="main-content" tabIndex={-1}>
-        <Outlet />
+        <Suspense fallback={<Loading title="Opening the page" />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
       <PwaUpdatePrompt />

@@ -1,22 +1,27 @@
+import { lazy } from 'react'
 import { Navigate, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import Home from './pages/Home.jsx'
 import Library from './pages/Library.jsx'
-import Dictionary from './pages/Dictionary.jsx'
-import DictionaryDetail from './pages/DictionaryDetail.jsx'
-import ParadigmPage from './pages/ParadigmPage.jsx'
-import ParadigmPracticePage from './pages/ParadigmPracticePage.jsx'
-import Wordlist from './pages/Wordlist.jsx'
-import WordlistReview from './pages/WordlistReview.jsx'
-import Profile from './pages/Profile.jsx'
-import HodiePage from './pages/HodiePage.jsx'
-import BookPage from './pages/BookPage.jsx'
-import ChapterPage from './pages/ChapterPage.jsx'
-import ExtraPage from './pages/ExtraPage.jsx'
-import ReferencePage from './pages/ReferencePage.jsx'
-import Iter from './pages/Iter.jsx'
-import NotFound from './pages/NotFound.jsx'
 import { useAccount } from './lib/account.jsx'
+
+// Reading, practice and account pages are split into their own chunks. Home
+// and Library stay eager: they are the two entry points and share the light
+// book registry.
+const Dictionary = lazy(() => import('./pages/Dictionary.jsx'))
+const DictionaryDetail = lazy(() => import('./pages/DictionaryDetail.jsx'))
+const ParadigmPage = lazy(() => import('./pages/ParadigmPage.jsx'))
+const ParadigmPracticePage = lazy(() => import('./pages/ParadigmPracticePage.jsx'))
+const Wordlist = lazy(() => import('./pages/Wordlist.jsx'))
+const WordlistReview = lazy(() => import('./pages/WordlistReview.jsx'))
+const Profile = lazy(() => import('./pages/Profile.jsx'))
+const HodiePage = lazy(() => import('./pages/HodiePage.jsx'))
+const BookPage = lazy(() => import('./pages/BookPage.jsx'))
+const ChapterPage = lazy(() => import('./pages/ChapterPage.jsx'))
+const ExtraPage = lazy(() => import('./pages/ExtraPage.jsx'))
+const ReferencePage = lazy(() => import('./pages/ReferencePage.jsx'))
+const Iter = lazy(() => import('./pages/Iter.jsx'))
+const NotFound = lazy(() => import('./pages/NotFound.jsx'))
 
 // The root is a doorway: returning readers go straight to their tabula,
 // new ones to the front page. Wait for the stored session before choosing,

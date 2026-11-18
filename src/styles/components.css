@@ -8103,3 +8103,36 @@ button.lesson__keywords-label:focus-visible {
     min-height: 20rem;
   }
 }
+
+/* Offline state on a book page: the chunk is cached by the service worker
+   after a chapter has been opened once. */
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  align-self: center;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+
+.offline-badge__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.offline-badge--ready {
+  color: var(--laurel);
+}
+
+.offline-badge--checking {
+  opacity: 0.75;
+}

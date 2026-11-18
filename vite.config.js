@@ -8,9 +8,51 @@ import { VitePWA } from 'vite-plugin-pwa'
 // and preview default to "/".
 const base = process.env.VITE_BASE || '/'
 
+// Large generated data files get a chunk each so they can be left out of the
+// install-time precache and fetched (then cached) on demand. Sources is small
+// and stays in the app shell; everything here is only needed on a few pages.
+const DATA_CHUNKS = new Map([
+  ['dictionary.generated.js', 'dictionary'],
+  ['dictionary-index.generated.js', 'dictionary-index'],
+  ['reading-vocabulary.generated.js', 'reading-vocabulary'],
+  ['printed-vocabulary.generated.js', 'printed-vocabulary'],
+  ['chapter-keywords.generated.js', 'chapter-keywords'],
+  ['learning-path.generated.js', 'learning-path'],
+  ['paradigm-rules.generated.js', 'paradigm-rules'],
+])
+
+function manualChunks(id) {
+  const file = id.replace(/\\/g, '/').split('/').pop()
+  const name = DATA_CHUNKS.get(file)
+  return name ? `data-${name}` : undefined
+}
+
+// Book text lives under src/data/<book>/index.js. Put those chunks in their
+// own folder so the service worker can runtime-cache them and keep the app
+// shell precache small.
+function chunkFileNames(chunkInfo) {
+  const id = (chunkInfo.facadeModuleId || '').replace(/\\/g, '/')
+  if (id.includes('/src/data/') && id.endsWith('/index.js')) {
+    const folder = id.split('/src/data/')[1].split('/')[0]
+    return `assets/books/${folder}-[hash].js`
+  }
+  if (String(chunkInfo.name || '').startsWith('data-')) {
+    return 'assets/data/[name]-[hash].js'
+  }
+  return 'assets/[name]-[hash].js'
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks,
+        chunkFileNames,
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -55,38 +97,39 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The authored course bundle and the dictionary index now exceed
-        // Workbox's 2 MB default; keep them in the offline precache.
-        maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
+        // The install precache is the app shell only: route chunks, CSS, fonts
+        // and images. Book text and the large generated indexes are fetched on
+        // first use and kept by the runtime rules below.
+        cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        // The full 17 MB dictionary is only needed on word-detail and paradigm
-        // pages. Keep it out of the install-time precache so the app starts
-        // small; the runtime rule below caches it after the first such page.
-        globIgnores: ['**/dictionary.generated-*.js'],
+        globIgnores: ['**/books/**', '**/data/**'],
         runtimeCaching: [
           {
-            urlPattern: /\/assets\/dictionary\.generated-[^/]+\.js$/,
+            urlPattern: /\/assets\/books\/.*\.js$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'dictionary-full',
-              expiration: { maxEntries: 4, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheName: 'virgil-book-texts',
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            urlPattern: /\/assets\/data\/.*\.js$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-stylesheets',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheName: 'virgil-data',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            // Reference-edition chapters are static JSON in public/sources/.
+            urlPattern: /\/sources\/.*\.json$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-webfonts',
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheName: 'virgil-source-texts',
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

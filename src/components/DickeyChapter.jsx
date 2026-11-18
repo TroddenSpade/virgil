@@ -1,5 +1,6 @@
 import { Fragment, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { keywordsFor } from '../data/keywords.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
 import { Inline } from './Commentary.jsx'
@@ -325,7 +326,7 @@ export default function DickeyChapter({ book, chapter }) {
           <h1 className="dickey__opener-title">{chapter.title}</h1>
         </header>
 
-        <KeywordChips ids={chapter.keywords} />
+        <KeywordChips ids={keywordsFor(book.slug, chapter.slug)} />
 
         <div className="dickey__layout">
           <aside className="lesson__rail">

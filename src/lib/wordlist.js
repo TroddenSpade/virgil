@@ -13,28 +13,23 @@
 // print markup ("{i}often pl.{/i}"). The helpers below reduce all of that to
 // a stable headword, a readable display form, and a small set of senses.
 
-import {
-  books as libraryBooks,
-  familiaRomanaBook,
-  romaAeternaBook,
-  exercitiaBook,
-  latinViaOvidBook,
-  companionBook,
-  companionRABook,
-} from '../data/library.js'
+import { books as libraryBooks, getBook } from '../data/library.js'
+import { printedVocabulary } from '../data/printed-vocabulary.generated.js'
 import {
   readingChapters as generatedReadingChapters,
   readingLemmas as generatedReadingLemmas,
 } from '../data/reading-vocabulary.generated.js'
 
-const VOCABULARY_SOURCE_BOOKS = [
-  familiaRomanaBook,
-  romaAeternaBook,
-  exercitiaBook,
-  latinViaOvidBook,
-  companionBook,
-  companionRABook,
+const VOCABULARY_BOOK_SLUGS = [
+  'familia-romana',
+  'roma-aeterna',
+  'exercitia-latina',
+  'latin-via-ovid',
+  'companion-to-familia-romana',
+  'companion-to-roma-aeterna',
 ]
+
+const VOCABULARY_SOURCE_BOOKS = VOCABULARY_BOOK_SLUGS.map(getBook).filter(Boolean)
 
 // Keep the familiar order of the six books with printed vocabulary, then add
 // the rest of the library so every edition gets a stable place in the list.
@@ -52,7 +47,7 @@ const BOOK_ORDER = new Map(
 )
 
 export const VOCABULARY_BOOKS = VOCABULARY_SOURCE_BOOKS.filter((book) =>
-  book.chapters.some((chapter) => chapter.vocabulary?.length),
+  Object.keys(printedVocabulary).some((key) => key.startsWith(`${book.id}:`)),
 )
 
 const KIND_ORDER = [
@@ -625,6 +620,7 @@ export function buildWordlist(
     for (const chapter of book.chapters) {
       if (!done.has(chapter.number)) continue
 
+      const printed = printedVocabulary[`${book.id}:${chapter.number}`] || []
       const source = {
         bookId: book.id,
         bookTitle: book.title,
@@ -643,7 +639,7 @@ export function buildWordlist(
       let added = 0
       let readingAdded = 0
 
-      for (const entry of chapter.vocabulary || []) {
+      for (const entry of printed) {
         const key = wordKey(entry.latin)
         if (!key) continue
         const parsed = {
@@ -686,7 +682,7 @@ export function buildWordlist(
         }
       }
 
-      if (chapter.vocabulary?.length) printedVocabularyChapters += 1
+      if (printed.length) printedVocabularyChapters += 1
       if (readingAdded) readingVocabularyChapters += 1
       if (!added) continue
       contributingChapters += 1

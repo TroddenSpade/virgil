@@ -105,8 +105,11 @@ npm run icons      # python3 scripts/generate-icons.py (requires Pillow)
 - **React 19 + Vite 7**
 - **React Router 7**
 - **vite-plugin-pwa** — installable PWA with an offline-capable service worker
-- **Cinzel + EB Garamond + Gentium Book Plus + Space Grotesk** — inscriptional
-  display, book body, macron-complete Latin, and a shared interface grotesque
+- **EB Garamond + Space Grotesk** — a self-hosted book face for the readings and
+  inscriptional headings, and the shared interface grotesque. Two variable,
+  subsetted WOFF2 families (latin + latin-ext) replace the former Google Fonts
+  request, so there is no render-blocking third-party fetch and the type is
+  available offline with the app shell.
 
 Content is data-driven: each chapter is a module in `src/data/familia-romana/`,
 `src/data/exercitia-latina/`, `src/data/roma-aeterna/` or `src/data/latin-via-ovid/`, so adding a
@@ -115,7 +118,10 @@ chapter means adding one file and listing it in the book's `outline.js`.
 ```
 src/
 ├─ data/
-│  ├─ library.js                 # the curriculum (books + roadmap)
+│  ├─ library.js                 # the light registry: books, shelves, chapter outlines
+│  ├─ book-loader.js             # loads one book's full text on demand (assets/books/)
+│  ├─ books-meta.generated.js    # generated registry (scripts/build-books-meta.mjs)
+│  ├─ printed-vocabulary.generated.js  # printed vocabulary for the wordlist
 │  ├─ dictionary.generated.js    # the course dictionary (built by scripts/build-dictionary.mjs)
 │  ├─ familia-romana/            # Pars I — 35 capitula
 │  │  ├─ index.js                # book metadata + merges outline with content
@@ -157,8 +163,10 @@ Question exercises are `{ q: '…', a: '…' }` pairs that the learner can revea
 npm install      # install dependencies
 npm run dev      # start the dev server at http://localhost:5173
 npm run build    # production build into dist/
+npm run check:bundle  # fail if the initial JS grows past 1 MB
 npm test         # run the wordlist, review, and lexicon tests (Vitest)
 npm run preview  # serve the production build (needed to test the PWA)
+npm run data     # regenerate books meta, keywords, itinerary and vocabulary
 ```
 
 To see the **install prompt**, run `npm run build && npm run preview` and open the site —

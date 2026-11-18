@@ -1,6 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { getBook } from '../data/library.js'
+import { useBookData } from '../hooks/useBookData.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
+import Loading from '../components/Loading.jsx'
 import CommentarySection, { Inline } from '../components/Commentary.jsx'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
@@ -21,12 +22,16 @@ function SectionHead({ num, latin, english }) {
 
 export default function ExtraPage() {
   const { bookSlug, extraSlug } = useParams()
-  const book = getBook(bookSlug)
-  const extras = book?.extras || []
+  const { book, status } = useBookData(bookSlug)
+
+  if (status === 'loading') return <Loading title="Opening the reference" />
+  if (!book) return <Navigate to={`/library/${bookSlug || ''}`} replace />
+
+  const extras = book.extras || []
   const index = extras.findIndex((extra) => extra.slug === extraSlug)
   const extra = extras[index]
 
-  if (!book || !extra) return <Navigate to={`/library/${bookSlug || ''}`} replace />
+  if (!extra) return <Navigate to={`/library/${bookSlug}`} replace />
 
   return <Reader book={book} extra={extra} index={index} extras={extras} />
 }

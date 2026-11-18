@@ -6,7 +6,7 @@
  * has a definition, that the index agrees with the chapter map, and that no
  * keyword is unused.
  */
-import { books } from '../src/data/library.js'
+import { books } from './book-data.mjs'
 import {
   chapterKeywords,
   keywordDefinitions,

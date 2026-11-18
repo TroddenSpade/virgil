@@ -51,11 +51,12 @@
   /* A double hairline, the frame of a carved tablet */
   --frame: inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--line-soft);
 
-  /* Type: inscriptional capitals, a book face, scholarly Latin, and
-     the same grotesque the other two sites use. */
-  --font-display: 'Cinzel', 'Trajan Pro', Georgia, 'Times New Roman', serif;
+  /* Type: a book face for the reading and the inscriptional headings, and the
+     grotesque the other two sites use for the interface. Both are self-hosted
+     (see src/styles/fonts.css). */
+  --font-display: 'EB Garamond', Georgia, 'Times New Roman', serif;
   --font-serif: 'EB Garamond', Georgia, 'Times New Roman', serif;
-  --font-latin: 'Gentium Book Plus', 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --font-latin: 'EB Garamond', Georgia, 'Times New Roman', serif;
   --font-ui: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* Layout */

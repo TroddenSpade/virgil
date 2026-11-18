@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getBook } from '../data/library.js'
+import { keywordsFor } from '../data/keywords.js'
 import { useLocalStorage } from '../hooks/useLocalStorage.js'
 import { primaryKeywordLabels } from './KeywordChips.jsx'
 import { Scenery } from './IterScenes.jsx'
@@ -649,7 +650,6 @@ function HoverCard({ tip, width, isDone, total }) {
   )
   const done = isDone(lesson)
   const book = getBook(lesson.bookSlug)
-  const chapter = book?.chapters.find((c) => c.slug === lesson.slug)
   const isReader = book?.kind === 'reader' || book?.kind === 'workbook'
   const unit = book?.unit || (isReader ? 'Colloquium' : 'Capitulum')
   const sameTitle =
@@ -658,12 +658,13 @@ function HoverCard({ tip, width, isDone, total }) {
     lesson.latinTitle.trim().toLowerCase() === lesson.title.trim().toLowerCase()
 
   const contents = [
-    chapter?.grammar?.length && `${chapter.grammar.length} grammar`,
-    chapter?.vocabulary?.length && `${chapter.vocabulary.length} words`,
-    chapter?.pensa?.length && `${chapter.pensa.length} practices`,
-    chapter?.readings?.length && `${chapter.readings.length} reading${chapter.readings.length > 1 ? 's' : ''}`,
+    lesson.grammarCount && `${lesson.grammarCount} grammar`,
+    lesson.vocabularyCount && `${lesson.vocabularyCount} words`,
+    lesson.pensaCount && `${lesson.pensaCount} practices`,
+    lesson.readingsCount &&
+      `${lesson.readingsCount} reading${lesson.readingsCount > 1 ? 's' : ''}`,
   ].filter(Boolean)
-  const keywords = primaryKeywordLabels(chapter?.keywords || [], 3)
+  const keywords = primaryKeywordLabels(keywordsFor(lesson.bookSlug, lesson.slug), 3)
 
   return (
     <div
@@ -683,7 +684,7 @@ function HoverCard({ tip, width, isDone, total }) {
 
       <p className="iter-map__tip-latin latin">{lesson.latinTitle || lesson.title}</p>
       {!sameTitle && lesson.title && <p className="iter-map__tip-title">{lesson.title}</p>}
-      {chapter?.tagline && <p className="iter-map__tip-tagline">{chapter.tagline}</p>}
+      {lesson.tagline && <p className="iter-map__tip-tagline">{lesson.tagline}</p>}
 
       {(lesson.focus || contents.length > 0) && (
         <div className="iter-map__tip-facts">
