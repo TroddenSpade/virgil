@@ -17,8 +17,10 @@
 import { books } from './book-data.mjs'
 import * as data from '../src/data/dictionary.generated.js'
 import { libraryStats } from '../src/data/library-stats.generated.js'
-import { hasDefinition } from '../src/lib/dictionary.js'
+import { dictionaryKeys, hasDefinition } from '../src/lib/dictionary.js'
 import { buildLexiconIndex, latinTokens, lookupLexicon } from '../src/lib/lexicon.js'
+import { headwordOf, isDenylisted } from './vocabulary.mjs'
+import { createEngine, dictionaryForm } from 'whitakers-words/node'
 
 const norm = (value) =>
   String(value ?? '')
@@ -32,6 +34,40 @@ const norm = (value) =>
     .replace(/-/g, '')
     .toLowerCase()
     .trim()
+
+const LETTER = 'A-Za-zĀĒĪŌŪȲÿŸāēīōūȳ'
+const engine = createEngine()
+const cleanForm = (form) =>
+  (form || '')
+    .split(/\s{2,}/)[0]
+    .trim()
+    .replace(/^\s*[-–—]\s*,\s*/, '')
+const lemmaOf = (form) => {
+  for (const part of cleanForm(form).split(',')) {
+    const cleaned = part
+      .replace(new RegExp(`^[^${LETTER}]+`), '')
+      .replace(new RegExp(`[^${LETTER}]+$`), '')
+      .trim()
+    if (cleaned) return cleaned
+  }
+  return ''
+}
+function analyses(head) {
+  const out = []
+  for (const candidate of [head, head.replace(/-/g, ''), head.replace(/\s+/g, '')]) {
+    try {
+      const parsed = engine.parseWord(norm(candidate))
+      for (const result of parsed.results || []) {
+        if (!result.de?.mean) continue
+        const lemma = lemmaOf(dictionaryForm(result.de))
+        if (lemma) out.push(lemma)
+      }
+    } catch {
+      // A malformed OCR head is reported by the coverage check, not thrown.
+    }
+  }
+  return [...new Set(out)]
+}
 
 const FRAGMENTS = new Set([...new Set([
   'um', 'ae', 'am', 'ōnis', 'us', 'ūs', 'ātis', 'uisse', 'sisse', 'disse',
@@ -146,6 +182,23 @@ for (const lemma of data.lemmas) {
   }
 }
 
+/* Every lemma must be reachable from a word and carry the evidence the reader
+   needs: at least one source and one example. Orphans used to be created as a
+   side effect of resolving a token, then left behind when the token was
+   rejected as a proper name. */
+const wordsByLemma = new Map()
+for (const word of data.words) {
+  wordsByLemma.set(word.l, (wordsByLemma.get(word.l) || 0) + 1)
+}
+for (const lemma of data.lemmas) {
+  if (!wordsByLemma.has(lemma.id)) failures.push(`lemma without any word: ${lemma.headword}`)
+  if (!(lemma.s || []).length) failures.push(`lemma without sources: ${lemma.headword}`)
+  if (lemma.e == null) failures.push(`lemma without an example: ${lemma.headword}`)
+  if (lemma.english === 'proper name' && /que$/i.test(norm(lemma.headword))) {
+    failures.push(`proper name with an enclitic headword: ${lemma.headword}`)
+  }
+}
+
 /* Every form's sources must be attached to its lemma too. */
 const lemmaById = new Map(data.lemmas.map((lemma) => [lemma.id, lemma]))
 for (const word of data.words) {
@@ -174,6 +227,7 @@ const paradigmGaps = data.lemmas.filter(
   (lemma) =>
     paradigmGroups.has(lemma.posGroup) &&
     !lemma.sig &&
+    !lemma.headword.includes(' ') &&
     lemma.english !== 'proper name' &&
     !/^[A-Z]{2,}$/.test(lemma.headword) &&
     !PARADIGM_EXCEPTIONS.has(norm(lemma.headword)) &&
@@ -225,6 +279,39 @@ if (latinCoverage < 99.5) {
   failures.push(`Latin reading coverage is ${latinCoverage.toFixed(3)}% (minimum 99.5%)`)
 }
 
+/* ---------- Printed vocabulary coverage ----------
+   Every non-denylisted vocabulary row must resolve to a lemma or a word. This
+   catches a glossary headword that never appears in a reading and was silently
+   skipped by the builder. */
+let vocabularyRows = 0
+const missingVocabulary = []
+for (const book of books) {
+  for (const chapter of book.chapters || []) {
+    for (const word of chapter.vocabulary || []) {
+      if (isDenylisted(book.slug, chapter.number, word.latin)) continue
+      const head = headwordOf(word)
+      if (!head) continue
+      vocabularyRows += 1
+      const direct = dictionaryKeys(head).some((key) => {
+        const k = norm(key)
+        return lemmaHeads.has(k) || wordKeys.has(k)
+      })
+      if (direct) continue
+      const analysed = analyses(head).some((lemma) => {
+        const k = norm(lemma)
+        return lemmaHeads.has(k) || wordKeys.has(k)
+      })
+      if (analysed) continue
+      missingVocabulary.push({ book: book.slug, chapter: chapter.number, head })
+    }
+  }
+}
+for (const row of missingVocabulary) {
+  failures.push(
+    `vocabulary headword unresolved: ${row.head} (${row.book} ${row.chapter})`,
+  )
+}
+
 /* ---------- Report ---------- */
 console.log('Dictionary validation')
 console.log('======================')
@@ -232,6 +319,7 @@ console.log(`lemmas: ${data.lemmas.length}`)
 console.log(`words: ${data.words.length}`)
 console.log(`sources: ${data.sources.length}`)
 console.log(`examples: ${data.examples.length}`)
+console.log(`printed vocabulary rows: ${vocabularyRows} (${missingVocabulary.length} unresolved)`)
 console.log(`lexicon coverage (all tokens): ${(readingTokens - missingTokens).toLocaleString()}/${readingTokens.toLocaleString()} (${coverage.toFixed(3)}%)`)
 console.log(`lexicon coverage (Latin words): ${(likelyTokens - missingLikely).toLocaleString()}/${likelyTokens.toLocaleString()} (${latinCoverage.toFixed(3)}%)`)
 console.log(`paradigm gaps: ${paradigmGaps.length}`)

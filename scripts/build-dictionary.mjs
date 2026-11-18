@@ -15,6 +15,12 @@ import { parseInflectsFile } from '../node_modules/whitakers-words/dist/lib/pars
 import { matchAndResolve } from '../node_modules/whitakers-words/dist/lib/engine/word-analysis.js'
 import { parseLabel, qualityKey } from '../src/lib/grammar.js'
 import { applyMacraOverrides, dictionaryOverrides } from './macra-overrides.mjs'
+import {
+  CURATED_HEAD_FIXES,
+  headwordOf,
+  isDenylisted,
+  posFromGroup,
+} from './vocabulary.mjs'
 
 const DATA = new URL('../src/data/', import.meta.url)
 const OUT = new URL('../src/data/dictionary.generated.js', import.meta.url)
@@ -101,26 +107,6 @@ const cleanForm = (form) =>
 const lemmaOf = (form) => {
   for (const part of cleanForm(form).split(',')) {
     const cleaned = part
-      .replace(new RegExp(`^[^${LETTER}]+`), '')
-      .replace(new RegExp(`[^${LETTER}]+$`), '')
-      .trim()
-    if (cleaned) return cleaned
-  }
-  return ''
-}
-
-const headwordOf = (w) => {
-  const raw = String(w.latin || '')
-  for (const part of raw.split(',')) {
-    const hadVariant = /[\/=…]|\.\.\./.test(part)
-    let cleaned = part
-      .replace(/\(.*?\)/g, '')
-      .replace(/\[.*?\]/g, '')
-      .replace(/[\/=…]/g, ' ').replace(/\.\.\./g, ' ')
-      .replace(/[!?;:]/g, ' ')
-      .trim()
-    if (hadVariant) cleaned = cleaned.split(/\s+/)[0] || ''
-    cleaned = cleaned
       .replace(new RegExp(`^[^${LETTER}]+`), '')
       .replace(new RegExp(`[^${LETTER}]+$`), '')
       .trim()
@@ -253,9 +239,10 @@ function inferInflection(head, pos, latin) {
     p.includes('interjection') || p.includes('pronoun') || p.includes('numeral')
   ) return null
 
-  const genderOf = (value) =>
-    /\(m\.\)/.test(value) ? 'M' : /\(f\.\)/.test(value) ? 'F' :
-    /\(n\.\)/.test(value) ? 'N' : /\(c\.\)/.test(value) ? 'C' : ''
+  const genderOf = (value) => {
+    const match = /\(\s*([mfnc])\.\s*\)/i.exec(String(value || ''))
+    return match ? match[1].toUpperCase() : ''
+  }
 
   const comma = entry.indexOf(',')
   let gen = ''
@@ -406,11 +393,6 @@ function inferInflection(head, pos, latin) {
 }
 
 /* ---------- Curated vocabulary ---------- */
-const FORCE_KEEP = new Set([
-  'russeus', 'nivatus', 'sucosus', 'praxis', 'odarium', 'phthisicus',
-  'gastra', 'perbasiare',
-])
-
 const JUNK_HEADS = new Set([
   'acc', 'abl', 'adv', 'dat', 'gen', 'nom', 'voc', 'prep', 'conj', 'pron',
   'interj', 'num', 'm', 'f', 'n', 'pl', 'sing', 'indecl', 'comp', 'sup',
@@ -424,6 +406,62 @@ const CURATED_ALIASES = {
   es: 'sum', est: 'sum', sunt: 'sum', sumus: 'sum', estis: 'sum',
   it: 'eo', eunt: 'eo', ibat: 'eo', iit: 'eo', itur: 'eo',
 }
+/* Names Whitaker's does not know, or knows only as a different word.  The
+   reading token is matched case-insensitively, but the alias is applied only
+   to capitalised tokens: lowercase calyce is the common noun calyx, while
+   Calyce is the nymph. */
+const PROPER_NAME_ALIASES = new Map(
+  Object.entries({
+    cnidus: 'Cnidus', cnidi: 'Cnidus', cnido: 'Cnidus', cnidum: 'Cnidus',
+    cnide: 'Cnidus', cnides: 'Cnidus', cnidos: 'Cnidus',
+    aeson: 'Aesōn', aesonis: 'Aesōn', aesone: 'Aesōn', aesonem: 'Aesōn',
+    aesoni: 'Aesōn', aesonos: 'Aesōn',
+    bessus: 'Bessus', bessi: 'Bessus', besso: 'Bessus', bessum: 'Bessus',
+    bessos: 'Bessus', bessis: 'Bessus', bessibus: 'Bessus', bessium: 'Bessus',
+    calyce: 'Calycē', calycen: 'Calycē', calyces: 'Calycē', calycis: 'Calycē',
+    calyci: 'Calycē',
+    bromus: 'Bromus', bromi: 'Bromus', bromo: 'Bromus', bromum: 'Bromus',
+    brome: 'Bromus', bromos: 'Bromus',
+    clonius: 'Clonius', cloni: 'Clonius', clonio: 'Clonius',
+    clonium: 'Clonius', clonie: 'Clonius',
+    didyme: 'Didymē', didymes: 'Didymē', didymen: 'Didymē', didymae: 'Didymē',
+    didymis: 'Didymē',
+    dryas: 'Dryās', dryanta: 'Dryās', dryantam: 'Dryās', dryante: 'Dryās',
+    dryados: 'Dryās', dryadis: 'Dryās', dryada: 'Dryās',
+    faunus: 'Faunus', fauni: 'Faunus', fauno: 'Faunus', faunum: 'Faunus',
+    faune: 'Faunus', faunis: 'Faunus', faunos: 'Faunus',
+    faunorum: 'Faunus', faunibus: 'Faunus',
+    birrus: 'Birrus', birri: 'Birrus', birro: 'Birrus', birrum: 'Birrus',
+    birre: 'Birrus',
+  }),
+)
+/* Printed vocabularies do not always carry enough principal parts for the
+   inflection inference to succeed. These are the few entries that need an
+   explicit recipe; every signature already exists among the reading lemmas. */
+const CURATED_PARADIGMS = new Map([
+  ['fureo', { sig: 'V|3.1|X', stems: ['fur', 'fur', 'furu', ''] }],
+  ['plerusque', { sig: 'ADJ|1.1|POS', stems: ['plēr', 'plēr', '', ''] }],
+  ['pastio', { sig: 'N|3.1|F|T', stems: ['pāstiō', 'pāstiōn', '', ''] }],
+  ['gnavus', { sig: 'ADJ|1.1|POS', stems: ['gnāv', 'gnāv', '', ''] }],
+  ['dicito', { sig: 'V|1.1|X', stems: ['dicit', 'dicit', 'dicitāv', 'dicitāt'] }],
+  ['assido', { sig: 'V|3.1|X', stems: ['assīd', 'assīd', 'assēd', 'assess'] }],
+  ['remando', { sig: 'V|1.1|X', stems: ['remand', 'remand', 'remandāv', 'remandāt'] }],
+  ['ommitto', { sig: 'V|3.1|X', stems: ['ommitt', 'ommitt', 'ommīs', 'ommiss'] }],
+  ['assumo', { sig: 'V|3.1|TRANS', stems: ['assūm', 'assūm', 'assūmps', 'assūmpt'] }],
+  ['circumveho', { sig: 'V|3.1|X', stems: ['circumveh', 'circumveh', 'circumvex', 'circumvect'] }],
+  ['dispalor', { sig: 'V|1.1|DEP', stems: ['dispāl', 'dispāl', 'dispālāt', 'dispālāt'] }],
+])
+/* The Companion prints a few alternative spellings that Whitaker's files under
+   the usual -iō form. Take the paradigm from the recognised spelling without
+   changing the printed headword. */
+const CURATED_ANALYSIS_VARIANTS = new Map([
+  ['decipo', 'decipio'],
+  ['excipo', 'excipio'],
+  ['inico', 'inicio'],
+  ['perspico', 'perspicio'],
+  ['succuro', 'succurro'],
+  ['nequio', 'nequeo'],
+])
 const curated = new Map()
 for (const { slug, book, chapters } of books) {
   for (const chapter of chapters) {
@@ -438,20 +476,33 @@ for (const { slug, book, chapters } of books) {
     }
     const sid = sourceId(source)
     for (const word of chapter.vocabulary || []) {
+      if (isDenylisted(slug, chapter.number, word.latin)) continue
+      const hadParenthetical = /^\s*\([^)]+\)/.test(String(word.latin || ''))
       let head = headwordOf(word)
       if (!head) continue
-      const originalHead = head
       let latin = String(word.latin || '').replace(/^\s*[-–—]\s*,\s*/, '')
+      const fix = CURATED_HEAD_FIXES.get(norm(head))
+      if (fix) {
+        head = fix.head
+        latin = fix.latin || latin
+      }
+      const originalHead = head
       // Fold inflected or irregular headwords into their lexical lemma when
       // possible, so the dictionary does not list amo/amat/amant separately.
-      if (!head.includes(' ') && !/^[A-ZĀĒĪŌŪȲ]/.test(head)) {
+      // A leading parenthetical is already the lemma the book intends, and an
+      // ordinal must stay its own adjective (centēsimus, not centum).
+      if (
+        !hadParenthetical &&
+        !head.includes(' ') &&
+        !/^[A-ZĀĒĪŌŪȲ]/.test(head)
+      ) {
         const alias = CURATED_ALIASES[norm(head)]
         if (alias) {
           head = alias
           latin = alias
         } else {
           const analysis = bestAnalysis(head)
-          if (analysis) {
+          if (analysis && !isOrdinal(analysis)) {
             const lemma = lemmaOf(dictionaryForm(analysis.de))
             if (lemma) {
               head = lemma
@@ -462,15 +513,16 @@ for (const { slug, book, chapters } of books) {
       }
       const key = norm(head).replace(/\s+/g, '')
       if (JUNK_HEADS.has(key)) continue
+      const rowPos = word.pos || posFromGroup(word.group, word.latin)
       const allowConsonantal =
-        /numeral|preposition|conjunction/i.test(word.pos || '') ||
+        /numeral|preposition|conjunction/i.test(rowPos) ||
         /^[IVXLCDM]+$/.test(originalHead) ||
         /^[A-Z]+$/.test(originalHead)
       if (!/[aeiouyāēīōūȳ]/.test(key) && !allowConsonantal) continue
       if (!originalHead.includes(' ') && norm(originalHead) !== key) {
         curatedFormLemma.set(norm(originalHead), key)
       }
-      const inferred = inferInflection(head, word.pos, latin)
+      const inferred = inferInflection(head, rowPos, latin)
       let entry = curated.get(key)
       if (!entry) {
         entry = {
@@ -493,12 +545,16 @@ for (const { slug, book, chapters } of books) {
           entry.stems = inferred.stems
         }
       }
-      if (word.sig && !entry.sig) {
+      const paradigm = CURATED_PARADIGMS.get(key)
+      if (paradigm) {
+        entry.sig = paradigm.sig
+        entry.stems = paradigm.stems
+      } else if (word.sig && !entry.sig) {
         entry.sig = word.sig
         entry.stems = word.stems || []
       }
       if (word.english?.trim()) entry.meanings.add(word.english.trim())
-      if (word.pos) entry.poses.add(word.pos)
+      if (rowPos) entry.poses.add(rowPos)
       entry.sourceIds.add(sid)
     }
   }
@@ -555,6 +611,15 @@ function bestAnalysis(token) {
     }
   }
   return best
+}
+
+/* Whitaker's lemmatises the higher ordinals to their cardinal (centēsimus ->
+   centum).  The ordinal is a separate adjective and must keep its own entry. */
+function isOrdinal(analysis) {
+  return (
+    analysis?.ir?.qual?.num?.sort === 'ORD' ||
+    analysis?.de?.part?.num?.sort === 'ORD'
+  )
 }
 
 /* A compact signature for the dictionary part, used to share one set of
@@ -667,7 +732,12 @@ for (const { slug, book, chapters } of books) {
         const analysis = bestAnalysis(token)
         if (!analysis) {
           if (!sentence.note && token.length >= 2) {
-            unknownTokens.push({ token, sentence: sentence.text, sid })
+            unknownTokens.push({
+              token,
+              sentence: sentence.text,
+              sid,
+              initial: !new RegExp(`[${LETTER}]`).test(sentence.text.slice(0, match.index)),
+            })
           }
           continue
         }
@@ -716,31 +786,13 @@ for (const { slug, book, chapters } of books) {
   }
 }
 
-/* Prefixes of forms actually found in the readings.  Glossary entries with
-   no such anchor and no valid analysis are OCR debris, not words. */
-const readingPrefixes = new Set()
-const readingKeys = [...wordMap.keys(), ...unknownTokens.map((u) => norm(u.token))]
-for (const key of readingKeys) {
-  for (let i = 3; i <= Math.min(6, key.length); i += 1) readingPrefixes.add(key.slice(0, i))
-}
-
 /* Merge the printed vocabulary into the reading lemmas. */
 for (const [key, curatedEntry] of curated) {
-  const headKey = norm(curatedEntry.head).replace(/\s+/g, '')
-  const analysis = bestAnalysis(curatedEntry.head)
-  const allowedPos = /numeral|preposition|conjunction|interjection|adverb|pronoun/i.test(
-    [...curatedEntry.poses].join(' '),
-  )
-  const anchored =
-    analysis ||
-    wordMap.has(headKey) ||
-    lemmaMap.has(headKey) ||
-    readingPrefixes.has(headKey.slice(0, 6)) ||
-    FORCE_KEEP.has(headKey) ||
-    /^[A-ZĀĒĪŌŪȲ]/.test(curatedEntry.head) ||
-    allowedPos ||
-    headKey.length <= 3
-  if (!anchored) continue
+  const variant = CURATED_ANALYSIS_VARIANTS.get(norm(curatedEntry.head))
+  const analysis = bestAnalysis(curatedEntry.head) || (variant ? bestAnalysis(variant) : null)
+  // Every printed vocabulary row is part of the dictionary, even when it never
+  // occurs in a reading (a companion glossary, for instance). Corrupt OCR rows
+  // were rejected or denylisted while the rows were read.
   let entry = lemmaMap.get(key)
   if (!entry) {
     entry = {
@@ -785,9 +837,22 @@ for (const [key, curatedEntry] of curated) {
   for (const sid of curatedEntry.sourceIds) {
     entry.sourceIds.add(sid)
     const word = addWord(curatedEntry.head, key, sid)
+    if (word) {
+      // The printed vocabulary is authoritative about its own headword. A
+      // reading form may already have been folded into another lemma (nōnus
+      // into novem, dicitō into dīcō); give the exact form to the curated
+      // lemma so that lemma is reachable from a word of its own.
+      if (word.l !== key) {
+        const old = lemmaMap.get(word.l)
+        if (old) old.formMap.delete(norm(word.w))
+        word.l = key
+      }
+      entry.formMap.set(norm(word.w), word.w)
+    }
     if (word && word.e == null) word.e = addExample(citation, sid, true)
   }
   const headWord = addWord(curatedEntry.head, key, null)
+  if (headWord) entry.formMap.set(norm(headWord.w), headWord.w)
 
   /* A vocabulary headword may never occur in a reading (a companion's
      glossary, for instance). Give it the glossary line itself as its
@@ -833,105 +898,212 @@ function bestCuratedPrefix(t) {
   }
   return best ? best : null
 }
-function ensureLemma(analysis) {
+function analysisProposal(analysis) {
   const form = cleanForm(dictionaryForm(analysis.de))
   const lemma = lemmaOf(form)
   if (!lemma) return null
-  const key = norm(lemma)
-  if (!lemmaMap.has(key)) {
-    const label = POS_LABEL[analysis.de.part.pofs] || 'other'
-    const gender = analysis.de.part.n?.gender?.toLowerCase()
-    lemmaMap.set(key, {
-      head: lemma,
-      latin: form,
-      de: analysis.de,
-      meanings: new Set([analysis.de.mean.trim()]),
-      poses: new Set([label === 'noun' && gender ? `noun (${gender}.)` : label]),
-      formMap: new Map(),
-      sourceIds: new Set(),
-      e: null,
-    })
-  }
+  return { key: norm(lemma), head: lemma, latin: form, analysis }
+}
+
+function createAnalysisLemma(proposal) {
+  const key = proposal.key
+  if (lemmaMap.has(key)) return key
+  const analysis = proposal.analysis
+  const label = POS_LABEL[analysis.de.part.pofs] || 'other'
+  const gender = analysis.de.part.n?.gender?.toLowerCase()
+  lemmaMap.set(key, {
+    head: proposal.head,
+    latin: proposal.latin,
+    de: analysis.de,
+    meanings: new Set([analysis.de.mean.trim()]),
+    poses: new Set([label === 'noun' && gender ? `noun (${gender}.)` : label]),
+    formMap: new Map(),
+    sourceIds: new Set(),
+    e: null,
+  })
   return key
 }
+
+function createNamedLemma(head, latin = head) {
+  const key = norm(head)
+  if (!key) return null
+  const existing = lemmaMap.get(key)
+  if (existing) {
+    if (/^[A-ZĀĒĪŌŪȲ]/.test(head) && !/^[A-ZĀĒĪŌŪȲ]/.test(existing.head)) {
+      existing.head = head
+      existing.meanings.add('proper name')
+    }
+    return key
+  }
+  const inferred = inferInflection(head, 'noun', latin)
+  lemmaMap.set(key, {
+    head,
+    latin,
+    de: null,
+    meanings: new Set(['proper name']),
+    poses: new Set(['noun']),
+    formMap: new Map(),
+    sourceIds: new Set(),
+    e: null,
+    sig: inferred?.sig || '',
+    stems: inferred?.stems || [],
+  })
+  return key
+}
+
+function createProposal(proposal) {
+  if (!proposal) return null
+  if (lemmaMap.has(proposal.key)) {
+    const entry = lemmaMap.get(proposal.key)
+    if (
+      proposal.proper &&
+      /^[A-ZĀĒĪŌŪȲ]/.test(proposal.head) &&
+      !/^[A-ZĀĒĪŌŪȲ]/.test(entry.head)
+    ) {
+      entry.head = proposal.head
+      entry.meanings.add('proper name')
+    }
+    return proposal.key
+  }
+  if (proposal.analysis) return createAnalysisLemma(proposal)
+  return createNamedLemma(proposal.head, proposal.latin || proposal.head)
+}
+
 function commonPrefix(a, b) {
   let i = 0
   while (i < a.length && i < b.length && a[i] === b[i]) i += 1
   return i
 }
-function resolveToken(token) {
-  const t = norm(token)
-  const aliases = {
-    mavult: 'malo', mavolt: 'malo', mavoluit: 'malo',
-    vult: 'volo', volt: 'volo', vultis: 'volo', volunt: 'volo',
-    est: 'sum', es: 'sum', sunt: 'sum', sumus: 'sum', estis: 'sum',
-    it: 'eo', eunt: 'eo', ibat: 'eo', iit: 'eo',
-    diibus: 'deus', deibus: 'deus', di: 'deus', dii: 'deus',
-    nosse: 'novisse', coisse: 'coivisse', coiisse: 'coivisse',
-    offla: 'offa', dupunduarius: 'dupondiarius',
-    eundem: 'idem', eandem: 'idem', eiusdem: 'idem', naenias: 'nenia', tisicus: 'phthisicus',
-    exierat: 'exeo', abistis: 'abeo', fefellitus: 'fallo',
-    norat: 'novi', isset: 'eo', mauult: 'malo', afore: 'adsum',
-    tetuli: 'fero', tetulit: 'fero', tetulisset: 'fero',
+
+const CAPITAL = /^[A-ZĀĒĪŌŪȲ]/
+
+function acceptsProposal(proposal, token, initial) {
+  if (!proposal) return false
+  if (lemmaMap.has(proposal.key) || curated.has(proposal.key)) return true
+  if (!CAPITAL.test(token) || initial) return true
+  return commonPrefix(norm(token), norm(proposal.head)) >= 6
+}
+
+const TOKEN_ALIASES = {
+  mavult: 'malo', mavolt: 'malo', mavoluit: 'malo',
+  vult: 'volo', volt: 'volo', vultis: 'volo', volunt: 'volo',
+  est: 'sum', es: 'sum', sunt: 'sum', sumus: 'sum', estis: 'sum',
+  it: 'eo', eunt: 'eo', ibat: 'eo', iit: 'eo',
+  diibus: 'deus', deibus: 'deus', di: 'deus', dii: 'deus',
+  nosse: 'novisse', coisse: 'coivisse', coiisse: 'coivisse',
+  offla: 'offa', dupunduarius: 'dupondiarius',
+  eundem: 'idem', eandem: 'idem', eiusdem: 'idem', naenias: 'nenia', tisicus: 'phthisicus',
+  exierat: 'exeo', abistis: 'abeo', fefellitus: 'fallo',
+  norat: 'novi', isset: 'eo', mauult: 'malo', afore: 'adsum',
+  tetuli: 'fero', tetulit: 'fero', tetulisset: 'fero',
+}
+
+function curatedProposal(key) {
+  const entry = curated.get(key)
+  if (entry) {
+    return { key, head: entry.head, latin: entry.latin, curated: true }
   }
-  if (aliases[t]) {
-    const a = bestAnalysis(aliases[t])
-    if (a) return ensureLemma(a)
-    if (lemmaMap.has(aliases[t])) return aliases[t]
+  const lemma = lemmaMap.get(key)
+  if (lemma) return { key, head: lemma.head, latin: lemma.latin }
+  return null
+}
+
+function resolveToken(token, { initial = false } = {}) {
+  const t = norm(token)
+  const capitalised = CAPITAL.test(token)
+
+  // A known name wins before Whitaker's can offer a homonymous common noun
+  // (Cnidum is the city Cnidus, not cnīdē, a nettle).
+  if (capitalised) {
+    const name = PROPER_NAME_ALIASES.get(t)
+    if (name) return { key: norm(name), head: name, latin: name, proper: true }
+  }
+
+  const exact = curated.has(t) ? curatedProposal(t) : null
+  if (exact) return exact
+
+  const alias = TOKEN_ALIASES[t]
+  if (alias) {
+    const analysis = bestAnalysis(alias)
+    const proposal = analysis && analysisProposal(analysis)
+    if (proposal) return proposal
+    const hit = curatedProposal(alias)
+    if (hit) return hit
   }
   // Syncopated perfects: abiit -> abivit, obiit -> obivit.
   if (t.endsWith('iit')) {
-    const a = bestAnalysis(t.slice(0, -2) + 'vit')
-    if (a) return ensureLemma(a)
+    const analysis = bestAnalysis(t.slice(0, -2) + 'vit')
+    const proposal = analysis && analysisProposal(analysis)
+    if (proposal) return proposal
   }
   // plovēbat (archaic) -> pluēbat.
   if (t.startsWith('plov')) {
-    const a = bestAnalysis('plu' + t.slice(4))
-    if (a) return ensureLemma(a)
+    const analysis = bestAnalysis('plu' + t.slice(4))
+    const proposal = analysis && analysisProposal(analysis)
+    if (proposal) return proposal
   }
   for (const suffix of ['que', 've', 'ne', 'met', 'st']) {
-    if (t.length > suffix.length + 2 && t.endsWith(suffix)) {
+    if (t.length > suffix.length + 1 && t.endsWith(suffix)) {
       const base = t.slice(0, -suffix.length)
-      const analysis = bestAnalysis(base)
-      if (analysis) {
-        const lemma = lemmaOf(dictionaryForm(analysis.de))
-        if (lemma) return ensureLemma(analysis) || norm(lemma)
+      if (capitalised) {
+        const name = PROPER_NAME_ALIASES.get(base)
+        if (name) return { key: norm(name), head: name, latin: name, proper: true }
       }
-      const hit = bestCuratedPrefix(base)
-      if (hit) return hit
+      const exactBase = curated.has(base) ? curatedProposal(base) : null
+      if (exactBase) return exactBase
+      const analysis = bestAnalysis(base)
+      const proposal = analysis && analysisProposal(analysis)
+      if (proposal && acceptsProposal(proposal, token, initial)) return proposal
+      // A three- or four-letter prefix is useful for a damaged lowercase form,
+      // but it turns Abrahamus into abrogō. Names get the fallback below.
+      if (!capitalised) {
+        const hit = bestCuratedPrefix(base)
+        if (hit) return curatedProposal(hit)
+      }
     }
   }
-  return bestCuratedPrefix(t)
+  if (!capitalised) {
+    const curatedHit = bestCuratedPrefix(t)
+    if (curatedHit) return curatedProposal(curatedHit)
+  }
+
+  const analysis = bestAnalysis(t)
+  const proposal = analysis && analysisProposal(analysis)
+  if (proposal && acceptsProposal(proposal, token, initial)) return proposal
+  return null
 }
+
+/* Enclitics are not part of a name.  Stripping one here keeps the fallback
+   from inventing headwords such as Cnidumque or Didymēque. */
+function stripProperEnclitic(token) {
+  const text = String(token)
+  if (/que$/i.test(text) && text.length > 5) return text.slice(0, -3)
+  return text
+}
+
 for (const u of unknownTokens) {
-  let key = resolveToken(u.token)
-  if (key && !lemmaMap.has(key)) key = null
-  if (key && /^[A-ZĀĒĪŌŪȲ]/.test(u.token)) {
-    const entry = lemmaMap.get(key)
-    if (commonPrefix(norm(u.token), norm(entry?.head || key)) < 6) key = null
-  }
-  if (!key && /^[A-ZĀĒĪŌŪȲ]/.test(u.token) && u.token.length >= 3) {
-    key = norm(u.token)
-    if (!lemmaMap.has(key)) {
-      const inferred = inferInflection(u.token, 'noun', u.token)
-      lemmaMap.set(key, {
-        head: u.token,
-        latin: u.token,
-        de: null,
-        meanings: new Set(['proper name']),
-        poses: new Set(['noun']),
-        formMap: new Map(),
-        sourceIds: new Set(),
-        e: null,
-        sig: inferred?.sig || '',
-        stems: inferred?.stems || [],
-      })
+  const key = createProposal(resolveToken(u.token, { initial: u.initial }))
+  let lemmaKey = key
+  if (!lemmaKey && CAPITAL.test(u.token) && u.token.length >= 3) {
+    const head = stripProperEnclitic(u.token)
+    const fallbackKey = norm(head)
+    const tokenKey = norm(u.token)
+    const existingWord = wordMap.get(tokenKey) || wordMap.get(fallbackKey)
+    if (fallbackKey && lemmaMap.has(fallbackKey)) {
+      lemmaKey = fallbackKey
+    } else if (existingWord) {
+      // The spelling is already a word under another lemma (audierās under
+      // audiō, cap under capiō). Do not invent a wordless proper-name twin.
+      lemmaKey = existingWord.l
+    } else if (fallbackKey) {
+      createNamedLemma(head, head)
+      lemmaKey = fallbackKey
     }
   }
-  if (!key) continue
-  const entry = lemmaMap.get(key)
+  if (!lemmaKey) continue
+  const entry = lemmaMap.get(lemmaKey)
   if (!entry) continue
-  const word = addWord(u.token, key, u.sid)
+  const word = addWord(u.token, lemmaKey, u.sid)
   entry.formMap.set(norm(u.token), u.token)
   entry.sourceIds.add(u.sid)
   if (word && word.e == null) {
@@ -951,6 +1123,14 @@ for (const word of wordMap.values()) {
   const lemma = lemmaMap.get(word.l)
   if (!lemma) continue
   for (const sid of word.sourceIds) lemma.sourceIds.add(sid)
+}
+
+/* A curated headword can take ownership of a form that another lemma held
+   after a wrong parse (Agathō was first read as agathum). Keep only lemmas a
+   word actually points at, so no unreachable twin is published. */
+const usedLemmas = new Set([...wordMap.values()].map((word) => word.l))
+for (const key of lemmaMap.keys()) {
+  if (!usedLemmas.has(key)) lemmaMap.delete(key)
 }
 
 const LEMMA_OVERRIDES = {
