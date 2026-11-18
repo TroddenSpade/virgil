@@ -14,6 +14,7 @@ import { pathToFileURL } from 'node:url'
 import { parseInflectsFile } from '../node_modules/whitakers-words/dist/lib/parsers/inflects.js'
 import { matchAndResolve } from '../node_modules/whitakers-words/dist/lib/engine/word-analysis.js'
 import { parseLabel, qualityKey } from '../src/lib/grammar.js'
+import { applyMacraOverrides, dictionaryOverrides } from './macra-overrides.mjs'
 
 const DATA = new URL('../src/data/', import.meta.url)
 const OUT = new URL('../src/data/dictionary.generated.js', import.meta.url)
@@ -31,14 +32,39 @@ const OUT_INDEX = new URL(
 )
 
 const MACRA = (() => {
+  let data = {}
   try {
-    return JSON.parse(
+    data = JSON.parse(
       readFileSync(new URL('../scripts/dictionary-macra.json', import.meta.url), 'utf8'),
     )
   } catch {
-    return {}
+    data = {}
   }
+
+  // Reviewed headword/word corrections live in src/data/macra-overrides.json.
+  // They win over the machine-generated cache, which occasionally records the
+  // wrong quantity for a lemma (for example Galliā for the country Gallia).
+  const reviewed = dictionaryOverrides()
+  const lemmas = { ...(data.lemmas || {}) }
+  for (const [key, patch] of Object.entries(reviewed.lemmas || {})) {
+    lemmas[key] = { ...(lemmas[key] || {}), ...patch }
+  }
+  const words = { ...(data.words || {}), ...(reviewed.words || {}) }
+
+  return { ...data, lemmas, words }
 })()
+
+// The token itself is the best evidence when it carries macra: the old cache
+// is keyed by the folded spelling, so applying it blindly to an already-marked
+// form could overwrite a correct ablative with a nominative spelling (or the
+// reverse). Only unmarked forms need the cache.
+const MARKED = /[ĀĒĪŌŪȲāēīōūȳ]/
+function markedForm(value) {
+  const text = String(value || '')
+  if (!text) return text
+  if (MARKED.test(text)) return text
+  return MACRA.words?.[norm(text)] || text
+}
 
 const engine = createEngine()
 const inflects = parseInflectsFile(
@@ -479,7 +505,7 @@ for (const { slug, book, chapters } of books) {
 }
 
 /* ---------- The readings ---------- */
-function sentencesOf(chapter) {
+function sentencesOf(chapter, bookSlug) {
   const out = []
   // Short verse lines are still complete lines: do not drop them merely for
   // being shorter than a prose sentence. Prose keeps the longer threshold so
@@ -489,14 +515,17 @@ function sentencesOf(chapter) {
     for (const paragraph of reading.paragraphs || []) {
       const parts = String(paragraph).split(/(?<=[.!?])\s+(?=[A-ZĀĒĪŌŪȲ"“])/)
       for (const raw of parts) {
-        const text = raw.trim()
+        const text = applyMacraOverrides(bookSlug, raw.trim())
         if (text.length >= minLength) out.push({ text, note: false })
       }
     }
     // Marginal notes are part of the book too: their words must be in the
     // lexicon even when they never occur in the running text.
     for (const note of reading.notes || []) {
-      const text = `${note.term || ''} ${note.gloss || ''}`.trim()
+      const text = applyMacraOverrides(
+        bookSlug,
+        `${note.term || ''} ${note.gloss || ''}`.trim(),
+      )
       if (text.length >= 8) out.push({ text, note: true })
     }
   }
@@ -629,7 +658,7 @@ for (const { slug, book, chapters } of books) {
       ...(book?.sourceUnit ? { unit: book.sourceUnit } : {}),
     }
     const sid = sourceId(source)
-    for (const sentence of sentencesOf(chapter)) {
+    for (const sentence of sentencesOf(chapter, slug)) {
       for (const match of sentence.text.matchAll(TOKEN)) {
         const token = match[0]
         if (token.length < 2) continue
@@ -970,7 +999,7 @@ const lemmas = [...lemmaMap.entries()]
       stems,
       sig,
       forms: [...entry.formMap.values()]
-        .map((form) => MACRA.words?.[norm(form)] || form)
+        .map((form) => markedForm(form))
         .sort((a, b) => a.localeCompare(b)),
       e: entry.e,
       s: [...entry.sourceIds],
@@ -987,7 +1016,7 @@ const lemmas = [...lemmaMap.entries()]
 const words = [...wordMap.values()]
   .filter((word) => lemmaById.has(word.l))
   .map((word) => ({
-    w: MACRA.words?.[norm(word.w)] || word.w,
+    w: markedForm(word.w),
     l: word.l,
     s: [...word.sourceIds],
     n: word.sourceIds.size,
@@ -997,7 +1026,7 @@ const words = [...wordMap.values()]
 
 const surfaceForms = [...surfaceMap.values()]
   .filter((form) => form.l && form.g)
-  .map((form) => ({ ...form, w: MACRA.words?.[norm(form.w)] || form.w }))
+  .map((form) => ({ ...form, w: markedForm(form.w) }))
   .sort((a, b) => a.w.localeCompare(b.w))
 
 /* ---------- Paradigm recipes ----------

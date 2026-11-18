@@ -5,6 +5,7 @@ import { displayTitle } from '../lib/authors.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import KeywordChips from '../components/KeywordChips.jsx'
 import OfflineBadge from '../components/OfflineBadge.jsx'
+import { MacraBadge } from '../components/MacraNote.jsx'
 
 const EXTRA_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 
@@ -201,6 +202,7 @@ function ActiveBook({ book }) {
                 Browse the commentary
               </a>
             )}
+            <MacraBadge book={book} />
             <OfflineBadge slug={book.slug} />
           </div>
 

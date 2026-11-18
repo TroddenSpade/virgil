@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { applyMacraOverrides, overrideBooks } from './scripts/macra-overrides.mjs'
 
 // The site is served from the root of a GitHub Pages custom domain
 // (https://virgil.parsasam.ir/), so the production build uses a base of "/".
@@ -42,6 +43,28 @@ function chunkFileNames(chunkInfo) {
   return 'assets/[name]-[hash].js'
 }
 
+// Apply the reviewed macra corrections while the book modules are loaded.
+// The source files stay exactly as the macronizer produced them; the build
+// (and the dev server) sees the reviewed text, and the same manifest is used
+// by the dictionary builder and the review script.
+function macraOverrides() {
+  const books = overrideBooks()
+
+  return {
+    name: 'virgil-macra-overrides',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!books.size) return null
+      const file = id.replace(/\\/g, '/')
+      const match = file.match(/\/src\/data\/([^/]+)\//)
+      if (!match || !books.has(match[1])) return null
+
+      const next = applyMacraOverrides(match[1], code)
+      return next === code ? null : { code: next, map: null }
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   base,
@@ -54,6 +77,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    macraOverrides(),
     react(),
     VitePWA({
       // 'prompt' instead of 'autoUpdate': a new service worker waits until the

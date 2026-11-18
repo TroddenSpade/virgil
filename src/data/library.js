@@ -240,6 +240,12 @@ const ORIGINAL_EDITIONS = new Set([
   ...(levelGroups.find((group) => group.id === 'advanced')?.slugs || []),
 ])
 
+// Books whose quantities are not simply printed by the source. The complete
+// Latīnistae editions use the Alatius Latin Macronizer; the Aeneid keeps the
+// macra printed in Book I and marks the other books editorially. This flag
+// drives the confidence note in the Note on the Text and the macra badge.
+const MIXED_MACRA = new Set(['vergil-aeneis'])
+
 const LEVEL_BY_SLUG = new Map()
 for (const group of levelGroups) {
   for (const slug of group.slugs) LEVEL_BY_SLUG.set(slug, group.id)
@@ -298,6 +304,11 @@ for (const book of books) {
   book.heroMark = HERO_MARKS[book.id] || book.shortTitle?.toUpperCase() || 'LIBER'
   book.isAuthorShelf = AUTHOR_SHELF_SLUGS.has(book.slug)
   book.isOriginalEdition = ORIGINAL_EDITIONS.has(book.slug)
+  book.macraEdition = AUTHOR_SHELF_SLUGS.has(book.slug)
+    ? MIXED_MACRA.has(book.slug)
+      ? 'mixed'
+      : 'editorial'
+    : null
 }
 
 export function getBook(slug) {

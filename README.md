@@ -165,6 +165,7 @@ npm run dev      # start the dev server at http://localhost:5173
 npm run build    # production build into dist/
 npm run check:bundle  # fail if the initial JS grows past 1 MB
 npm run validate:all  # per-book coverage/structure, dictionary and keyword checks
+npm run macra:review  # list suspicious editorial macra and write a JSON report
 npm test         # run the wordlist, review, and lexicon tests (Vitest)
 npm run preview  # serve the production build (needed to test the PWA)
 npm run data     # regenerate books meta, keywords, itinerary and vocabulary
@@ -175,6 +176,27 @@ chapters/readings and duplicate numbers or headings, and flags suspicious OCR
 tokens. It writes every unresolved token, grouped by book, to
 `reports/book-validation.json` — CI uploads that file as the `book-validation`
 artifact.
+
+### Editorial macra
+
+The complete Latīnistae editions, and the books of the Aeneid whose source
+prints no quantities, carry machine-generated macra from the Alatius Latin
+Macronizer. A wrong quantity is worse than a missing one, so reviewed
+corrections live in `src/data/macra-overrides.json` and are applied at build
+time — never by editing the macronized source or a generated dictionary.
+
+```bash
+npm run macra:review                         # every Latīnistae book
+npm run macra:review -- --book caesar-de-bello-gallico
+```
+
+The review lists sentence-initial long `-ā` before a form of *esse*, gerundives
+in `-ndā est`, and forms of the same lemma that appear with conflicting marks.
+It writes `reports/macra-review.json` and audits every reviewed correction, so
+a stale override is visible. Add a short phrase-level correction with a reason
+and the review date; `validate:books` fails if an override no longer matches the
+text. The Note on the Text shows the correction count and links to a prefilled
+issue for reporting a suspected error.
 
 To see the **install prompt**, run `npm run build && npm run preview` and open the site —
 a browser (Chrome/Edge) will offer to install Virgil as an app. It also works offline once

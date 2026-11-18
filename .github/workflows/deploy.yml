@@ -38,12 +38,17 @@ jobs:
       - name: Validate data
         run: npm run validate:all
 
-      - name: Upload book validation report
+      - name: Review macra overrides
+        run: npm run macra:review -- --strict
+
+      - name: Upload validation reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: book-validation
-          path: reports/book-validation.json
+          name: data-reports
+          path: |
+            reports/book-validation.json
+            reports/macra-review.json
           if-no-files-found: ignore
 
       - name: Build

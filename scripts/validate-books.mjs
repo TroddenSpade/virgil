@@ -27,6 +27,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { books } from './book-data.mjs'
 import * as data from '../src/data/dictionary.generated.js'
+import { allCorrections } from './macra-overrides.mjs'
 import { buildLexiconIndex, latinTokens, lookupLexicon } from '../src/lib/lexicon.js'
 
 const norm = (value) =>
@@ -321,12 +322,43 @@ for (const book of books) {
   })
 }
 
+/* ---------- Reviewed macra corrections ---------- */
+const bookBySlug = new Map(books.map((book) => [book.slug, book]))
+const appliedOverrides = []
+for (const correction of allCorrections()) {
+  if (!correction.book || !correction.from || typeof correction.to !== 'string') {
+    failures.push('macra override is missing book/from/to')
+    continue
+  }
+  const book = bookBySlug.get(correction.book)
+  if (!book) {
+    failures.push(`macra override names unknown book ${correction.book}`)
+    continue
+  }
+  const text = JSON.stringify({ chapters: book.chapters, extras: book.extras })
+  if (!text.includes(correction.from)) {
+    failures.push(
+      `macra override for ${correction.book} no longer matches: ${correction.from}`,
+    )
+    continue
+  }
+  if (!correction.reason) {
+    warnings.push(`${correction.book}: macra override has no reason: ${correction.from}`)
+  }
+  appliedOverrides.push(correction)
+}
+
 console.log('Book validation')
 console.log('===============')
 console.log(`books: ${rows.length}`)
 console.log(`chapters: ${rows.reduce((total, row) => total + row.chapters, 0)}`)
 console.log(`readings: ${rows.reduce((total, row) => total + row.readings, 0)}`)
 console.log(`Latin tokens: ${rows.reduce((total, row) => total + row.likely, 0).toLocaleString()}`)
+console.log(
+  `Reviewed macra corrections: ${appliedOverrides.length} applied across ${
+    new Set(appliedOverrides.map((correction) => correction.book)).size
+  } books`,
+)
 console.log(`Latin coverage (global): ${
   (() => {
     const likely = rows.reduce((total, row) => total + row.likely, 0)
@@ -372,6 +404,12 @@ const report = {
   },
   warnings,
   failures,
+  macraOverrides: appliedOverrides.map((correction) => ({
+    book: correction.book,
+    from: correction.from,
+    to: correction.to,
+    reviewed: correction.reviewed || null,
+  })),
   books: sorted.map((row) => ({
     slug: row.slug,
     chapters: row.chapters,

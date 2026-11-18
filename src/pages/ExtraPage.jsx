@@ -3,6 +3,7 @@ import { useBookData } from '../hooks/useBookData.js'
 import { useScrollSpy } from '../hooks/useScrollSpy.js'
 import Loading from '../components/Loading.jsx'
 import CommentarySection, { Inline } from '../components/Commentary.jsx'
+import MacraNote from '../components/MacraNote.jsx'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
@@ -84,6 +85,7 @@ function Reader({ book, extra, index, extras }) {
           </aside>
 
           <div className="lesson__main">
+            {extra.slug === 'de-textu' && <MacraNote book={book} />}
             {sections.map((section) => (
               <section className="lesson__section" id={section.id} key={section.id}>
                 <SectionHead num={section.num} latin={section.latin} english={section.english} />

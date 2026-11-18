@@ -25,6 +25,15 @@ export function loadParadigmRules() {
   return pendingRules
 }
 
+// Adverbs, prepositions, conjunctions and interjections have no inflection
+// paradigm. The word page uses this to hide the "Full paradigm" action rather
+// than sending the reader to an empty page.
+const PARADIGM_SIG = /^(?:N|V|ADJ|PRON|PACK|NUM)\|/
+
+export function hasParadigm(lemma) {
+  return Boolean(lemma?.sig && PARADIGM_SIG.test(lemma.sig))
+}
+
 const MACRA = /[āēīōūȳ]/gi
 const macraCount = (value) => (String(value).match(MACRA) || []).length
 

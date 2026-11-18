@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Inline } from './Commentary.jsx'
 import { LexiconControls, LexiconText, useLexiconMode } from './Lexicon.jsx'
 import DiacriticsControl from './DiacriticsControl.jsx'
+import ReportMacraLink from './ReportMacraLink.jsx'
 import { useWordlist } from '../hooks/useWordlist.js'
 import { useSavedWords } from '../hooks/useSavedWords.js'
 import { applyDiacriticsToReadings, readingHasDiacritics } from '../lib/diacritics.js'
@@ -54,6 +55,14 @@ export default function Reading({ readings, source, diacritics = null }) {
           </button>
         )}
         <DiacriticsControl mode={diacritics} hasMarks={hasMarks} />
+        {diacritics && (
+          <ReportMacraLink
+            book={source?.bookTitle || source?.bookShort || ''}
+            chapter={source?.roman ? `${source.roman}${source.title ? ` — ${source.title}` : ''}` : ''}
+            reading={displayReadings.length === 1 ? displayReadings[0].title || '' : ''}
+            page={source?.href || ''}
+          />
+        )}
         <LexiconControls mode={lexicon} />
       </div>
 

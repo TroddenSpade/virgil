@@ -57,6 +57,11 @@ lost or duplicated.
    Latin Macronizer), keep the source's words otherwise unchanged, and say in the book
    description, `extras`, and your report that the marks are editorial. Do not ship an
    Advanced/Latīnistae book with an inert Diacritics menu.
+   After marking, run `npm run macra:review -- --book <slug>` and inspect the
+   high-priority forms and conflicts. Record verified corrections in
+   `src/data/macra-overrides.json` (phrase, replacement, reason, review date);
+   the build applies them without editing the macronized text. A wrong quantity
+   is worse than a missing one, so do not skip this review step.
 3. **Diacritics must be functional where they are offered.** The reading toolbar can
    hide diacritic classes, but the underlying data always keeps them. The menu belongs
    to original editions on the Advanced and Latīnistae shelves only; do not add it to
@@ -100,6 +105,9 @@ src/components/DiacriticsControl.jsx    dropdown in original-edition reading bar
 scripts/build-chapter-keywords.mjs      keyword generation; contains a hard-coded MODULES list
 scripts/build-dictionary.mjs            generates dictionary, index, reading lexicon, paradigms
 scripts/validate-dictionary.mjs         hard dictionary/lexicon quality gate
+scripts/report-macra.mjs                review queue for suspicious editorial macra
+scripts/macra-overrides.mjs             reads and applies the reviewed corrections
+src/data/macra-overrides.json           reviewed phrase-level macra corrections
 scripts/build-learning-path.mjs         optional Iter road placement
 ```
 

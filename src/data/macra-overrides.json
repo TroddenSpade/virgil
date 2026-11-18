@@ -1,0 +1,196 @@
+{
+  "note": "Reviewed corrections to the editorial macra. Each correction is applied to the named book at build time; never hand-edit the macronized source text. Add an entry only after checking the quantity against the context, and keep the reason short.",
+  "corrections": [
+    {
+      "book": "caesar-de-bello-gallico",
+      "from": "Galliā est omnīs",
+      "to": "Gallia est omnis",
+      "reason": "Gallia is the nominative subject and omnis agrees with it; neither final vowel is long.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "caesar-bellum-alexandrinum",
+      "from": "Captā est ūna hostium quadrirēmis",
+      "to": "Capta est ūna hostium quadrirēmis",
+      "reason": "Capta is the nominative participle with quadrirēmis as its subject, not an ablative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "caesar-bellum-alexandrinum",
+      "from": "Zēlā est oppidum in Pontō positum",
+      "to": "Zēla est oppidum in Pontō positum",
+      "reason": "Zēla is the nominative subject of est; the later ab Zēlā remains ablative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-fasti",
+      "from": "Annā est!",
+      "to": "Anna est!",
+      "reason": "Anna is the nominative name in direct speech.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-remedia-amoris",
+      "from": "Vincendā est tēlō Penthesilēā",
+      "to": "Vincenda est tēlō Penthesilēa",
+      "reason": "The gerundive Vincenda agrees with Penthesilēa as subject; tēlō tuō is the ablative of means.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "catullus-carmina",
+      "from": "Cinnā est Gāius",
+      "to": "Cinna est Gāius",
+      "reason": "Cinna is the nominative name in apposition to Gaius.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "catullus-carmina",
+      "from": "culpā est, in quācumque",
+      "to": "culpa est, in quācumque",
+      "reason": "Culpa is the nominative subject; the clause names where the fault lies.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "cicero-epistulae-ad-familiares",
+      "from": "mīrā est eōrum āmentiā",
+      "to": "mīra est eōrum āmentia",
+      "reason": "Mīra and āmentia are both nominative; the sentence means \"their madness is strange\".",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-metamorphoses",
+      "from": "proximā sunt Zephyrō",
+      "to": "proxima sunt Zephyrō",
+      "reason": "Proxima is the neuter plural subject with sunt, not an ablative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-metamorphoses",
+      "from": "mūtātā est in avem",
+      "to": "mūtāta est in avem",
+      "reason": "Mūtāta is the nominative participle agreeing with the subject.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-metamorphoses",
+      "from": "plēnā est prōmissī",
+      "to": "plēna est prōmissī",
+      "reason": "Plēna agrees with grātia as nominative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-metamorphoses",
+      "from": "sīquā est tibi cūra",
+      "to": "sīqua est tibi cūra",
+      "reason": "Sīqua is the nominative subject of est (\"if any care is yours\").",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-amores",
+      "from": "sīquā est modo corporis umbra",
+      "to": "sīqua est modo corporis umbra",
+      "reason": "Sīqua is the nominative subject of est.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-remedia-amoris",
+      "from": "sīquā est inter utrumque",
+      "to": "sīqua est inter utrumque",
+      "reason": "Sīqua is the nominative subject of est.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-heroides",
+      "from": "incertā est fāma remissā Pylō",
+      "to": "incerta est fāma remissā Pylō",
+      "reason": "Incerta agrees with fāma as nominative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-heroides",
+      "from": "dēfēnsā est humilī",
+      "to": "dēfēnsa est humilī",
+      "reason": "Dēfēnsa agrees with casa as nominative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-tristia",
+      "from": "poenā est, quam tantō",
+      "to": "poena est, quam tantō",
+      "reason": "Poena is the nominative subject of est.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "ovidius-tristia",
+      "from": "compositā est aliīs",
+      "to": "composita est aliīs",
+      "reason": "Composita agrees with cūra as nominative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "vergil-aeneis",
+      "from": "causā fuit; neque enim",
+      "to": "causa fuit; neque enim",
+      "reason": "Causa is the nominative predicate with fuit.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "vergil-aeneis",
+      "from": "praetereā fuit in tēctīs",
+      "to": "praeterea fuit in tēctīs",
+      "reason": "Praeterea is an adverb and never takes a macron.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "vergil-aeneis",
+      "from": "replendā est cūriā",
+      "to": "replenda est cūriā",
+      "reason": "Replenda is a gerundive agreeing with cūria as nominative.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "horatius-sermones",
+      "from": "causā fuit pater hīs",
+      "to": "causa fuit pater hīs",
+      "reason": "Causa is the nominative predicate with fuit.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "horatius-sermones",
+      "from": "summā fuit: duo sī",
+      "to": "summa fuit: duo sī",
+      "reason": "Summa is the nominative predicate (\"virtue was the sum\").",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "horatius-sermones",
+      "from": "captā est, dēterior",
+      "to": "capta est, dēterior",
+      "reason": "Capta is the nominative participle with the subject understood.",
+      "reviewed": "2026-11-18"
+    },
+    {
+      "book": "horatius-epistulae",
+      "from": "quaerendā est āreā",
+      "to": "quaerenda est ārea",
+      "reason": "Quaerenda is a gerundive agreeing with ārea as nominative.",
+      "reviewed": "2026-11-18"
+    }
+  ],
+  "dictionary": {
+    "note": "Reviewed corrections to dictionary headwords that came from the macronizer. These are applied when the dictionary is regenerated.",
+    "lemmas": {
+      "gallia": {
+        "headword": "Gallia",
+        "latin": "Gallia, -ae"
+      },
+      "omnis": {
+        "headword": "omnis",
+        "latin": "omnis, -e"
+      }
+    },
+    "words": {
+      "omnis": "omnis"
+    }
+  }
+}

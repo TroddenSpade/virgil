@@ -520,6 +520,17 @@ main {
   color: var(--on-accent);
   box-shadow: var(--shadow-lift-strong);
 }
+.btn--gold {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--on-accent);
+}
+.btn--gold:hover {
+  background: var(--bronze-deep);
+  border-color: var(--bronze-deep);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-lift-strong);
+}
 .btn--ghost {
   background: transparent;
   border-color: var(--line-strong);

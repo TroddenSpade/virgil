@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Loading from '../components/Loading.jsx'
 import DiacriticsControl from '../components/DiacriticsControl.jsx'
+import ReportMacraLink from '../components/ReportMacraLink.jsx'
 import { useDiacritics } from '../hooks/useDiacritics.js'
+import { hasParadigm } from '../lib/paradigm.js'
 import { containsDiacritics, stripDiacritics } from '../lib/diacritics.js'
 import {
   norm,
@@ -103,6 +105,8 @@ export default function DictionaryDetail() {
       }
     : null
 
+  const showParadigm = hasParadigm(lemma)
+
   const crumb = (
     <nav className="dict-crumb">
       <Link to="/dictionary">← Lexicon</Link>
@@ -185,10 +189,27 @@ export default function DictionaryDetail() {
             <div className="lexicon__meta">
               {entry.pos && entry.pos !== 'other' && <span className="lexicon__pos">{entry.pos}</span>}
             </div>
-            <div className="lexicon__head-tools">
-              <DiacriticsControl
-                mode={diacritics}
-                hasMarks={containsDiacritics(wordEntry?.w || lemma?.headword || '')}
+            <div className="lexicon__head-tools" role="group" aria-label="Word options">
+              <div className="lexicon__head-actions">
+                {showParadigm && (
+                  <Link
+                    className="btn btn--gold btn--sm lexicon__paradigm-button"
+                    to={paradigmHref(lemma.headword)}
+                  >
+                    Full paradigm
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
+                <DiacriticsControl
+                  mode={diacritics}
+                  hasMarks={containsDiacritics(wordEntry?.w || lemma?.headword || '')}
+                />
+              </div>
+              <ReportMacraLink
+                className="lexicon__report"
+                word={wordEntry?.w || lemma?.headword || entry.latin}
+                current={example?.latin || wordEntry?.w || lemma?.headword || entry.latin}
+                page={wordHref(lemma.headword)}
               />
             </div>
           </header>
@@ -202,10 +223,6 @@ export default function DictionaryDetail() {
               .
             </p>
           )}
-
-          <p className="lexicon__paradigm-link">
-            <Link to={paradigmHref(lemma.headword)}>Full paradigm →</Link>
-          </p>
 
           <section className="lexicon__sense">
             <p className="lexicon__section-title">Sense</p>
