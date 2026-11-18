@@ -80,10 +80,10 @@ export default defineConfig({
     macraOverrides(),
     react(),
     VitePWA({
-      // 'prompt' instead of 'autoUpdate': a new service worker waits until the
-      // user accepts the update, at which point we activate it and reload so the
-      // page is served from the freshly fetched version.
-      registerType: 'prompt',
+      // Updates are applied without asking. The new worker activates as soon
+      // as it is installed; PwaUpdatePrompt then reloads the page and shows a
+      // short "updated" notice only after the new version is active.
+      registerType: 'autoUpdate',
       // Registration is handled explicitly by useRegisterSW in PwaUpdatePrompt,
       // so don't also inject the auto-register script into index.html.
       injectRegister: null,
@@ -121,6 +121,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Take over open tabs immediately so an old shell never keeps serving
+        // deleted book chunks after a deploy.
+        skipWaiting: true,
+        clientsClaim: true,
         // The install precache is the app shell only: route chunks, CSS, fonts
         // and images. Book text and the large generated indexes are fetched on
         // first use and kept by the runtime rules below.

@@ -202,6 +202,11 @@ To see the **install prompt**, run `npm run build && npm run preview` and open t
 a browser (Chrome/Edge) will offer to install Virgil as an app. It also works offline once
 loaded, thanks to the service worker.
 
+Updates are **forced**: a newly deployed service worker activates immediately, the page
+reloads into the new build, and a short “Updated” notice confirms it afterwards. There is
+no “refresh to update” prompt and no way for an open tab to keep serving an old shell. When
+testing a deploy, clear the site data once if a browser still holds a pre-fix worker.
+
 ### Deployment (GitHub Pages)
 
 The site is deployed automatically to GitHub Pages by

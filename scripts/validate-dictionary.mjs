@@ -16,6 +16,7 @@
  */
 import { books } from './book-data.mjs'
 import * as data from '../src/data/dictionary.generated.js'
+import { libraryStats } from '../src/data/library-stats.generated.js'
 import { hasDefinition } from '../src/lib/dictionary.js'
 import { buildLexiconIndex, latinTokens, lookupLexicon } from '../src/lib/lexicon.js'
 
@@ -66,6 +67,41 @@ const PARADIGM_EXCEPTIONS = new Set(['erīnys', 'fugitat', 'ivssv', 'propīn'].m
 
 const failures = []
 const warnings = []
+
+/* ---------- Published counts ---------- */
+// Home, Library and the dictionary hero read this tiny module. Keep it in
+// step with the dictionary index and the book registry.
+if (data.stats) {
+  if (libraryStats.words !== data.stats.words) {
+    failures.push(
+      `library stats words ${libraryStats.words} != dictionary words ${data.stats.words}`,
+    )
+  }
+  if (libraryStats.lemmas !== data.stats.lemmas) {
+    failures.push(
+      `library stats lemmas ${libraryStats.lemmas} != dictionary lemmas ${data.stats.lemmas}`,
+    )
+  }
+  if (libraryStats.wordsWithExamples !== data.stats.wordsWithExamples) {
+    failures.push(
+      `library stats wordsWithExamples ${libraryStats.wordsWithExamples} != dictionary ${data.stats.wordsWithExamples}`,
+    )
+  }
+  if (libraryStats.chapters !== data.stats.sources) {
+    failures.push(
+      `library stats chapters ${libraryStats.chapters} != dictionary sources ${data.stats.sources}`,
+    )
+  }
+}
+if (libraryStats.books !== books.length) {
+  failures.push(`library stats books ${libraryStats.books} != registry books ${books.length}`)
+}
+const registryChapters = books.reduce((total, book) => total + (book.chapters?.length || 0), 0)
+if (libraryStats.chapters !== registryChapters) {
+  failures.push(
+    `library stats chapters ${libraryStats.chapters} != registry chapters ${registryChapters}`,
+  )
+}
 
 /* ---------- Lemma and word identity ---------- */
 const lemmaIds = new Set()

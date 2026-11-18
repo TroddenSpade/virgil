@@ -14,6 +14,7 @@ import {
   iterLessonCount,
   iterStageSummary,
 } from '../data/iter-meta.generated.js'
+import { libraryStats } from '../data/library-stats.generated.js'
 import { useProgress } from '../hooks/useLocalStorage.js'
 import VirgilLines from '../components/VirgilLines.jsx'
 
@@ -161,7 +162,7 @@ const tools = [
   {
     mark: 'A',
     title: 'The Lexicon',
-    body: 'Every form in the readings, its headword and sense, and the chapter it comes from. More than 30,000 words, with examples.',
+    body: `Every form in the readings, its headword and sense, and the chapter it comes from. ${libraryStats.words.toLocaleString()} words from ${libraryStats.lemmas.toLocaleString()} lemmas, with examples.`,
     to: '/dictionary',
     link: 'Open the dictionary →',
   },

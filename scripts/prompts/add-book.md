@@ -119,6 +119,7 @@ src/data/dictionary-index.generated.js
 src/data/reading-vocabulary.generated.js
 src/data/paradigm-rules.generated.js
 src/data/chapter-keywords.generated.js
+src/data/library-stats.generated.js
 src/data/learning-path.generated.js
 ```
 

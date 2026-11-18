@@ -120,6 +120,13 @@
 
 /* ---------- Library ---------- */
 
+.library-meta {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
 .library-levels {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

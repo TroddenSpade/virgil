@@ -5,6 +5,7 @@ import DiacriticsControl from '../components/DiacriticsControl.jsx'
 import { useDiacritics } from '../hooks/useDiacritics.js'
 import { containsDiacritics, stripDiacritics } from '../lib/diacritics.js'
 import { norm, hasDefinition, wordHref, sourceLabel } from '../lib/dictionary.js'
+import { libraryStats } from '../data/library-stats.generated.js'
 
 const POS_ORDER = [
   'noun',
@@ -148,7 +149,15 @@ export default function Dictionary() {
   )
 
   const letters = data?.letters || []
-  const stats = data?.stats || { words: 0, lemmas: 0, sources: 0, withExamples: 0 }
+  // The same generated numbers as Home and Library, so the hero cannot drift
+  // from the prose or from the actual dictionary build.
+  const stats = {
+    words: libraryStats.words,
+    lemmas: libraryStats.lemmas,
+    sources: libraryStats.chapters,
+    examples: libraryStats.examples,
+    withExamples: libraryStats.wordsWithExamples,
+  }
 
   const posOptions = useMemo(
     () => POS_ORDER.filter((group) => entries.some((entry) => entry.posGroup === group)),

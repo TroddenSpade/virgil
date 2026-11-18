@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { books, libraryShelves } from '../data/library.js'
+import { libraryStats } from '../data/library-stats.generated.js'
 import { authorIdentity, authorRank, displayTitle } from '../lib/authors.js'
 
 function BookCard({ book }) {
@@ -73,6 +74,12 @@ export default function Library() {
           via Ovid, Exercitia Latina II and the Latin texts of Caesar, Vergil, Ovid, Petronius, Sallust, Cicero and
           Plautus are here in full, and the Latīnistae shelf is set aside for the original works. Together
           they lead from your first Latin sentence to the poetry of Virgil.
+        </p>
+
+        <p className="library-meta muted">
+          {libraryStats.books.toLocaleString()} books · {libraryStats.works} complete originals ·{' '}
+          {libraryStats.chapters.toLocaleString()} chapters ·{' '}
+          {libraryStats.words.toLocaleString()} dictionary words
         </p>
 
         <nav className="library-levels" aria-label="Library shelves">
