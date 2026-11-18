@@ -5,8 +5,9 @@
 // repository address. The actual text corrections are applied at build time,
 // never in the browser.
 import manifest from '../data/macra-overrides.json'
+import { ISSUE_URL } from './issues.js'
 
-export const MACRA_ISSUE_URL = 'https://github.com/TroddenSpade/virgil/issues/new'
+export const MACRA_ISSUE_URL = ISSUE_URL
 
 export function correctionsForBook(bookSlug) {
   if (!bookSlug) return []
@@ -62,7 +63,7 @@ export function macraReportHref({
     '_Reported from the Virgil macron review. Please quote the surrounding sentence if the quantity depends on the context._',
   ]
 
-  const url = new URL(MACRA_ISSUE_URL)
+  const url = new URL(ISSUE_URL)
   url.searchParams.set('title', issueTitle({ book, chapter, word }))
   url.searchParams.set('body', lines.join('\n'))
   return url.toString()

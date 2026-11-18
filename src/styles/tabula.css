@@ -665,7 +665,7 @@
   font-size: 0.68rem;
 }
 .reading__text p {
-  font-size: 1.24rem;
+  font-size: calc(1.24rem * var(--reading-scale, 1));
   line-height: 1.9;
 }
 .reading__text > p:first-of-type::first-letter {

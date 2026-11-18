@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { Inline } from './Commentary.jsx'
 import { LexiconControls, LexiconText, useLexiconMode } from './Lexicon.jsx'
 import DiacriticsControl from './DiacriticsControl.jsx'
+import ReadingAppearanceControl from './ReadingAppearanceControl.jsx'
 import ReportMacraLink from './ReportMacraLink.jsx'
+import ReportTextLink from './ReportTextLink.jsx'
 import { useWordlist } from '../hooks/useWordlist.js'
 import { useSavedWords } from '../hooks/useSavedWords.js'
 import { applyDiacriticsToReadings, readingHasDiacritics } from '../lib/diacritics.js'
@@ -49,6 +51,7 @@ export default function Reading({ readings, source, diacritics = null }) {
   return (
     <div className="readings">
       <div className="readings__bar">
+        <ReadingAppearanceControl />
         {hasNotes && (
           <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowNotes((v) => !v)}>
             {showNotes ? 'Hide marginal notes' : 'Show marginal notes'}
@@ -119,6 +122,20 @@ export default function Reading({ readings, source, diacritics = null }) {
               </aside>
             )}
           </div>
+
+          <footer className="reading__foot">
+            <ReportTextLink
+              book={source?.bookTitle || source?.bookShort || ''}
+              chapter={
+                source?.roman
+                  ? `${source.roman}${source.title ? ` — ${source.title}` : ''}`
+                  : source?.title || ''
+              }
+              section={reading.latinTitle || reading.title || `Reading ${index + 1}`}
+              page={`${source?.href || ''}${reading.id ? `#${reading.id}` : ''}`}
+              quote={reading.paragraphs?.[0] || reading.personae || ''}
+            />
+          </footer>
         </section>
       ))}
     </div>

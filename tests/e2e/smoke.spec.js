@@ -84,6 +84,91 @@ test.describe('Virgil smoke', () => {
     ).toBeVisible()
   })
 
+  test('remembers reading appearance and reports a text error', async ({
+    page,
+  }) => {
+    await page.goto('/library/familia-romana/imperium-romanum')
+
+    const paragraph = page.locator('.reading__text p').first()
+    await expect(paragraph).toBeVisible()
+
+    const sizeBefore = await paragraph.evaluate((node) =>
+      parseFloat(getComputedStyle(node).fontSize),
+    )
+    await page.getByRole('button', { name: 'Larger reading text' }).click()
+    await expect(
+      page.getByRole('button', { name: /Text size 110 percent/ }),
+    ).toBeVisible()
+    const sizeAfter = await paragraph.evaluate((node) =>
+      parseFloat(getComputedStyle(node).fontSize),
+    )
+    expect(sizeAfter).toBeGreaterThan(sizeBefore)
+
+    const widthBefore = await page
+      .locator('.reading__text')
+      .first()
+      .evaluate((node) => node.getBoundingClientRect().width)
+    await page.getByLabel('Reading column width').selectOption('narrow')
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.documentElement.style
+            .getPropertyValue('--reading-measure')
+            .trim(),
+        ),
+      )
+      .toBe('0.78')
+    const widthAfter = await page
+      .locator('.reading__text')
+      .first()
+      .evaluate((node) => node.getBoundingClientRect().width)
+    expect(widthAfter).toBeLessThan(widthBefore)
+
+    // The preference is local, not per page: a reload keeps both values.
+    await page.reload()
+    await expect(
+      page.getByRole('button', { name: /Text size 110 percent/ }),
+    ).toBeVisible()
+    await expect(page.getByLabel('Reading column width')).toHaveValue('narrow')
+    const sizeAfterReload = await page
+      .locator('.reading__text p')
+      .first()
+      .evaluate((node) => parseFloat(getComputedStyle(node).fontSize))
+    expect(sizeAfterReload).toBeCloseTo(sizeAfter, 1)
+
+    // Each reading quotes its first line and links back to this passage.
+    const report = page.locator('.reading__foot .report-link').first()
+    await expect(report).toBeVisible()
+    const reportUrl = new URL(await report.getAttribute('href'))
+    expect(reportUrl.pathname).toBe('/TroddenSpade/virgil/issues/new')
+    const title = reportUrl.searchParams.get('title')
+    const body = reportUrl.searchParams.get('body')
+    expect(title).toContain('[text]')
+    expect(title).toContain('Familia Romana')
+    expect(body).toContain('Book: Lingua Latina')
+    expect(body).toContain('Section: LĒCTIŌ PRĪMA')
+    expect(body).toContain('Rōma in Italiā est.')
+    expect(body).toContain(
+      '/library/familia-romana/imperium-romanum#lectio-prima',
+    )
+
+    // Reference chapters get the same controls and a report link per section.
+    await page.goto('/library/familia-romana/read/cap-01')
+    await expect(
+      page.locator('.reader__toolbar .reading-appearance'),
+    ).toBeVisible()
+    const sectionReport = page
+      .locator('.lesson__section-report .report-link')
+      .first()
+    await expect(sectionReport).toBeVisible()
+    const sectionBody = new URL(
+      await sectionReport.getAttribute('href'),
+    ).searchParams.get('body')
+    expect(sectionBody).toContain('Book: Lingua Latina')
+    expect(sectionBody).toContain('Quoted line')
+    expect(sectionBody).toContain('/library/familia-romana/read/cap-01#')
+  })
+
   test('searches the dictionary and opens a paradigm', async ({ page }) => {
     // The dictionary index and dictionary chunks are deliberately large and
     // load on demand, so this test gets more room than the reading flow.

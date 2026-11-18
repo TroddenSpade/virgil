@@ -34,7 +34,11 @@ Following Ørberg's direct method, each chapter contains:
 - **Vocabula** — the chapter's new words, with a search and a flashcard trainer.
 - **Pensa A · B · C** — the original exercises, with instant answer-checking and model answers.
 
-Chapters are marked **learned** by the reader, and progress is shown per book.
+Chapters are marked **learned** by the reader, and progress is shown per book. The reading
+toolbar also carries **A− / A+** text-size controls and a **Width** selector; both preferences
+persist on the device. Each reading ends with **Report an error in this text**, which opens a
+prefilled issue containing the book, chapter, section, page URL and the quoted line. Macra
+keep their separate editorial review link.
 
 ### Dictionary
 
@@ -50,8 +54,8 @@ node scripts/build-dictionary.mjs   # writes src/data/dictionary.generated.js
 
 The **My Profile** page at `/profile` is local-first. Study state always lives in this browser;
 sign in with an email link to keep a copy in Supabase and load it on another device. Learned
-chapters, hand-saved and known words, and review history travel together — theme and install
-preferences stay on the device.
+chapters, hand-saved and known words, and review history travel together — theme, reading
+appearance and install preferences stay on the device.
 
 To enable sync in a deployment:
 

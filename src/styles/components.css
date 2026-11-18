@@ -915,6 +915,80 @@ button.lesson__keywords-label:focus-visible {
   gap: 0.55rem 0.8rem;
   margin-bottom: 0.9rem;
 }
+.reading-appearance {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.7rem;
+  font-family: var(--font-ui);
+}
+.reading-appearance__sizes {
+  display: inline-flex;
+  align-items: stretch;
+}
+.reading-appearance__button {
+  min-width: 1.9rem;
+  padding: 0.32rem 0.45rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.reading-appearance__button + .reading-appearance__button {
+  border-left: 0;
+}
+.reading-appearance__button:hover:not(:disabled) {
+  color: var(--wine);
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+}
+.reading-appearance__button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid color-mix(in srgb, var(--bronze) 60%, transparent);
+  outline-offset: 1px;
+}
+.reading-appearance__button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.reading-appearance__value {
+  min-width: 3.2rem;
+  font-variant-numeric: tabular-nums;
+}
+.reading-appearance__measure {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.reading-appearance__label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.reading-appearance__measure select {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.3rem 0.35rem;
+}
+.reading-appearance__measure select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bronze) 60%, transparent);
+  outline-offset: 1px;
+}
+@media (max-width: 520px) {
+  .reading-appearance__label {
+    display: none;
+  }
+}
 .diacritics {
   position: relative;
 }
@@ -1071,7 +1145,10 @@ button.lesson__keywords-label:focus-visible {
 }
 .reader__toolbar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 0.55rem 0.8rem;
   margin-top: 1.75rem;
 }
 .reader__toolbar + .lesson__layout {
@@ -1793,13 +1870,23 @@ button.lesson__keywords-label:focus-visible {
   gap: 2.75rem;
   align-items: start;
 }
+.reading__text {
+  max-width: calc(100% * var(--reading-measure, 1));
+}
 .reading__text p {
-  font-size: 1.22rem;
+  font-size: calc(1.22rem * var(--reading-scale, 1));
   line-height: 1.85;
   margin-bottom: 1.15rem;
 }
 .reading__text p:last-child {
   margin-bottom: 0;
+}
+.reading__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
 }
 /* A drop cap opens each reading, like a printed book */
 .reading__text > p:first-of-type::first-letter {
@@ -2334,10 +2421,10 @@ button.lesson__keywords-label:focus-visible {
   letter-spacing: 0.04em;
 }
 .reader__body {
-  max-width: 68ch;
+  max-width: calc(min(68ch, 100%) * var(--reading-measure, 1));
 }
 .reader__body p {
-  font-size: 1.06rem;
+  font-size: calc(1.06rem * var(--reading-scale, 1));
   line-height: 1.8;
   margin: 0 0 1rem;
 }
@@ -2409,10 +2496,10 @@ button.lesson__keywords-label:focus-visible {
 /* ---------- Reference reader, sectioned like the lessons ---------- */
 
 .reference-text {
-  max-width: 74ch;
+  max-width: calc(min(74ch, 100%) * var(--reading-measure, 1));
 }
 .reference-text__p {
-  font-size: 1.06rem;
+  font-size: calc(1.06rem * var(--reading-scale, 1));
   line-height: 1.82;
   margin: 0 0 1rem;
 }
@@ -2432,7 +2519,7 @@ button.lesson__keywords-label:focus-visible {
   padding-left: 2.7rem;
 }
 .reference-text__li {
-  font-size: 1.06rem;
+  font-size: calc(1.06rem * var(--reading-scale, 1));
   line-height: 1.8;
   margin-bottom: 0.3rem;
   padding-left: 0.25rem;
@@ -2441,6 +2528,10 @@ button.lesson__keywords-label:focus-visible {
   font-family: var(--font-ui);
   font-size: 0.82em;
   color: var(--ink-muted, var(--muted, #7a6a58));
+}
+.lesson__section-report {
+  margin: 0.9rem 0 0;
+  text-align: right;
 }
 
 /* The side-margin column reproduced at the foot of a reference chapter. */

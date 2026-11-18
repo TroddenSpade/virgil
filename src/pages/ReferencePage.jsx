@@ -7,6 +7,8 @@ import { useWordlist } from '../hooks/useWordlist.js'
 import { useSavedWords } from '../hooks/useSavedWords.js'
 import { buildSections } from '../lib/sections.js'
 import { LexiconControls, LexiconText, useLexiconMode } from '../components/Lexicon.jsx'
+import ReadingAppearanceControl from '../components/ReadingAppearanceControl.jsx'
+import ReportTextLink from '../components/ReportTextLink.jsx'
 
 export default function ReferencePage() {
   const { bookSlug, chapterId } = useParams()
@@ -90,6 +92,14 @@ function BlockList({ blocks, lexicon, wordKeys, savedWords, source }) {
   return <>{out}</>
 }
 
+/* A section's first readable line, used to quote the passage in a report. */
+function firstBlockText(blocks) {
+  const block = (blocks || []).find(
+    (entry) => entry?.t !== 'h' && String(entry?.text || '').trim(),
+  )
+  return block?.text || ''
+}
+
 /* The narrow side-margin column the printed book carries on each page
    (vocabulary and paradigm notes), gathered once per chapter. */
 function MarginNotes({ lines }) {
@@ -157,6 +167,9 @@ function Reader({ book, chapterId }) {
       ? `Capitulum ${chapter.roman}`
       : `Chapter ${chapter.roman}`
     : source?.title || book.title
+  const chapterLabel = chapter.roman
+    ? `${chapter.roman}${chapter.title ? ` — ${chapter.title}` : ''}`
+    : chapter.title || ''
 
   return (
     <article className="lesson">
@@ -185,6 +198,7 @@ function Reader({ book, chapterId }) {
 
         {status === 'ready' && (
           <div className="reader__toolbar">
+            <ReadingAppearanceControl />
             <LexiconControls mode={lexicon} />
           </div>
         )}
@@ -230,6 +244,15 @@ function Reader({ book, chapterId }) {
                       source={readerSource}
                     />
                   </div>
+                  <p className="lesson__section-report">
+                    <ReportTextLink
+                      book={book.title}
+                      chapter={chapterLabel}
+                      section={`${section.num ? `${section.num} · ` : ''}${section.latin}${section.english ? ` (${section.english})` : ''}`}
+                      page={`${readerSource?.href || ''}#${section.id}`}
+                      quote={firstBlockText(section.blocks)}
+                    />
+                  </p>
                 </section>
               ))}
               <MarginNotes lines={data?.margin} />
@@ -246,6 +269,15 @@ function Reader({ book, chapterId }) {
               savedWords={savedWords}
               source={readerSource}
             />
+            <p className="lesson__section-report">
+              <ReportTextLink
+                book={book.title}
+                chapter={chapterLabel}
+                section={chapter.latinTitle || chapter.title || ''}
+                page={readerSource?.href || ''}
+                quote={firstBlockText(data?.blocks)}
+              />
+            </p>
             <MarginNotes lines={data?.margin} />
           </div>
         )}
