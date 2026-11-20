@@ -827,6 +827,12 @@ button.lesson__keywords-label:focus-visible {
   margin: 0.2rem 0 0;
 }
 
+.lesson__done-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 2.75rem;
+}
+
 .lesson__nav {
   display: flex;
   justify-content: space-between;

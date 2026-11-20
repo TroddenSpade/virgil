@@ -569,10 +569,6 @@ export default function Profile() {
                   <p className="eyebrow">Account</p>
                   <h2>Keep a copy</h2>
                 </div>
-                <span className={`profile-pill profile-pill--${status.tone}`}>
-                  <span className="profile-pill__dot" />
-                  {status.label}
-                </span>
               </div>
               <p className="muted profile-account__intro">
                 Sign in with an email link to keep a copy of your learned chapters, saved words,

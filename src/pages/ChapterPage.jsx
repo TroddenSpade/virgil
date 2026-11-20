@@ -154,15 +154,6 @@ function Lesson({ book, chapter }) {
                   </a>
                 ))}
               </nav>
-
-              <button
-                type="button"
-                className={`btn btn--sm lesson__done ${done ? 'btn--primary' : 'btn--ghost'}`}
-                onClick={() => toggle(chapter.number)}
-                aria-pressed={done}
-              >
-                {done ? '✓ Marked as learned' : 'Mark as learned'}
-              </button>
             </div>
           </aside>
 
@@ -302,6 +293,17 @@ function Lesson({ book, chapter }) {
                 )}
               </>
             )}
+
+            <div className="lesson__done-row">
+              <button
+                type="button"
+                className={`btn lesson__done ${done ? 'btn--primary' : 'btn--ghost'}`}
+                onClick={() => toggle(chapter.number)}
+                aria-pressed={done}
+              >
+                {done ? '✓ Marked as learned' : 'Mark as learned'}
+              </button>
+            </div>
           </div>
         </div>
 
